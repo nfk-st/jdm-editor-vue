@@ -25,8 +25,17 @@ git -C /tmp/jdm-editor checkout 283bb11da324e0aaa641c790de9dd888ea2d2832
 ## Correspondence rules (ADR-0002)
 
 - **File/module names map 1:1.** `src/components/decision-graph/dg.tsx` →
-  `src/components/decision-graph/Dg.vue` (or `dg.ts` for logic-only files).
-  A renames commit must justify itself against this rule.
+  `src/components/decision-graph/dg.vue` (same filename, `.vue` for views,
+  `.ts` for logic-only files). New files with no upstream counterpart (e.g.
+  `components/ui/*`) are ours to name.
+- **Token surface is upstream's.** All CSS variables use upstream's `--grl-*`
+  names (see `src/design-tokens.scss`, the static equivalent of upstream's
+  `GlobalCssVariables`), so ported SCSS works verbatim. Our additions are
+  marked "additive". Chrome prefix for classes: `grl-`.
+- **Public component props:** upstream `value`/`onChange` pairs become
+  `modelValue` + `update:modelValue` (v-model) on OUR public components;
+  internal passthrough props keep upstream names (e.g.
+  `AutosizeTextArea.value`).
 - **Logic ports literally.** Stores, reducers, utils, schema: same function
   names, same signatures where TypeScript allows, same file contents modulo
   framework.
@@ -98,7 +107,7 @@ Bottom-up so every module lands with its dependencies already present:
 |---|---|---|---|
 | 1 | scaffold, tokens, theme, wasm | — | ✅ done |
 | 2 | `helpers/*` (16 files, ~1.1k) | 1056 | ✅ done |
-| 3 | `components/shared` (diff-* inputs) | 203 | ⬜ |
+| 3 | `components/shared` (diff-* inputs) | 203 | ✅ done (diff-ce deferred to #4 — depends on code-editor) |
 | 4 | `components/code-editor` (+ zen grammar wiring) | 3084 | ⬜ |
 | 5 | `components/expression` | 753 | ⬜ |
 | 6 | `components/decision-table` | 4039 | ⬜ |

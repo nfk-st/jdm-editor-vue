@@ -1,102 +1,128 @@
 //
 // Design tokens — the antd replacement (ADR-0001).
-// Parity-first: light set approximates antd v5 defaults; dark approximates antd darkAlgorithm.
-// Consumers override tokens via <JdmConfigProvider :theme="{ tokens: { ... } }">.
+// Static equivalent of upstream's GlobalCssVariables (theme.tsx): same
+// `--grl-*` names, values approximating antd v5 defaults (light) and
+// darkAlgorithm (dark), so upstream SCSS ports verbatim.
+// Scope: .grl-root (our shell) instead of upstream's :root — allows
+// per-instance themes. Additive tokens beyond upstream's surface are marked.
 //
-// `--node-color-*` names are kept identical to upstream so the ported
-// NodeColor enum and node SCSS need zero changes.
-//
 
-.jdm-root {
-  // ── Palette ────────────────────────────────────────────────────────────
-  --jdm-color-primary: #1677ff;
-  --jdm-color-primary-hover: #4096ff;
-  --jdm-color-primary-active: #0958d9;
-  --jdm-color-success: #52c41a;
-  --jdm-color-warning: #faad14;
-  --jdm-color-error: #ff4d4f;
-  --jdm-color-error-hover: #ff7875;
+.grl-root {
+  // ── Primary ────────────────────────────────────────────────────────────
+  --grl-color-primary: #1677ff;
+  --grl-color-primary-hover: #4096ff;
+  --grl-color-primary-active: #0958d9;
+  --grl-color-primary-bg: #e6f4ff;
+  --grl-color-primary-bg-hover: #bae0ff;
+  --grl-color-primary-border: #91caff;
+  --grl-color-primary-border-hover: #69b1ff;
+  --grl-color-primary-text-hover: #4096ff;
 
-  // ── Neutrals ───────────────────────────────────────────────────────────
-  --jdm-color-text: rgba(0, 0, 0, 0.88);
-  --jdm-color-text-secondary: rgba(0, 0, 0, 0.65);
-  --jdm-color-text-tertiary: rgba(0, 0, 0, 0.45);
-  --jdm-color-text-inverse: #fff;
-  --jdm-color-border: #d9d9d9;
-  --jdm-color-border-secondary: #f0f0f0;
-  --jdm-color-bg-container: #ffffff;
-  --jdm-color-bg-elevated: #ffffff;
-  --jdm-color-bg-layout: #f5f5f5;
-  --jdm-color-bg-spotlight: #e6f4ff;
-  --jdm-color-fill: rgba(0, 0, 0, 0.06);
-  --jdm-color-fill-hover: rgba(0, 0, 0, 0.15);
-  --jdm-color-fill-selected: rgba(22, 119, 255, 0.06);
+  // ── Status ─────────────────────────────────────────────────────────────
+  --grl-color-success: #52c41a;
+  --grl-color-success-bg: #f6ffed;
+  --grl-color-success-border: #b7eb8f;
+  --grl-color-error: #ff4d4f;
+  --grl-color-error-bg: #fff2f0;
+  --grl-color-error-border: #ffccc7;
+  --grl-color-warning: #faad14;
+  --grl-color-warning-bg: #fffbe6;
+  --grl-color-warning-border: #ffe58f;
+  --grl-color-warning-text: #d48806;
+  --grl-color-info: #1677ff;
+  --grl-color-info-bg: #e6f4ff;
+  --grl-color-info-border: #91caff;
+  --grl-color-info-text: #4096ff;
 
-  // ── Shape & motion ─────────────────────────────────────────────────────
-  --jdm-border-radius: 6px;
-  --jdm-border-radius-sm: 4px;
-  --jdm-control-height: 32px;
-  --jdm-control-height-sm: 24px;
-  --jdm-box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+  // ── Backgrounds / text ─────────────────────────────────────────────────
+  --grl-color-bg-layout: #f5f5f5;
+  --grl-color-bg-mask: rgba(0, 0, 0, 0.45);
+  --grl-color-bg-elevated: #ffffff;
+  --grl-color-bg-container: #ffffff;
+  --grl-color-bg-container-disabled: rgba(0, 0, 0, 0.04);
+  --grl-color-bg-text-hover: rgba(0, 0, 0, 0.06);
+  --grl-color-text: rgba(0, 0, 0, 0.88);
+  --grl-color-text-base: #000000;
+  --grl-color-text-secondary: rgba(0, 0, 0, 0.65);
+  --grl-color-text-placeholder: rgba(0, 0, 0, 0.25);
+  --grl-color-text-disabled: rgba(0, 0, 0, 0.25);
+  --grl-control-outline: rgba(5, 145, 255, 0.1);
+
+  // ── Mode-hardcoded (upstream theme.tsx literals) ───────────────────────
+  --grl-color-border: #d9d9d9;
+  --grl-color-border-hover: #c3c3c3;
+  --grl-color-border-fade: #eef0f5;
+  --grl-color-primary-bg-fade: #f8fafc;
+  --grl-decision-table-output: #eaeaea;
+  --grl-decision-table-selected-row: #f4faff;
+
+  // ── Typography / shape ─────────────────────────────────────────────────
+  --grl-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+  --grl-line-height: 1.5714;
+  --grl-border-radius: 6px;
+
+  // ── Node colors (upstream parity) ──────────────────────────────────────
+  --node-color-blue: var(--grl-color-primary);
+  --node-color-purple: #7c4dff;
+  --node-color-orange: #f76d40;
+  --node-color-green: #10ac84;
+
+  // ── Additive (not in upstream's surface; ours only) ─────────────────────
+  --grl-box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
     0 9px 28px 8px rgba(0, 0, 0, 0.05);
 
-  // ── Spacing scale ──────────────────────────────────────────────────────
-  --jdm-space-1: 4px;
-  --jdm-space-2: 8px;
-  --jdm-space-3: 12px;
-  --jdm-space-4: 16px;
-  --jdm-space-5: 24px;
-  --jdm-space-6: 32px;
-
-  // ── Font ───────────────────────────────────────────────────────────────
-  --jdm-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial,
-    sans-serif;
-  --jdm-font-size: 14px;
-  --jdm-font-size-sm: 12px;
-
-  // ── Node colors (upstream parity: var(--node-color-*)) ─────────────────
-  --node-color-blue: #1668dc;
-  --node-color-purple: #722ed1;
-  --node-color-orange: #d87214;
-  --node-color-green: #389e0d;
-
-  // ── Canvas ─────────────────────────────────────────────────────────────
-  --jdm-canvas-bg: #fafafa;
-  --jdm-canvas-dot: #c0c0c6;
-
-  color: var(--jdm-color-text);
-  font-family: var(--jdm-font-family);
-  font-size: var(--jdm-font-size);
+  color: var(--grl-color-text);
+  font-family: var(--grl-font-family);
+  font-size: 14px;
+  line-height: var(--grl-line-height);
 
   &[data-mode='dark'] {
-    --jdm-color-primary: #1668dc;
-    --jdm-color-primary-hover: #3c89e8;
-    --jdm-color-primary-active: #1554ad;
-    --jdm-color-success: #49aa19;
-    --jdm-color-warning: #d89614;
-    --jdm-color-error: #dc4446;
-    --jdm-color-error-hover: #e86e6b;
+    --grl-color-primary: #1668dc;
+    --grl-color-primary-hover: #3c89e8;
+    --grl-color-primary-active: #1554ad;
+    --grl-color-primary-bg: #111a2c;
+    --grl-color-primary-bg-hover: #112545;
+    --grl-color-primary-border: #15325b;
+    --grl-color-primary-border-hover: #3c89e8;
+    --grl-color-primary-text-hover: #3c89e8;
 
-    --jdm-color-text: rgba(255, 255, 255, 0.85);
-    --jdm-color-text-secondary: rgba(255, 255, 255, 0.65);
-    --jdm-color-text-tertiary: rgba(255, 255, 255, 0.45);
-    --jdm-color-border: #424242;
-    --jdm-color-border-secondary: #303030;
-    --jdm-color-bg-container: #141414;
-    --jdm-color-bg-elevated: #1f1f1f;
-    --jdm-color-bg-layout: #000000;
-    --jdm-color-bg-spotlight: #111a2c;
-    --jdm-color-fill: rgba(255, 255, 255, 0.16);
-    --jdm-color-fill-hover: rgba(255, 255, 255, 0.25);
-    --jdm-color-fill-selected: rgba(22, 104, 220, 0.12);
+    --grl-color-success: #49aa19;
+    --grl-color-success-bg: #162312;
+    --grl-color-success-border: #274916;
+    --grl-color-error: #dc4446;
+    --grl-color-error-bg: #2a1215;
+    --grl-color-error-border: #591c23;
+    --grl-color-warning: #d89614;
+    --grl-color-warning-bg: #2b2111;
+    --grl-color-warning-border: #594214;
+    --grl-color-warning-text: #ffc53d;
+    --grl-color-info: #1668dc;
+    --grl-color-info-bg: #111a2c;
+    --grl-color-info-border: #15325b;
+    --grl-color-info-text: #3c89e8;
 
-    --node-color-blue: #3c89e8;
-    --node-color-purple: #9254de;
-    --node-color-orange: #e8927c;
-    --node-color-green: #6cb31a;
+    --grl-color-bg-layout: #000000;
+    --grl-color-bg-elevated: #1f1f1f;
+    --grl-color-bg-container: #141414;
+    --grl-color-bg-container-disabled: rgba(255, 255, 255, 0.08);
+    --grl-color-bg-text-hover: rgba(255, 255, 255, 0.08);
+    --grl-color-text: rgba(255, 255, 255, 0.85);
+    --grl-color-text-base: #ffffff;
+    --grl-color-text-secondary: rgba(255, 255, 255, 0.65);
+    --grl-color-text-placeholder: rgba(255, 255, 255, 0.25);
+    --grl-color-text-disabled: rgba(255, 255, 255, 0.25);
+    --grl-control-outline: rgba(22, 104, 220, 0.15);
 
-    --jdm-canvas-bg: #191919;
-    --jdm-canvas-dot: #3a3a42;
+    --grl-color-border: #424242;
+    --grl-color-border-hover: #555555;
+    --grl-color-border-fade: #333333;
+    --grl-color-primary-bg-fade: #141414;
+    --grl-decision-table-output: #091422;
+    --grl-decision-table-selected-row: #121720;
+
+    --grl-box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.32), 0 3px 6px -4px rgba(0, 0, 0, 0.36),
+      0 9px 28px 8px rgba(0, 0, 0, 0.2);
 
     color-scheme: dark;
   }

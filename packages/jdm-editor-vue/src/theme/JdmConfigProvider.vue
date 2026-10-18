@@ -23,7 +23,7 @@ const tokenStyle = computed(() => props.theme?.tokens ?? {});
 </script>
 
 <template>
-  <div class="jdm-root" :data-mode="mode" :style="tokenStyle">
+  <div class="grl-root" :data-mode="mode" :style="tokenStyle">
     <slot />
   </div>
 </template>
