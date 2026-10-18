@@ -62,6 +62,9 @@
   --grl-line-height: 1.5714;
   --grl-border-radius: 6px;
 
+  --grl-primary-color: var(--grl-color-primary);
+  --grl-primary-color-bg: var(--grl-color-primary-bg);
+
   // ── Node colors (upstream parity) ──────────────────────────────────────
   --node-color-blue: var(--grl-color-primary);
   --node-color-purple: #7c4dff;

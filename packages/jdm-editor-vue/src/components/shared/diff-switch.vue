@@ -1,7 +1,10 @@
 <script setup lang="ts">
 // Ported from components/shared/diff-switch.tsx (antd Space → inline flex).
-import Switch from '../ui/Switch.vue';
+// PORTING(P7): unknown attrs pass through to the live switch.
+defineOptions({ inheritAttrs: false });
+
 import ArrowDiffIcon from '../arrow-diff-icon.vue';
+import Switch from '../ui/Switch.vue';
 
 defineProps<{
   modelValue?: boolean;
@@ -20,6 +23,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: '
       <ArrowDiffIcon />
     </template>
     <Switch
+      v-bind="$attrs"
       :model-value="modelValue"
       size="small"
       :disabled="disabled"

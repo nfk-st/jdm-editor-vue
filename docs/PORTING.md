@@ -56,8 +56,22 @@ git -C /tmp/jdm-editor checkout 283bb11da324e0aaa641c790de9dd888ea2d2832
 
 - **antd → Reka UI + tokens (ADR-0001).** Every antd import becomes a Reka UI
   primitive (or a small local wrapper in `src/components/ui/`) styled with the
-  `--jdm-*` tokens. Visual target: parity with the React editor (see
+  `--grl-*` tokens. Visual target: parity with the React editor (see
   upstream storybook running locally: `pnpm storybook` in the clone).
+- **Stance: client-only, SSR-import-safe.** Components render client-side
+  only (canvas, Monaco, CodeMirror are browser-bound); Nuxt users wrap in
+  `<ClientOnly>`. Importing the library under SSR must not throw — no
+  module-level browser API access (see the `PORTING(SSR)` guards in
+  `helpers/platform.ts` and `helpers/monaco.ts`; deliberate, documented
+  deviations from byte-identical).
+- **Token surface is upstream's** (rule above). Variables upstream defines in
+  its own SCSS (`--textarea-*`, `--mono-font-family`, …) are upstream's and
+  need no marking; only additions to `design-tokens.scss`'s token surface
+  are marked "additive".
+- **ThemeConfig is narrowed by design:** upstream's antd `token` map becomes
+  `tokens?: Record<string, string>` (inline CSS custom properties on the
+  root). `prefixCls` is dropped (antd-only concept). Upstream's
+  `DictionaryProvider` component maps to `provideDictionaries()`.
 - **Framework-agnostic deps are kept at the same versions**: exceljs, immer,
   zod, lodash, ts-pattern, fast-deep-equal, json5, monaco, codemirror,
   `@gorules/lezer-zen@0.8.1`, `@gorules/lezer-zen-template@0.4.0`,
@@ -89,7 +103,8 @@ module is ported.
 - [x] `JdmConfigProvider` (+ `ThemeConfig`, `DictionaryMap`, `useDictionaries`)
 - [x] `ensureWasmLoaded`, `useWasmReady` (from `helpers/wasm`)
 - [x] `codemirror` (from `helpers/codemirror`)
-- [x] `useNodeType` (from `helpers/node-type`)
+- [x] `useNodeType` (from `helpers/node-type`) — *ported; injects a key no
+  provider supplies yet — wiring lands with decision-graph (step 8)*
 - [x] `usePersistentState` (from `helpers/use-persistent-state`)
 - [x] `helpers/schema` exports + `./dist/schema` entry
 - [ ] `components/decision-graph`: `DecisionGraph` (props: `id`, `defaultValue`, `value`, `disabled`, `viewConfig`, `components`, `onChange`, `reactFlowProOptions`→dropped?, `onReactFlowInit`→`onInit`; ref: `addNode`, …) — expand on port

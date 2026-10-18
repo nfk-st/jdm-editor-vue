@@ -1,19 +1,26 @@
 <script setup lang="ts">
 // Ported from components/autosize-text-area.tsx — contentEditable div with
 // CSS-driven max-rows sizing (styles in src/styles.scss, .grl-textarea-input).
+// PORTING(P3): emits only `change` (upstream invokes only onChange);
+// maxRows is required, as upstream.
+defineOptions({ inheritAttrs: false });
+
 import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
-  maxRows?: number;
+  maxRows: number;
   value?: string;
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
 }>();
 
-const emit = defineEmits<{ (e: 'change', value: string): void; (e: 'input', value: string): void }>();
+const emit = defineEmits<{ (e: 'change', value: string): void }>();
 
 const divRef = ref<HTMLDivElement | null>(null);
+
+// PORTING(P2): upstream forwards its ref to the div — expose the element.
+defineExpose({ el: divRef });
 
 watch(
   () => props.value,
@@ -32,9 +39,7 @@ onMounted(() => {
 });
 
 const handleInput = (e: Event) => {
-  const value = (e.currentTarget as HTMLDivElement).textContent ?? '';
-  emit('input', value);
-  emit('change', value);
+  emit('change', (e.currentTarget as HTMLDivElement).textContent ?? '');
 };
 </script>
 
@@ -42,6 +47,7 @@ const handleInput = (e: Event) => {
   <div
     ref="divRef"
     class="grl-textarea-input"
+    v-bind="$attrs"
     :contenteditable="!disabled && !readOnly"
     :data-placeholder="placeholder"
     :aria-disabled="disabled"

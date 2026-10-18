@@ -54,6 +54,8 @@ export const loader = {
   __getMonacoInstance: (): Monaco | null => monacoInstance,
 };
 
-if (self.monaco) {
+// PORTING(SSR): `self` doesn't exist under Node SSR — guard the module-level
+// pre-config (client-only, SSR-import-safe — see docs/PORTING.md "Stance").
+if (typeof self !== 'undefined' && self.monaco) {
   loader.config({ monaco: self.monaco });
 }

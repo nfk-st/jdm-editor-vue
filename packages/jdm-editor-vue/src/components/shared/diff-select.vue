@@ -1,5 +1,8 @@
 <script setup lang="ts">
 // Ported from components/shared/diff-select.tsx (antd Space → inline flex).
+// PORTING(P7): unknown attrs pass through to the live select.
+defineOptions({ inheritAttrs: false });
+
 import clsx from 'clsx';
 
 import ArrowDiffIcon from '../arrow-diff-icon.vue';
@@ -28,6 +31,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
       <ArrowDiffIcon />
     </template>
     <Select
+      v-bind="$attrs"
       :model-value="modelValue"
       :options="options"
       :placeholder="placeholder"

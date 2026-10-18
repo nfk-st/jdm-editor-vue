@@ -106,7 +106,7 @@ describe('DiffAutosizeTextArea', () => {
 
   it('renders both sides in diff mode', () => {
     const wrapper = mount(DiffAutosizeTextArea, {
-      props: { modelValue: 'new', previousValue: 'old', displayDiff: true },
+      props: { modelValue: 'new', previousValue: 'old', displayDiff: true, maxRows: 4 },
     });
     const areas = wrapper.findAll('.grl-textarea-input');
     expect(areas).toHaveLength(2);

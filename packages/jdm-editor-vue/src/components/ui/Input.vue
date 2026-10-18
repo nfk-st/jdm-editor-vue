@@ -13,9 +13,13 @@ const props = defineProps<{
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'change', value: string): void }>();
 
 const onInput = (e: Event) => {
-  const value = (e.target as HTMLInputElement).value;
-  emit('update:modelValue', value);
-  emit('change', value);
+  emit('update:modelValue', (e.target as HTMLInputElement).value);
+};
+
+// Native `change` (fires on blur/commit for text inputs) — matches antd Input
+// semantics; `update:modelValue` carries the per-keystroke updates.
+const onChange = (e: Event) => {
+  emit('change', (e.target as HTMLInputElement).value);
 };
 
 const value = computed(() => (props.modelValue === undefined ? undefined : String(props.modelValue)));
@@ -31,6 +35,7 @@ const value = computed(() => (props.modelValue === undefined ? undefined : Strin
     :disabled="disabled"
     :readonly="readOnly"
     @input="onInput"
+    @change="onChange"
   />
 </template>
 

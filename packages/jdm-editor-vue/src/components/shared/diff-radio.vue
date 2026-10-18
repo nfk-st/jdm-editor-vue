@@ -1,5 +1,8 @@
 <script setup lang="ts">
 // Ported from components/shared/diff-radio.tsx.
+// PORTING(P7): unknown attrs pass through to the radio group.
+defineOptions({ inheritAttrs: false });
+
 import clsx from 'clsx';
 
 import RadioGroup from '../ui/RadioGroup.vue';
@@ -20,6 +23,7 @@ const itemClass = (option: { label: string; value: string }) =>
 
 <template>
   <RadioGroup
+    v-bind="$attrs"
     :model-value="modelValue"
     :options="options"
     :disabled="disabled"

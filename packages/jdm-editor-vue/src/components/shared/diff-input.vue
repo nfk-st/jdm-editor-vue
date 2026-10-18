@@ -1,8 +1,12 @@
 <script setup lang="ts">
 // Ported from components/shared/diff-input.tsx.
+// PORTING(P7): upstream spreads full InputProps; unknown attrs pass through
+// to the underlying input to narrow that gap.
+defineOptions({ inheritAttrs: false });
+
 import Input from '../ui/Input.vue';
 
-const props = defineProps<{
+defineProps<{
   modelValue?: string;
   previousValue?: string;
   displayDiff?: boolean;
@@ -16,16 +20,19 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
 
 <template>
   <div v-if="displayDiff" class="diff-input-group">
+    <!-- PORTING(P1): upstream strips only the change handler here; consumer
+         disabled/readOnly pass through unchanged. -->
     <Input
       v-if="(previousValue || '').length > 0"
       :model-value="previousValue"
       :placeholder="placeholder"
       :disabled="disabled"
-      :read-only="true"
+      :read-only="readOnly"
       class="previous-input"
     />
     <Input
       v-if="(modelValue || '').length > 0"
+      v-bind="$attrs"
       :model-value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -37,6 +44,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
   </div>
   <Input
     v-else
+    v-bind="$attrs"
     :model-value="modelValue"
     :placeholder="placeholder"
     :disabled="disabled"
