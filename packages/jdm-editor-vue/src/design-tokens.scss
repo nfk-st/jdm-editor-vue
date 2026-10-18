@@ -1,0 +1,103 @@
+//
+// Design tokens — the antd replacement (ADR-0001).
+// Parity-first: light set approximates antd v5 defaults; dark approximates antd darkAlgorithm.
+// Consumers override tokens via <JdmConfigProvider :theme="{ tokens: { ... } }">.
+//
+// `--node-color-*` names are kept identical to upstream so the ported
+// NodeColor enum and node SCSS need zero changes.
+//
+
+.jdm-root {
+  // ── Palette ────────────────────────────────────────────────────────────
+  --jdm-color-primary: #1677ff;
+  --jdm-color-primary-hover: #4096ff;
+  --jdm-color-primary-active: #0958d9;
+  --jdm-color-success: #52c41a;
+  --jdm-color-warning: #faad14;
+  --jdm-color-error: #ff4d4f;
+  --jdm-color-error-hover: #ff7875;
+
+  // ── Neutrals ───────────────────────────────────────────────────────────
+  --jdm-color-text: rgba(0, 0, 0, 0.88);
+  --jdm-color-text-secondary: rgba(0, 0, 0, 0.65);
+  --jdm-color-text-tertiary: rgba(0, 0, 0, 0.45);
+  --jdm-color-text-inverse: #fff;
+  --jdm-color-border: #d9d9d9;
+  --jdm-color-border-secondary: #f0f0f0;
+  --jdm-color-bg-container: #ffffff;
+  --jdm-color-bg-elevated: #ffffff;
+  --jdm-color-bg-layout: #f5f5f5;
+  --jdm-color-bg-spotlight: #e6f4ff;
+  --jdm-color-fill: rgba(0, 0, 0, 0.06);
+  --jdm-color-fill-hover: rgba(0, 0, 0, 0.15);
+  --jdm-color-fill-selected: rgba(22, 119, 255, 0.06);
+
+  // ── Shape & motion ─────────────────────────────────────────────────────
+  --jdm-border-radius: 6px;
+  --jdm-border-radius-sm: 4px;
+  --jdm-control-height: 32px;
+  --jdm-control-height-sm: 24px;
+  --jdm-box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+
+  // ── Spacing scale ──────────────────────────────────────────────────────
+  --jdm-space-1: 4px;
+  --jdm-space-2: 8px;
+  --jdm-space-3: 12px;
+  --jdm-space-4: 16px;
+  --jdm-space-5: 24px;
+  --jdm-space-6: 32px;
+
+  // ── Font ───────────────────────────────────────────────────────────────
+  --jdm-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+  --jdm-font-size: 14px;
+  --jdm-font-size-sm: 12px;
+
+  // ── Node colors (upstream parity: var(--node-color-*)) ─────────────────
+  --node-color-blue: #1668dc;
+  --node-color-purple: #722ed1;
+  --node-color-orange: #d87214;
+  --node-color-green: #389e0d;
+
+  // ── Canvas ─────────────────────────────────────────────────────────────
+  --jdm-canvas-bg: #fafafa;
+  --jdm-canvas-dot: #c0c0c6;
+
+  color: var(--jdm-color-text);
+  font-family: var(--jdm-font-family);
+  font-size: var(--jdm-font-size);
+
+  &[data-mode='dark'] {
+    --jdm-color-primary: #1668dc;
+    --jdm-color-primary-hover: #3c89e8;
+    --jdm-color-primary-active: #1554ad;
+    --jdm-color-success: #49aa19;
+    --jdm-color-warning: #d89614;
+    --jdm-color-error: #dc4446;
+    --jdm-color-error-hover: #e86e6b;
+
+    --jdm-color-text: rgba(255, 255, 255, 0.85);
+    --jdm-color-text-secondary: rgba(255, 255, 255, 0.65);
+    --jdm-color-text-tertiary: rgba(255, 255, 255, 0.45);
+    --jdm-color-border: #424242;
+    --jdm-color-border-secondary: #303030;
+    --jdm-color-bg-container: #141414;
+    --jdm-color-bg-elevated: #1f1f1f;
+    --jdm-color-bg-layout: #000000;
+    --jdm-color-bg-spotlight: #111a2c;
+    --jdm-color-fill: rgba(255, 255, 255, 0.16);
+    --jdm-color-fill-hover: rgba(255, 255, 255, 0.25);
+    --jdm-color-fill-selected: rgba(22, 104, 220, 0.12);
+
+    --node-color-blue: #3c89e8;
+    --node-color-purple: #9254de;
+    --node-color-orange: #e8927c;
+    --node-color-green: #6cb31a;
+
+    --jdm-canvas-bg: #191919;
+    --jdm-canvas-dot: #3a3a42;
+
+    color-scheme: dark;
+  }
+}

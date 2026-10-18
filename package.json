@@ -1,0 +1,23 @@
+{
+  "name": "goruleditor",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Vue 3 port of GoRules' jdm-editor — monorepo root",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter playground dev",
+    "build": "pnpm --filter @nfk.st/jdm-editor-vue build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "prettier": "^3.5.3"
+  }
+}

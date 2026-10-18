@@ -1,0 +1,14 @@
+@use './design-tokens';
+
+// Vue Flow base styles (upstream ships reactflow's CSS the same way).
+@import '@vue-flow/core/dist/style.css';
+@import '@vue-flow/core/dist/theme-default.css';
+@import '@vue-flow/controls/dist/style.css';
+@import '@vue-flow/background/dist/style.css';
+
+// Splitpanes (replaces react-resizable-panels).
+@import 'splitpanes/dist/splitpanes.css';
+
+.jdm-root {
+  height: 100%;
+}

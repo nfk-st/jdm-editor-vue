@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+*.local
+.DS_Store
+storybook-static
+.vue-ts
+.vite-cache
