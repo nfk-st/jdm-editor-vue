@@ -1,0 +1,53 @@
+// PORTING: upstream imports `DecisionTableStoreType` from
+// ../components/decision-table/context/dt-store.context (not ported yet);
+// the local minimal state stand-in below covers the fields read here.
+// Swap back to the real import when decision-table lands.
+type DecisionTableStoreState = {
+  decisionTable: {
+    inputs: any[];
+    outputs: any[];
+  };
+};
+
+export type SchemaSelectProps = {
+  field: string;
+  name?: string;
+  items?: SchemaSelectProps[];
+};
+export const recursiveSelect = (selector: string[], fields: SchemaSelectProps[]): SchemaSelectProps | undefined => {
+  const key = selector?.[0];
+  if (!key) return;
+  const field = fields.find((field) => field.field === key);
+  if (field?.items) {
+    return recursiveSelect(selector.slice(1), field.items);
+  }
+  return field;
+};
+
+export const getPath = (key: string, items: SchemaSelectProps[]): string[] | undefined => {
+  if (!key || !items) return;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item.field === key) {
+      return [item.field];
+    }
+
+    if (item.items) {
+      const path = getPath(key, item.items);
+      if (!path) continue;
+      return [item.field, ...path];
+    }
+  }
+};
+
+export const columnIdSelector = (x: string) => (state: DecisionTableStoreState) =>
+  [
+    ...state.decisionTable.inputs.map((i: any) => ({
+      ...i,
+      colType: 'input',
+    })),
+    ...state.decisionTable.outputs.map((i: any) => ({
+      ...i,
+      colType: 'output',
+    })),
+  ].find((c) => c.id === x);

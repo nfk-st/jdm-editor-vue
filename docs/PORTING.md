@@ -79,10 +79,10 @@ module is ported.
 - [x] `./styles.scss` → `dist/style.css`
 - [x] `JdmConfigProvider` (+ `ThemeConfig`, `DictionaryMap`, `useDictionaries`)
 - [x] `ensureWasmLoaded`, `useWasmReady` (from `helpers/wasm`)
-- [ ] `codemirror` (from `helpers/codemirror`)
-- [ ] `useNodeType` (from `helpers/node-type`)
-- [ ] `usePersistentState` (from `helpers/use-persistent-state`)
-- [ ] `helpers/schema` exports + `./dist/schema` entry
+- [x] `codemirror` (from `helpers/codemirror`)
+- [x] `useNodeType` (from `helpers/node-type`)
+- [x] `usePersistentState` (from `helpers/use-persistent-state`)
+- [x] `helpers/schema` exports + `./dist/schema` entry
 - [ ] `components/decision-graph`: `DecisionGraph` (props: `id`, `defaultValue`, `value`, `disabled`, `viewConfig`, `components`, `onChange`, `reactFlowProOptions`→dropped?, `onReactFlowInit`→`onInit`; ref: `addNode`, …) — expand on port
 - [ ] `components/decision-table`: `DecisionTable` (props: `id`, `defaultValue`, `value`, `activeRules`, `permission`, `disabled`, `disableHitPolicy`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `cellRenderer` → `#cell` slot)
 - [ ] `components/function`: Function editor exports
@@ -97,7 +97,7 @@ Bottom-up so every module lands with its dependencies already present:
 | # | Module | Upstream LOC | Status |
 |---|---|---|---|
 | 1 | scaffold, tokens, theme, wasm | — | ✅ done |
-| 2 | `helpers/*` (16 files, ~1.1k) | 1056 | 🔄 in progress |
+| 2 | `helpers/*` (16 files, ~1.1k) | 1056 | ✅ done |
 | 3 | `components/shared` (diff-* inputs) | 203 | ⬜ |
 | 4 | `components/code-editor` (+ zen grammar wiring) | 3084 | ⬜ |
 | 5 | `components/expression` | 753 | ⬜ |

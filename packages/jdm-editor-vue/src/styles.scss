@@ -1,10 +1,10 @@
 @use './design-tokens';
 
 // Vue Flow base styles (upstream ships reactflow's CSS the same way).
+// NB: @vue-flow/background ships no CSS (its exports map has none).
 @import '@vue-flow/core/dist/style.css';
 @import '@vue-flow/core/dist/theme-default.css';
 @import '@vue-flow/controls/dist/style.css';
-@import '@vue-flow/background/dist/style.css';
 
 // Splitpanes (replaces react-resizable-panels).
 @import 'splitpanes/dist/splitpanes.css';
