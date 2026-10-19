@@ -1,0 +1,148 @@
+<script setup lang="ts">
+// antd Button replacement — token-styled, supports the variants the port uses
+// (text/link/default), danger state, icon slot, small/default sizes.
+defineOptions({ inheritAttrs: false });
+
+withDefaults(
+  defineProps<{
+    type?: 'default' | 'primary' | 'text' | 'link';
+    danger?: boolean;
+    disabled?: boolean;
+    size?: 'default' | 'small';
+    block?: boolean;
+  }>(),
+  { type: 'default', danger: false, disabled: false, size: 'default', block: false },
+);
+
+const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', event: FocusEvent): void }>();
+</script>
+
+<template>
+  <button
+    class="grl-btn"
+    :class="[
+      `grl-btn--${type}`,
+      `grl-btn--${size}`,
+      danger && 'grl-btn--danger',
+      disabled && 'grl-btn--disabled',
+      block && 'grl-btn--block',
+    ]"
+    v-bind="$attrs"
+    type="button"
+    :disabled="disabled"
+    @click="(e) => emit('click', e)"
+    @blur="(e) => emit('blur', e)"
+  >
+    <span v-if="$slots.icon" class="grl-btn__icon"><slot name="icon" /></span>
+    <slot />
+  </button>
+</template>
+
+<style lang="scss">
+.grl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 4px 15px;
+  font-size: 14px;
+  font-family: var(--grl-font-family);
+  line-height: 1.5714;
+  color: var(--grl-color-text);
+  background-color: var(--grl-color-bg-container);
+  border: 1px solid var(--grl-color-border);
+  border-radius: var(--grl-border-radius);
+  cursor: pointer;
+  transition: var(--grl-transition);
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--grl-control-outline);
+  }
+
+  &--small {
+    height: var(--grl-control-height-sm, 24px);
+    padding: 0 7px;
+    font-size: 12px;
+  }
+
+  // antd type='text'
+  &--text {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+
+    &:hover:not(.grl-btn--disabled) {
+      background-color: var(--grl-color-bg-text-hover);
+    }
+  }
+
+  // antd type='link'
+  &--link {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--grl-color-primary);
+    padding: 4px 0;
+
+    &:hover:not(.grl-btn--disabled) {
+      color: var(--grl-color-primary-hover);
+    }
+  }
+
+  &--default:hover:not(.grl-btn--disabled) {
+    border-color: var(--grl-color-primary-hover);
+    color: var(--grl-color-primary-hover);
+  }
+
+  &--danger {
+    &.grl-btn--text,
+    &.grl-btn--link {
+      color: var(--grl-color-error);
+
+      &:hover:not(.grl-btn--disabled) {
+        color: var(--grl-color-error-hover);
+      }
+    }
+
+    &.grl-btn--default {
+      color: var(--grl-color-error);
+      border-color: var(--grl-color-error);
+
+      &:hover:not(.grl-btn--disabled) {
+        color: var(--grl-color-error-hover);
+        border-color: var(--grl-color-error-hover);
+      }
+    }
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    color: var(--grl-color-text-disabled);
+    background-color: var(--grl-color-bg-container-disabled);
+
+    &:hover {
+      color: var(--grl-color-text-disabled);
+      border-color: var(--grl-color-border);
+    }
+
+    &.grl-btn--text,
+    &.grl-btn--link {
+      background-color: transparent;
+      border-color: transparent;
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+</style>

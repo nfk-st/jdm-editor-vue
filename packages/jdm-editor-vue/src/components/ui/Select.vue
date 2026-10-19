@@ -28,8 +28,9 @@ const props = withDefaults(
     // antd parity: variant='borderless' and suffixIcon={null}.
     borderless?: boolean;
     hideArrow?: boolean;
+    size?: 'default' | 'small';
   }>(),
-  { options: () => [], borderless: false, hideArrow: false },
+  { options: () => [], borderless: false, hideArrow: false, size: 'default' },
 );
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'change', value: string): void }>();
@@ -59,7 +60,11 @@ const selectedLabel = computed(() => {
   >
     <SelectTrigger
       class="grl-select"
-      :class="{ 'grl-select--disabled': disabled, 'grl-select--borderless': borderless }"
+      :class="{
+        'grl-select--disabled': disabled,
+        'grl-select--borderless': borderless,
+        'grl-select--small': size === 'small',
+      }"
     >
       <SelectValue class="grl-select__value" :placeholder="placeholder">{{ selectedLabel }}</SelectValue>
       <ChevronDown v-if="!hideArrow" class="grl-select__arrow" :size="12" />
@@ -132,6 +137,12 @@ const selectedLabel = computed(() => {
     &:hover:not(.grl-select--disabled) {
       border-color: transparent;
     }
+  }
+
+  // antd size='small'
+  &--small {
+    height: 24px;
+    font-size: 12px;
   }
 
   &__value {

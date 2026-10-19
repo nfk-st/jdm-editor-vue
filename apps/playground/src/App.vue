@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
-import { CodeEditor, ExpressionBuilder, JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
+import { CodeEditor, Expression, ExpressionBuilder, JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
 import '@nfk.st/jdm-editor-vue/dist/style.css';
+import { ref } from 'vue';
 
 const mode = ref<'light' | 'dark'>('light');
 
 const expression = ref('age >= 18 && status == "active"');
 const builderValue = ref('count > 1');
+
+const rows = ref([
+  { id: crypto.randomUUID(), key: 'eligible', value: 'age >= 18' },
+  { id: crypto.randomUUID(), key: 'score', value: 'min(age / 10, 10)' },
+]);
 
 // Stand-in sample graph — DecisionGraph lands with the decision-graph module.
 const graph = ref({
@@ -41,6 +45,12 @@ const graph = ref({
           <h3>ExpressionBuilder</h3>
           <ExpressionBuilder v-model="builderValue" />
           <pre class="value">{{ builderValue }}</pre>
+        </section>
+
+        <section class="demo">
+          <h3>Expression (row editor)</h3>
+          <Expression v-model="rows" />
+          <pre class="value">{{ rows.map((r) => `${r.key} = ${r.value}`).join('\n') }}</pre>
         </section>
 
         <section class="demo muted">
