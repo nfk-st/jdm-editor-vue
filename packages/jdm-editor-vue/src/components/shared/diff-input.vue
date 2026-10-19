@@ -1,19 +1,23 @@
-<script setup lang="ts">
-// Ported from components/shared/diff-input.tsx.
-// PORTING(P7): upstream spreads full InputProps; unknown attrs pass through
-// to the underlying input to narrow that gap.
-defineOptions({ inheritAttrs: false });
-
-import Input from '../ui/Input.vue';
-
-defineProps<{
+<script lang="ts">
+export type DiffInputProps = {
   modelValue?: string;
   previousValue?: string;
   displayDiff?: boolean;
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
-}>();
+};
+</script>
+
+<script setup lang="ts">
+import Input from '../ui/Input.vue';
+
+// Ported from components/shared/diff-input.tsx.
+// PORTING(P7): upstream spreads full InputProps; unknown attrs pass through
+// to the underlying input to narrow that gap.
+defineOptions({ inheritAttrs: false });
+
+defineProps<DiffInputProps>();
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'change', value: string): void }>();
 </script>

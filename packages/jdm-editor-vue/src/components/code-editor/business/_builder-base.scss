@@ -90,6 +90,24 @@
   overflow-x: hidden;
   flex-wrap: wrap;
 
+  // PORTING: upstream's one .eb-enum class styles BOTH antd select modes
+  // (antd shares internals); flatten our single-select surface the same way
+  // so the same consumer class works for both.
+  .grl-select {
+    padding: 0 !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .grl-select__value {
+    font-family: inherit;
+    font-size: var(--b-font-size) !important;
+    line-height: var(--b-height) !important;
+    padding: 0 var(--b-h-padding) !important;
+  }
+
   .grl-multiselect__chip {
     font-family: inherit;
     font-size: calc(var(--b-font-size) - 1px) !important;

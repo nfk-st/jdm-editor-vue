@@ -7,7 +7,6 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { focusBuilderRoot } from './focus-helper';
 import {
   defaultValue,
   enumFilterOption,
@@ -16,6 +15,7 @@ import {
   inferKindFromExpr,
   isExprCompatibleWithKind,
 } from './expression-builder.vue';
+import { focusBuilderRoot } from './focus-helper';
 import {
   formatDateValue,
   formatStringArrayValue,
@@ -145,9 +145,9 @@ describe('expression-builder pure logic', () => {
 
   it('isExprCompatibleWithKind checks operator and value shape', () => {
     expect(isExprCompatibleWithKind({ kind: 'complex', raw: 'a' }, 'string')).toBe(true);
-    expect(
-      isExprCompatibleWithKind({ kind: 'simple', operator: { type: 'between' }, value: null }, 'boolean'),
-    ).toBe(false);
+    expect(isExprCompatibleWithKind({ kind: 'simple', operator: { type: 'between' }, value: null }, 'boolean')).toBe(
+      false,
+    );
     expect(isExprCompatibleWithKind({ kind: 'simple', operator: { type: 'null' }, value: null }, 'string')).toBe(true);
     expect(isExprCompatibleWithKind({ kind: 'simple', operator: { type: 'eq' }, value: null }, 'boolean')).toBe(true);
     expect(

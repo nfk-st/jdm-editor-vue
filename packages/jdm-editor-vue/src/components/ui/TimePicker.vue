@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import dayjs, { type Dayjs } from 'dayjs';
+import { type SegmentPart, TimeFieldInput, TimeFieldRoot, type TimeValue, injectTimeFieldRootContext } from 'reka-ui';
+import { defineComponent, onMounted, shallowRef, watch } from 'vue';
+
 // antd TimePicker replacement — reka-ui's TimeField (editable hour/minute
 // segments; reka-ui v2 ships TimeField, not a popover TimePicker) behind a
 // dayjs public surface, matching how upstream's builders use it
@@ -7,19 +11,18 @@
 // New file (no upstream counterpart beyond antd itself), hence PascalCase.
 defineOptions({ inheritAttrs: false });
 
-import dayjs, { type Dayjs } from 'dayjs';
-import { TimeFieldInput, TimeFieldRoot, injectTimeFieldRootContext, type SegmentPart, type TimeValue } from 'reka-ui';
-import { defineComponent, onMounted, shallowRef, watch } from 'vue';
-
 const props = defineProps<{
-  value?: Dayjs | null;
+  modelValue?: Dayjs | null;
   disabled?: boolean;
   format?: string;
   needConfirm?: boolean;
   allowClear?: boolean;
 }>();
 
-const emit = defineEmits<{ (e: 'change', time: Dayjs | null): void }>();
+const emit = defineEmits<{
+  (e: 'update:modelValue', time: Dayjs | null): void;
+  (e: 'change', time: Dayjs | null): void;
+}>();
 
 // shallowRef: template auto-unwrap (UnwrapRef) would re-map the class union
 // and break its nominal (#private) assignability against reka-ui's props.
@@ -41,15 +44,17 @@ const TimeValueSync = defineComponent({
       modelValue.value = placeholder.set({ hour, minute });
     };
     // Mirrors React's "props → state" effect timing (first sync after mount).
-    onMounted(() => sync(props.value));
-    watch(() => props.value, sync);
+    onMounted(() => sync(props.modelValue));
+    watch(() => props.modelValue, sync);
     return () => null;
   },
 });
 
 const onUpdate = (value: TimeValue | undefined) => {
   modelValue.value = value;
-  emit('change', value ? dayjs().hour(value.hour).minute(value.minute) : null);
+  const time = value ? dayjs().hour(value.hour).minute(value.minute) : null;
+  emit('update:modelValue', time);
+  emit('change', time);
 };
 
 // PORTING(reka): TimeFieldInput's `part` prop is a SegmentPart union, not a

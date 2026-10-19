@@ -29,18 +29,18 @@ import {
   TextCursorInputIcon,
 } from 'lucide-vue-next';
 import { P, match } from 'ts-pattern';
-import { computed, defineComponent, h, ref, watch, type FunctionalComponent, type PropType } from 'vue';
+import { type FunctionalComponent, type PropType, computed, defineComponent, h, ref, watch } from 'vue';
 
 import type { ColumnFieldType } from '../../../helpers/schema';
 import { type DictionaryMap, useDictionaries } from '../../../theme';
 import AutosizeTextArea from '../../autosize-text-area.vue';
-import CodeEditorBase from '../ce-base.vue';
 import DatePicker from '../../ui/DatePicker.vue';
 import InputNumber from '../../ui/InputNumber.vue';
 import MultiSelect from '../../ui/MultiSelect.vue';
 import Popover from '../../ui/Popover.vue';
 import Select from '../../ui/Select.vue';
 import TimePicker from '../../ui/TimePicker.vue';
+import CodeEditorBase from '../ce-base.vue';
 
 // PORTING(public): upstream `value`/`onChange` → `modelValue` +
 // `update:modelValue` per docs/PORTING.md's public-prop convention.
@@ -311,9 +311,7 @@ const OpDropdown = defineComponent({
     const search = ref('');
 
     const grid = computed(() => GRID_OPS[props.kind].map(getOp));
-    const list = computed(() =>
-      OPS_BY_KIND[props.kind].filter((t) => !GRID_OPS[props.kind].includes(t)).map(getOp),
-    );
+    const list = computed(() => OPS_BY_KIND[props.kind].filter((t) => !GRID_OPS[props.kind].includes(t)).map(getOp));
     const filtered = computed(() =>
       list.value.filter((o) => !search.value || o.label.toLowerCase().includes(search.value.toLowerCase())),
     );
@@ -330,26 +328,20 @@ const OpDropdown = defineComponent({
       h(
         Popover,
         {
-          open: open.value,
+          'open': open.value,
           'onUpdate:open': (v: boolean) => {
             open.value = v;
             if (!v) search.value = '';
           },
-          side: 'bottom',
-          align: 'start',
-          contentClass: 'op-dropdown-popover',
+          'side': 'bottom',
+          'align': 'start',
+          'contentClass': 'op-dropdown-popover',
         },
         {
           trigger: () =>
-            h(
-              'button',
-              { class: clsx('op-trigger', { disabled: props.disabled }), disabled: props.disabled },
-              [
-                props.isCustom
-                  ? h(SquareFunctionIcon, { size: 14 })
-                  : h(OpIcon, { op: getOp(props.operator), size: 14 }),
-              ],
-            ),
+            h('button', { class: clsx('op-trigger', { disabled: props.disabled }), disabled: props.disabled }, [
+              props.isCustom ? h(SquareFunctionIcon, { size: 14 }) : h(OpIcon, { op: getOp(props.operator), size: 14 }),
+            ]),
           default: () =>
             h('div', { class: 'op-panel' }, [
               props.onKindChange
@@ -492,11 +484,11 @@ const NumInput = defineComponent({
   props: simpleInputProps,
   setup: (props) => () =>
     h(InputNumber, {
-      class: 'eb-number',
-      modelValue: props.value?.type === 'number' ? props.value.value : 0,
+      'class': 'eb-number',
+      'modelValue': props.value?.type === 'number' ? props.value.value : 0,
       // antd InputNumber onChange → ui/InputNumber update:modelValue.
       'onUpdate:modelValue': (v: number | null) => v !== null && props.onChange({ type: 'number', value: v }),
-      disabled: props.disabled,
+      'disabled': props.disabled,
     }),
 });
 
@@ -517,10 +509,10 @@ const BoolInput = defineComponent({
   props: simpleInputProps,
   setup: (props) => () =>
     wrapSelect('eb-select', {
-      modelValue: String(props.value?.type === 'boolean' ? props.value.value : true),
-      options: BOOL_OPTIONS,
+      'modelValue': String(props.value?.type === 'boolean' ? props.value.value : true),
+      'options': BOOL_OPTIONS,
       'onUpdate:modelValue': (v: string) => props.onChange({ type: 'boolean', value: v === 'true' }),
-      disabled: props.disabled,
+      'disabled': props.disabled,
     }),
 });
 
@@ -532,19 +524,19 @@ const DateInput = defineComponent({
     const granularity = computed(() => (props.value?.type === 'date' ? props.value.granularity : undefined));
     return () => [
       h(DatePicker, {
-        class: 'eb-date',
-        value: dayjs(dateVal.value),
-        onChange: (d: Dayjs | null) =>
+        'class': 'eb-date',
+        'modelValue': dayjs(dateVal.value),
+        'onUpdate:modelValue': (d: Dayjs | null) =>
           d && props.onChange({ type: 'date', value: d.format('YYYY-MM-DD'), granularity: granularity.value }),
-        disabled: props.disabled,
-        allowClear: false,
+        'disabled': props.disabled,
+        'allowClear': false,
       }),
       wrapSelect('eb-granularity', {
-        modelValue: granularity.value ?? '',
-        options: GRANULARITIES,
+        'modelValue': granularity.value ?? '',
+        'options': GRANULARITIES,
         'onUpdate:modelValue': (g: string) =>
           props.onChange({ type: 'date', value: dateVal.value, granularity: g || undefined }),
-        disabled: props.disabled,
+        'disabled': props.disabled,
       }),
     ];
   },
@@ -555,16 +547,17 @@ const TimeInput = defineComponent({
   props: simpleInputProps,
   setup: (props) => () =>
     h(TimePicker, {
-      class: 'eb-time',
-      value:
+      'class': 'eb-time',
+      'modelValue':
         props.value?.type === 'time'
           ? dayjs().hour(props.value.hour).minute(props.value.minute)
           : dayjs().hour(9).minute(0),
-      onChange: (t: Dayjs | null) => t && props.onChange({ type: 'time', hour: t.hour(), minute: t.minute() }),
-      disabled: props.disabled,
-      format: 'HH:mm',
-      allowClear: false,
-      needConfirm: false,
+      'onUpdate:modelValue': (t: Dayjs | null) =>
+        t && props.onChange({ type: 'time', hour: t.hour(), minute: t.minute() }),
+      'disabled': props.disabled,
+      'format': 'HH:mm',
+      'allowClear': false,
+      'needConfirm': false,
     }),
 });
 
@@ -647,17 +640,17 @@ const ArrayInput = defineComponent({
     );
     return () =>
       h(MultiSelect, {
-        class: 'eb-tags',
-        mode: 'tags',
-        modelValue: vals.value,
+        'class': 'eb-tags',
+        'mode': 'tags',
+        'modelValue': vals.value,
         'onUpdate:modelValue': (v: string[]) =>
           props.onChange(
             props.kind === 'number'
               ? { type: 'numberArray', values: v.map((x) => parseFloat(x)).filter((n) => !isNaN(n)) }
               : { type: 'stringArray', values: v },
           ),
-        disabled: props.disabled,
-        tokenSeparators: [','],
+        'disabled': props.disabled,
+        'tokenSeparators': [','],
       });
   },
 });
@@ -683,17 +676,17 @@ const IntervalInput = defineComponent({
           iv.value.leftInclusive ? '[' : '(',
         ),
         h(InputNumber, {
-          class: 'eb-interval-num',
-          modelValue: iv.value.left,
+          'class': 'eb-interval-num',
+          'modelValue': iv.value.left,
           'onUpdate:modelValue': (v: number | null) => v !== null && upd({ left: v }),
-          disabled: props.disabled,
+          'disabled': props.disabled,
         }),
         h('span', { class: 'eb-interval-separator' }, '..'),
         h(InputNumber, {
-          class: 'eb-interval-num',
-          modelValue: iv.value.right,
+          'class': 'eb-interval-num',
+          'modelValue': iv.value.right,
           'onUpdate:modelValue': (v: number | null) => v !== null && upd({ right: v }),
-          disabled: props.disabled,
+          'disabled': props.disabled,
         }),
         h(
           'span',
@@ -717,41 +710,44 @@ const EnumValInput = defineComponent({
   setup(props) {
     return () =>
       match(props.operator)
-        .with(
-          'in',
-          'notIn',
-          () =>
-            // antd Select mode multiple/tags → ui/MultiSelect.
-            h(MultiSelect, {
-              class: 'eb-enum',
-              mode: props.loose ? 'tags' : 'multiple',
-              modelValue: props.value?.type === 'stringArray' ? props.value.values : [],
-              'onUpdate:modelValue': (v: string[]) => props.onChange({ type: 'stringArray', values: v }),
-              options: props.options,
-              disabled: props.disabled,
-              // showSearch + filterOption
-              filterOption: enumFilterOption,
-              ...(props.loose ? { tokenSeparators: [','] } : {}),
-            }),
+        .with('in', 'notIn', () =>
+          // antd Select mode multiple/tags → ui/MultiSelect.
+          h(MultiSelect, {
+            'class': 'eb-enum',
+            'mode': props.loose ? 'tags' : 'multiple',
+            'modelValue': props.value?.type === 'stringArray' ? props.value.values : [],
+            'onUpdate:modelValue': (v: string[]) => props.onChange({ type: 'stringArray', values: v }),
+            'options': props.options,
+            'disabled': props.disabled,
+            // PORTING: antd single-select showSearch is dropped (ui/Select
+            // has no search); MultiSelect implements it for tags mode.
+            'filterOption': enumFilterOption,
+            ...(props.loose ? { tokenSeparators: [','] } : {}),
+          }),
         )
         .with('eq', 'neq', () =>
           props.loose
             ? h(MultiSelect, {
-                class: 'eb-enum',
-                mode: 'tags',
-                maxCount: 1,
-                modelValue: props.value?.type === 'string' && props.value.value ? [props.value.value] : [],
+                'class': 'eb-enum',
+                'mode': 'tags',
+                'maxCount': 1,
+                'modelValue': props.value?.type === 'string' && props.value.value ? [props.value.value] : [],
                 'onUpdate:modelValue': (v: string[]) => props.onChange({ type: 'string', value: v[0] ?? '' }),
-                options: props.options,
-                disabled: props.disabled,
-                filterOption: enumFilterOption,
+                'options': props.options,
+                'disabled': props.disabled,
+                'filterOption': enumFilterOption,
               })
             : h('div', { class: 'eb-enum' }, [
                 h(Select, {
-                  modelValue: props.value?.type === 'string' ? props.value.value : undefined,
+                  // PORTING: upstream passes variant='borderless' and
+                  // suffixIcon={null} (showSearch/filterOption drop noted
+                  // above in the loose branch applies here too).
+                  'borderless': true,
+                  'hideArrow': true,
+                  'modelValue': props.value?.type === 'string' ? props.value.value : undefined,
                   'onUpdate:modelValue': (v: string) => props.onChange({ type: 'string', value: v }),
-                  options: props.options,
-                  disabled: props.disabled,
+                  'options': props.options,
+                  'disabled': props.disabled,
                 }),
               ]),
         )
@@ -762,36 +758,23 @@ const EnumValInput = defineComponent({
 const ValInput: FunctionalComponent<ValInputProps> = (props) =>
   match(props.operator)
     .with('between', () => h(IntervalInput, { value: props.value, onChange: props.onChange, disabled: props.disabled }))
-    .with(
-      'in',
-      'notIn',
-      () => h(ArrayInput, { value: props.value, onChange: props.onChange, kind: props.kind, disabled: props.disabled }),
+    .with('in', 'notIn', () =>
+      h(ArrayInput, { value: props.value, onChange: props.onChange, kind: props.kind, disabled: props.disabled }),
     )
-    .with(
-      'dateAfter',
-      'dateBefore',
-      'dateSame',
-      'dateSameOrAfter',
-      'dateSameOrBefore',
-      () => h(DateInput, { value: props.value, onChange: props.onChange, disabled: props.disabled }),
+    .with('dateAfter', 'dateBefore', 'dateSame', 'dateSameOrAfter', 'dateSameOrBefore', () =>
+      h(DateInput, { value: props.value, onChange: props.onChange, disabled: props.disabled }),
     )
-    .with(
-      'timeGt',
-      'timeGte',
-      'timeLt',
-      'timeLte',
-      () => h(TimeInput, { value: props.value, onChange: props.onChange, disabled: props.disabled }),
+    .with('timeGt', 'timeGte', 'timeLt', 'timeLte', () =>
+      h(TimeInput, { value: props.value, onChange: props.onChange, disabled: props.disabled }),
     )
-    .with(
-      'dayOfWeekIn',
-      () =>
-        h(ChipInput, {
-          value: props.value,
-          onChange: props.onChange,
-          disabled: props.disabled,
-          options: DAYS,
-          defaultValues: [1, 2, 3, 4, 5],
-        }),
+    .with('dayOfWeekIn', () =>
+      h(ChipInput, {
+        value: props.value,
+        onChange: props.onChange,
+        disabled: props.disabled,
+        options: DAYS,
+        defaultValues: [1, 2, 3, 4, 5],
+      }),
     )
     .with('quarterIn', () =>
       h(ChipInput, {
@@ -800,7 +783,8 @@ const ValInput: FunctionalComponent<ValInputProps> = (props) =>
         disabled: props.disabled,
         options: QUARTERS,
         defaultValues: [1],
-      }))
+      }),
+    )
     .otherwise(() =>
       match(props.kind)
         .with('boolean', () => h(BoolInput, { value: props.value, onChange: props.onChange, disabled: props.disabled }))
@@ -885,10 +869,8 @@ const setOp = (op: OperatorType) => {
       () => null,
     )
     .with('between', () => (canReuse('interval') ? cur : defaultValue(op, kind.value)))
-    .with(
-      'in',
-      'notIn',
-      () => (canReuse('stringArray') || canReuse('numberArray') ? cur : defaultValue(op, kind.value)),
+    .with('in', 'notIn', () =>
+      canReuse('stringArray') || canReuse('numberArray') ? cur : defaultValue(op, kind.value),
     )
     .with('dateAfter', 'dateBefore', 'dateSame', 'dateSameOrAfter', 'dateSameOrBefore', () =>
       canReuse('date') ? cur : defaultValue(op, kind.value),
@@ -954,9 +936,7 @@ const simpleValue = computed<SimpleValue | null>(() => (expr.value.kind === 'sim
       :on-custom-toggle="toggleCustom"
       :disabled="disabled"
     />
-    <span v-if="NO_VALUE_OPS.includes(op)">
-      <span v-if="op !== 'any'" class="eb-label">{{ getOp(op).label }}</span>
-    </span>
+    <span v-if="NO_VALUE_OPS.includes(op) && op !== 'any'" class="eb-label">{{ getOp(op).label }}</span>
     <EnumValInput
       v-else-if="isEnum"
       :value="simpleValue"

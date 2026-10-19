@@ -88,11 +88,11 @@ export const getEnumOptions = (
 import { computed, ref, watch } from 'vue';
 
 import AutosizeTextArea from '../../autosize-text-area.vue';
-import CodeEditorBase from '../ce-base.vue';
 import DatePicker from '../../ui/DatePicker.vue';
 import InputNumber from '../../ui/InputNumber.vue';
 import MultiSelect from '../../ui/MultiSelect.vue';
 import Select from '../../ui/Select.vue';
+import CodeEditorBase from '../ce-base.vue';
 import { focusBuilderRoot } from './focus-helper';
 import './standard-expression-builder.scss';
 
@@ -227,6 +227,8 @@ const BOOL_OPTIONS = [
         :model-value="parsed.kind === 'string' ? parsed.value : undefined"
         :options="enumOptions.values"
         :disabled="disabled"
+        borderless
+        hide-arrow
         @update:model-value="(v: string) => onChange(formatStringValue(v))"
       />
     </div>
@@ -258,10 +260,10 @@ const BOOL_OPTIONS = [
     <DatePicker
       v-if="ftType === 'date'"
       class="seb-date"
-      :value="dateValue"
+      :model-value="dateValue"
       :disabled="disabled"
       :allow-clear="false"
-      @change="(d: Dayjs | null) => d && onChange(formatDateValue(d.format('YYYY-MM-DD')))"
+      @update:model-value="(d: Dayjs | null) => d && onChange(formatDateValue(d.format('YYYY-MM-DD')))"
     />
   </div>
 </template>

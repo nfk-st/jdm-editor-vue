@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // antd Select replacement — Reka UI Select over {label, value} options.
-import { ChevronDown, Check } from 'lucide-vue-next';
+import { Check, ChevronDown } from 'lucide-vue-next';
 import {
   SelectContent,
   SelectItem,
@@ -12,39 +12,67 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui';
+import { computed } from 'vue';
 
-withDefaults(
+// antd allows empty-string option values (e.g. the date-granularity "Exact"
+// option); reka-ui's <SelectItem> throws on them. Map '' to a sentinel at
+// the boundary so the public contract (and emitted values) stay upstream-shaped.
+const EMPTY_VALUE = '__grl-empty__';
+
+const props = withDefaults(
   defineProps<{
     modelValue?: string;
     options?: { label: string; value: string }[];
     placeholder?: string;
     disabled?: boolean;
+    // antd parity: variant='borderless' and suffixIcon={null}.
+    borderless?: boolean;
+    hideArrow?: boolean;
   }>(),
-  { options: () => [] },
+  { options: () => [], borderless: false, hideArrow: false },
 );
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'change', value: string): void }>();
+
+const rootModelValue = () => (props.modelValue === '' ? EMPTY_VALUE : props.modelValue);
+
+// reka's SelectValue shows the raw value until its item has rendered once
+// (antd shows the option label immediately) — resolve the label ourselves,
+// falling back to the raw value (antd behavior for unmatched presets).
+const selectedLabel = computed(() => {
+  if (props.modelValue === undefined) return undefined;
+  return props.options.find((o) => o.value === props.modelValue)?.label ?? props.modelValue;
+});
 </script>
 
 <template>
   <SelectRoot
-    :model-value="modelValue"
+    :model-value="rootModelValue()"
     :disabled="disabled"
     @update:model-value="
-      (v: string) => {
-        emit('update:modelValue', v);
-        emit('change', v);
+      (v) => {
+        const value = v === EMPTY_VALUE ? '' : v == null ? '' : String(v);
+        emit('update:modelValue', value);
+        emit('change', value);
       }
     "
   >
-    <SelectTrigger class="grl-select" :class="{ 'grl-select--disabled': disabled }">
-      <SelectValue class="grl-select__value" :placeholder="placeholder" />
-      <ChevronDown class="grl-select__arrow" :size="12" />
+    <SelectTrigger
+      class="grl-select"
+      :class="{ 'grl-select--disabled': disabled, 'grl-select--borderless': borderless }"
+    >
+      <SelectValue class="grl-select__value" :placeholder="placeholder">{{ selectedLabel }}</SelectValue>
+      <ChevronDown v-if="!hideArrow" class="grl-select__arrow" :size="12" />
     </SelectTrigger>
     <SelectPortal>
       <SelectContent class="grl-select__content" position="popper" :side-offset="4">
         <SelectViewport class="grl-select__viewport">
-          <SelectItem v-for="option in options" :key="option.value" :value="option.value" class="grl-select__item">
+          <SelectItem
+            v-for="option in options"
+            :key="option.value"
+            :value="option.value === '' ? EMPTY_VALUE : option.value"
+            class="grl-select__item"
+          >
             <SelectItemText>{{ option.label }}</SelectItemText>
             <SelectItemIndicator class="grl-select__indicator">
               <Check :size="12" />
@@ -92,6 +120,17 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
 
     &:hover {
       border-color: var(--grl-color-border);
+    }
+  }
+
+  // antd variant='borderless'
+  &--borderless {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+
+    &:hover:not(.grl-select--disabled) {
+      border-color: transparent;
     }
   }
 

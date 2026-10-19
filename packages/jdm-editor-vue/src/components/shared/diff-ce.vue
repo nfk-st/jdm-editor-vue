@@ -1,6 +1,5 @@
 <script lang="ts">
 // Ported from components/shared/diff-ce.tsx.
-// PORTING: swap to barrel import ('../code-editor') when index lands.
 import type { CodeEditorProps } from '../code-editor';
 
 // PORTING: upstream `CodeEditorProps & { displayDiff; previousValue; noStyle }`
@@ -18,7 +17,6 @@ export type DiffCodeEditorProps = CodeEditorProps & {
 // CodeEditor (which declares the full prop surface).
 import { computed, ref } from 'vue';
 
-// PORTING: swap to barrel import when index lands.
 import { CodeEditor } from '../code-editor';
 
 defineOptions({ inheritAttrs: false });

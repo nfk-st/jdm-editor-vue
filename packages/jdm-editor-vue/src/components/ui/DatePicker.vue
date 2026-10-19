@@ -1,10 +1,4 @@
 <script setup lang="ts">
-// antd DatePicker replacement — reka-ui DatePicker primitives (popover +
-// calendar) behind a dayjs public surface, which is what upstream's builders
-// pass/expect (`value={dayjs(...)} onChange={(d) => d.format('YYYY-MM-DD')}`).
-// New file (no upstream counterpart beyond antd itself), hence PascalCase.
-defineOptions({ inheritAttrs: false });
-
 import dayjs, { type Dayjs } from 'dayjs';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import {
@@ -23,8 +17,8 @@ import {
   DatePickerPrev,
   DatePickerRoot,
   DatePickerTrigger,
-  injectDatePickerRootContext,
   type DateValue,
+  injectDatePickerRootContext,
 } from 'reka-ui';
 // PORTING(reka): reka-ui's date model is @internationalized/date's DateValue
 // (not a direct dependency of this package). The root context's placeholder —
@@ -34,13 +28,22 @@ import {
 import { parseStringToDateValue } from 'reka-ui/date';
 import { computed, defineComponent, onMounted, ref, shallowRef, watch } from 'vue';
 
+// antd DatePicker replacement — reka-ui DatePicker primitives (popover +
+// calendar) behind a dayjs public surface, which is what upstream's builders
+// pass/expect (`value={dayjs(...)} onChange={(d) => d.format('YYYY-MM-DD')}`).
+// New file (no upstream counterpart beyond antd itself), hence PascalCase.
+defineOptions({ inheritAttrs: false });
+
 const props = defineProps<{
-  value?: Dayjs | null;
+  modelValue?: Dayjs | null;
   disabled?: boolean;
   allowClear?: boolean;
 }>();
 
-const emit = defineEmits<{ (e: 'change', date: Dayjs | null): void }>();
+const emit = defineEmits<{
+  (e: 'update:modelValue', date: Dayjs | null): void;
+  (e: 'change', date: Dayjs | null): void;
+}>();
 
 // shallowRef: template auto-unwrap (UnwrapRef) would re-map the class union
 // and break its nominal (#private) assignability against reka-ui's props.
@@ -55,8 +58,8 @@ const DateValueSync = defineComponent({
       modelValue.value = iso ? parseStringToDateValue(iso, ctx.placeholder.value) : undefined;
     };
     // Mirrors React's "props → state" effect timing (first sync after mount).
-    onMounted(() => sync(props.value));
-    watch(() => props.value, sync);
+    onMounted(() => sync(props.modelValue));
+    watch(() => props.modelValue, sync);
     return () => null;
   },
 });
@@ -64,10 +67,12 @@ const DateValueSync = defineComponent({
 const onUpdate = (value: DateValue | undefined) => {
   modelValue.value = value;
   // CalendarDate's toString() is the ISO `YYYY-MM-DD` form upstream formats.
-  emit('change', value ? dayjs(value.toString()) : null);
+  const day = value ? dayjs(value.toString()) : null;
+  emit('update:modelValue', day);
+  emit('change', day);
 };
 
-const display = computed(() => (props.value ? props.value.format('YYYY-MM-DD') : ''));
+const display = computed(() => (props.modelValue ? props.modelValue.format('YYYY-MM-DD') : ''));
 </script>
 
 <template>

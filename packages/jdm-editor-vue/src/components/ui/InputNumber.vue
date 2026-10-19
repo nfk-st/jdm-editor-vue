@@ -4,7 +4,7 @@
 // antd itself), hence PascalCase.
 // antd's `controls={false}` (every upstream usage here) maps to hiding the
 // native spinners below; `variant='borderless'` is handled by consumers' SCSS.
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
   modelValue?: number | null;
@@ -18,17 +18,33 @@ const emit = defineEmits<{
   (e: 'change', value: number | null): void;
 }>();
 
-// antd InputNumber reports changes as the user types (no step controls).
+// antd InputNumber reports changes as the user types (no step controls), but
+// keeps an internal string so partially-typed values ("1.", "-") survive the
+// controlled round-trip. We do the same: the input binds to `text`, and the
+// prop only rewrites it when the change came from outside (differs from what
+// we last emitted).
+const lastEmitted = ref<number | null>(props.modelValue ?? null);
+const text = ref<string>(props.modelValue === undefined || props.modelValue === null ? '' : String(props.modelValue));
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    const incoming = val === undefined || val === null ? null : val;
+    if (incoming !== lastEmitted.value) {
+      lastEmitted.value = incoming;
+      text.value = incoming === null ? '' : String(incoming);
+    }
+  },
+);
+
 const onInput = (e: Event) => {
   const raw = (e.target as HTMLInputElement).value;
+  text.value = raw;
   const value = raw === '' || isNaN(Number(raw)) ? null : Number(raw);
+  lastEmitted.value = value;
   emit('update:modelValue', value);
   emit('change', value);
 };
-
-const value = computed(() =>
-  props.modelValue === undefined || props.modelValue === null ? '' : String(props.modelValue),
-);
 </script>
 
 <template>
@@ -36,7 +52,7 @@ const value = computed(() =>
     class="grl-input-number"
     :class="{ 'grl-input-number--disabled': disabled }"
     type="number"
-    :value="value"
+    :value="text"
     :placeholder="placeholder"
     :disabled="disabled"
     :readonly="readOnly"
