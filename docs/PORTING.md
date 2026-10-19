@@ -114,6 +114,9 @@ module is ported.
 - [x] `components/code-editor`: `CodeEditor` (modelValue v-model; type/lint/strict/noStyle/lazy),
   `ExpressionBuilder`, `StandardExpressionBuilder` (business barrel), `focusBuilderRoot`,
   `DiffIcon` (dg-types stand-in until #8); `diff-ce` landed (`DiffCodeEditor`)
+- [x] `components/decision-table`: `DecisionTable` (modelValue v-model; tableHeight required;
+  `manager` deprecated stub; scrollContainerRef/scrollApiRef Ref props + exposed scroll surface;
+  reorder + excel dialogs; `cellRenderer` prop via `#cell` slot adapter on dt.vue)
 - [ ] `components/shared`, `diff-icon`
 
 ## Port order & status
@@ -127,7 +130,7 @@ Bottom-up so every module lands with its dependencies already present:
 | 3 | `components/shared` (diff-* inputs) | 203 | ✅ done (diff-ce deferred to #4 — depends on code-editor) |
 | 4 | `components/code-editor` (+ zen grammar wiring) | 3084 | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect) |
 | 5 | `components/expression` | 753 | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip) |
-| 6 | `components/decision-table` | 4039 | ⬜ |
+| 6 | `components/decision-table` | 4039 | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select) |
 | 7 | `components/function` | 3868 | ⬜ |
 | 8 | `components/decision-graph` (+ simulator + diff) | 9102 | ⬜ |
 | 9 | stories → Storybook (vue3-vite), parity review | — | ⬜ |

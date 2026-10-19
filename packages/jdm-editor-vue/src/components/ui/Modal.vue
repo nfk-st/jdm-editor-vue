@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // antd Modal replacement — Reka UI Dialog with token styling. Controlled
 // `open` (upstream drives modals via open props), #default body, #footer.
+// PORTING(additive): `getContainer` (antd prop of the same name) portals the
+// dialog into a custom element; `centered` matches antd's centered layout.
 import { DialogClose } from 'reka-ui';
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
 import { X } from 'lucide-vue-next';
@@ -10,8 +12,10 @@ withDefaults(
     open?: boolean;
     title?: string;
     width?: number | string;
+    centered?: boolean;
+    getContainer?: () => HTMLElement;
   }>(),
-  { open: false, width: 520 },
+  { open: false, width: 520, centered: false },
 );
 
 const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
@@ -19,9 +23,13 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
 
 <template>
   <DialogRoot :open="open" @update:open="(o) => emit('update:open', o)">
-    <DialogPortal>
-      <DialogOverlay class="grl-modal__overlay" />
-      <DialogContent class="grl-modal" :style="{ width: typeof width === 'number' ? `${width}px` : width }">
+    <DialogPortal :to="getContainer ? getContainer() : undefined">
+      <DialogOverlay class="grl-modal__overlay" :class="{ 'grl-modal__overlay--contained': getContainer }" />
+      <DialogContent
+        class="grl-modal"
+        :class="{ 'grl-modal--centered': centered, 'grl-modal--contained': getContainer }"
+        :style="{ width: typeof width === 'number' ? `${width}px` : width }"
+      >
         <DialogTitle v-if="title || $slots.title" class="grl-modal__title"><slot name="title">{{ title }}</slot></DialogTitle>
         <DialogDescription v-if="$slots.description" class="grl-modal__description"><slot name="description" /></DialogDescription>
         <div class="grl-modal__body">
@@ -44,6 +52,12 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
   inset: 0;
   z-index: 1000;
   background-color: var(--grl-color-bg-mask);
+
+  // PORTING(additive): antd getContainer — the overlay spans the container's
+  // nearest positioned ancestor instead of the viewport.
+  &--contained {
+    position: absolute;
+  }
 }
 
 .grl-modal {
@@ -60,6 +74,19 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
   border-radius: var(--grl-border-radius);
   box-shadow: var(--grl-box-shadow);
   padding: 20px 24px;
+
+  // PORTING(additive): antd centered layout.
+  &--centered {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  // PORTING(additive): antd getContainer — the dialog renders inside the
+  // caller's element, positioned absolutely against the nearest positioned
+  // ancestor (same anchoring antd's absolute wrap relies on).
+  &--contained {
+    position: absolute;
+  }
 
   &__title {
     margin: 0 0 8px;

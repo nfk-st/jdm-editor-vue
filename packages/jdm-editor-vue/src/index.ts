@@ -11,5 +11,5 @@ export * from './helpers/schema';
 export * from './components';
 
 // PORTING(vue): remaining public surface lands module by module —
-//   components: decision-graph, decision-table, function, expression
+//   components: decision-graph, function
 // See docs/PORTING.md for the parity checklist.

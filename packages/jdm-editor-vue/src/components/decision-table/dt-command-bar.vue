@@ -2,18 +2,20 @@
 // Ported from components/decision-table/dt-command-bar.tsx.
 // PORTING: antd Button/Divider/Popconfirm/Select/Tooltip → ui/Button +
 // token-styled divider + ConfirmAction + ui/Select + ui/Tooltip; antd
-// message (toasts) → console stand-in until toast chrome lands with the
-// dialog phase; lucide replaces @ant-design/icons.
+// message (toasts) → console stand-in (no toast primitive in ui/ yet);
+// lucide replaces @ant-design/icons.
 import { ArrowDown, ArrowUp, Download, Trash2, Upload, X } from 'lucide-vue-next';
-import { computed, defineComponent, h, ref } from 'vue';
+import { computed, ref } from 'vue';
 
-import type { ParsedExcelData, RuleData } from '../../helpers/excel';
+import type { ParsedExcelData } from '../../helpers/excel';
 import { exportDecisionTable, getExcelData } from '../../helpers/excel';
 import ConfirmAction from '../confirm-action.vue';
 import Stack from '../stack.vue';
 import Button from '../ui/Button.vue';
 import Select from '../ui/Select.vue';
 import Tooltip from '../ui/Tooltip.vue';
+import DtExcelDialog from './components/dt-excel-dialog.vue';
+import type { MappedExcelData } from './components/dt-excel-dialog.vue';
 import {
   parseDecisionTable,
   useDecisionTableActions,
@@ -21,31 +23,8 @@ import {
   useDecisionTableState,
 } from './context/dt-store.context';
 
-// PORTING: MappedExcelData + DtExcelDialog come from components/dt-excel-dialog
-// (chrome phase) — local stand-ins keep the call sites upstream-shaped. The
-// component name collides deliberately so importing the real one forces
-// deleting the stand-in.
-type ItemValue = {
-  id: string;
-  label: string;
-  value?: string;
-  type?: 'input' | 'output';
-};
-type MappedExcelData = {
-  items: ItemValue[];
-  rules: RuleData[][];
-};
-const DtExcelDialog = defineComponent({
-  name: 'DtExcelDialog',
-  props: {
-    excelData: { type: null, default: undefined },
-    handleSuccess: { type: null, default: undefined },
-    handleCancel: { type: null, default: undefined },
-  },
-  setup: () => () => null,
-});
-
-// PORTING: antd message.success/error → console (toast UI is chrome-phase).
+// PORTING: antd message.success/error → console (no toast primitive in ui/
+// yet; swap when one lands).
 const message = {
   success: (m: string) => console.info(m),
   error: (m: string) => console.error(m),

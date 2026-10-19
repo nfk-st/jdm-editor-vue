@@ -1,4 +1,3 @@
-<script lang="ts">
 // Ported from components/decision-table/table/table-head-cell.tsx.
 // Upstream exports four peer components from this one module; the SFC keeps
 // them as module-scope defineComponents (the in-file subcomponent pattern
@@ -12,7 +11,10 @@ import Stack from '../../stack.vue';
 import TextEdit from '../../text-edit.vue';
 import Button from '../../ui/Button.vue';
 import Tooltip from '../../ui/Tooltip.vue';
-import type { ColumnType, DecisionTablePermission, TableSchemaItem } from '../context/dt-store.context';
+import InputFieldEdit from '../components/input-field-edit.vue';
+import OutputFieldEdit from '../components/output-field-edit.vue';
+import { useDecisionTableDialog } from '../context/dt-dialog.context';
+import type { DecisionTablePermission, TableSchemaItem } from '../context/dt-store.context';
 import { useDecisionTableActions, useDecisionTableState } from '../context/dt-store.context';
 import { getReferenceMap } from '../util';
 
@@ -26,54 +28,6 @@ export type TableHeadCellFieldProps = {
   disabled?: boolean;
   schema: TableSchemaItem;
 };
-
-// PORTING: context/dt-dialog.context is a later phase — no-op stand-in keeps
-// the reorder-button call sites upstream-shaped. Swap to the real composable
-// (../context/dt-dialog.context) when the dialog phase lands.
-type TableDialogState = { type: 'reorder'; columnType: ColumnType; item: TableSchemaItem | null };
-const useDecisionTableDialog = (): { setDialog: (dialog: TableDialogState | undefined) => void } => ({
-  setDialog: () => {},
-});
-
-// PORTING: stand-ins for components/input-field-edit.tsx +
-// output-field-edit.tsx (chrome phase). They accept upstream's full prop
-// surface (callbacks declared as props so nothing falls through) so the call
-// sites below stay 1:1; they render the trigger slot in create mode and a
-// static field pill in edit mode — the edit popover itself lands with the
-// real components. The names collide deliberately: importing the real ones
-// forces deleting these.
-const fieldEditStandInProps = {
-  disabled: { type: Boolean, default: undefined },
-  value: { type: String as PropType<string | undefined>, default: undefined },
-  variableType: { type: null, default: undefined },
-  inputData: { type: null, default: undefined },
-  referenceData: { type: null, default: undefined },
-  fieldType: { type: null, default: undefined },
-  mode: { type: String as PropType<'edit' | 'create'>, default: 'edit' as const },
-  onCreate: {
-    type: Function as PropType<(name: string, field: string, fieldType?: never) => void>,
-    default: undefined,
-  },
-  onChange: { type: Function as PropType<(value: string, fieldType?: never) => void>, default: undefined },
-  onRemove: { type: Function as PropType<() => void>, default: undefined },
-};
-const InputFieldEdit = defineComponent({
-  name: 'InputFieldEdit',
-  props: fieldEditStandInProps,
-  setup(props, { slots }) {
-    return () => (props.mode === 'create' ? slots.default?.() : h('div', { class: 'grl-dt-field' }, props.value));
-  },
-});
-const OutputFieldEdit = defineComponent({
-  name: 'OutputFieldEdit',
-  props: fieldEditStandInProps,
-  setup(props, { slots }) {
-    return () =>
-      props.mode === 'create'
-        ? slots.default?.()
-        : h('div', { class: ['grl-dt-field', 'grl-dt-field--output'] }, props.value);
-  },
-});
 
 export const TableHeadCellInput = defineComponent({
   name: 'TableHeadCellInput',
@@ -382,4 +336,3 @@ export const TableHeadCellOutputField = defineComponent({
     };
   },
 });
-</script>

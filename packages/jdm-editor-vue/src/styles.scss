@@ -183,3 +183,45 @@
     }
   }
 }
+
+// ── Field-edit trigger (decision-table field editors) ─────────────────────
+
+[data-theme='dark'] .grl-field-edit {
+  color: white;
+  background: #15314c;
+
+  &--output {
+    background: #153214;
+  }
+}
+
+.grl-field-edit {
+  background: #acccec;
+  color: black;
+  display: flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-top: 2px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--mono-font-family);
+  cursor: pointer;
+  user-select: none;
+  max-width: 100%;
+
+  &--output {
+    background: #c7e0ba;
+  }
+
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+  }
+}

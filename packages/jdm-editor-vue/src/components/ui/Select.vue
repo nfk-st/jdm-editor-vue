@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // antd Select replacement — Reka UI Select over {label, value} options.
-import { Check, ChevronDown } from 'lucide-vue-next';
+import { Check, ChevronDown, X } from 'lucide-vue-next';
 import {
   SelectContent,
   SelectItem,
@@ -29,11 +29,20 @@ const props = withDefaults(
     borderless?: boolean;
     hideArrow?: boolean;
     size?: 'default' | 'small';
+    // antd allowClear — an X affordance that clears the selection (emits '').
+    allowClear?: boolean;
   }>(),
-  { options: () => [], borderless: false, hideArrow: false, size: 'default' },
+  { options: () => [], borderless: false, hideArrow: false, size: 'default', allowClear: false },
 );
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'change', value: string): void }>();
+
+const onClear = (e: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
+  emit('update:modelValue', '');
+  emit('change', '');
+};
 
 const rootModelValue = () => (props.modelValue === '' ? EMPTY_VALUE : props.modelValue);
 
@@ -67,6 +76,15 @@ const selectedLabel = computed(() => {
       }"
     >
       <SelectValue class="grl-select__value" :placeholder="placeholder">{{ selectedLabel }}</SelectValue>
+      <span
+        v-if="allowClear && !disabled && modelValue !== undefined && modelValue !== ''"
+        class="grl-select__clear"
+        role="button"
+        aria-label="Clear select"
+        @click="onClear"
+      >
+        <X :size="12" />
+      </span>
       <ChevronDown v-if="!hideArrow" class="grl-select__arrow" :size="12" />
     </SelectTrigger>
     <SelectPortal>
@@ -162,6 +180,19 @@ const selectedLabel = computed(() => {
 
     [data-state='open'] & {
       transform: rotate(180deg);
+    }
+  }
+
+  // antd allowClear affordance
+  &__clear {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--grl-color-text-secondary);
+    cursor: pointer;
+    transition: var(--grl-transition-quick);
+
+    &:hover {
+      color: var(--grl-color-text);
     }
   }
 

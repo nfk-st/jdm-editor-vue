@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // antd Input replacement — native input styled with --grl-* tokens.
 // New file (no upstream counterpart beyond antd itself), hence PascalCase.
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
   modelValue?: string | number;
@@ -11,6 +11,15 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'change', value: string): void }>();
+
+const inputEl = ref<HTMLInputElement | null>(null);
+// PORTING(additive): antd Input exposes focus/select on its ref — mirrored
+// here for callers that drive focus programmatically (output-field-edit).
+defineExpose({
+  focus: () => inputEl.value?.focus(),
+  select: () => inputEl.value?.select(),
+  el: inputEl,
+});
 
 const onInput = (e: Event) => {
   emit('update:modelValue', (e.target as HTMLInputElement).value);
@@ -27,6 +36,7 @@ const value = computed(() => (props.modelValue === undefined ? undefined : Strin
 
 <template>
   <input
+    ref="inputEl"
     class="grl-input"
     :class="{ 'grl-input--disabled': disabled }"
     type="text"

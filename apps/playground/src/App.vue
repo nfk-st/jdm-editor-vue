@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { CodeEditor, Expression, ExpressionBuilder, JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
+import { CodeEditor, DecisionTable, Expression, ExpressionBuilder, JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
+import type { DecisionTableType } from '@nfk.st/jdm-editor-vue';
 import '@nfk.st/jdm-editor-vue/dist/style.css';
 import { ref } from 'vue';
 
@@ -7,6 +8,20 @@ const mode = ref<'light' | 'dark'>('light');
 
 const expression = ref('age >= 18 && status == "active"');
 const builderValue = ref('count > 1');
+
+const tableIds = { in1: crypto.randomUUID(), in2: crypto.randomUUID(), out1: crypto.randomUUID() };
+const table = ref<DecisionTableType>({
+  hitPolicy: 'first',
+  inputs: [
+    { id: tableIds.in1, name: 'age', field: 'age', fieldType: { type: 'number' } },
+    { id: tableIds.in2, name: 'country', field: 'country', fieldType: { type: 'string' } },
+  ],
+  outputs: [{ id: tableIds.out1, name: 'risk', field: 'risk', outputFieldType: { type: 'string' } }],
+  rules: [
+    { _id: crypto.randomUUID(), [tableIds.in1]: '>= 60', [tableIds.in2]: '== "DE"', [tableIds.out1]: '"low"' },
+    { _id: crypto.randomUUID(), [tableIds.in1]: '< 30', [tableIds.in2]: '', [tableIds.out1]: '"high"' },
+  ],
+});
 
 const rows = ref([
   { id: crypto.randomUUID(), key: 'eligible', value: 'age >= 18' },
@@ -53,6 +68,11 @@ const graph = ref({
           <pre class="value">{{ rows.map((r) => `${r.key} = ${r.value}`).join('\n') }}</pre>
         </section>
 
+        <section class="demo demo--wide">
+          <h3>DecisionTable</h3>
+          <DecisionTable v-model="table" :table-height="360" />
+        </section>
+
         <section class="demo muted">
           <p>DecisionGraph component ports with the decision-graph module.</p>
           <p>Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</p>
@@ -90,6 +110,10 @@ const graph = ref({
   flex-direction: column;
   gap: 8px;
   max-width: 640px;
+}
+
+.demo--wide {
+  max-width: 100%;
 }
 .value {
   margin: 0;

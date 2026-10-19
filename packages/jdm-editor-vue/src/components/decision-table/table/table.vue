@@ -81,7 +81,7 @@ import {
   TableHeadCellInputField,
   TableHeadCellOutput,
   TableHeadCellOutputField,
-} from './table-head-cell.vue';
+} from './table-head-cell';
 import TableHeadRow from './table-head-row.vue';
 import TableRow from './table-row.vue';
 

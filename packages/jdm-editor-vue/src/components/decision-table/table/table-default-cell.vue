@@ -1,5 +1,5 @@
 <script lang="ts">
-// Ported from components/decision-table/table/table-default-cell.tsx.
+// Ported from components/decision-table/table/table-default-cell.vuex.
 // TableDefaultCell (default export) + TableInputCell + TableInputCellStatus
 // live in this one file, following expression-item.vue's module-scope
 // subcomponent pattern. Render-function components: the listener-supplied

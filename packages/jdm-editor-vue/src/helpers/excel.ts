@@ -1,34 +1,16 @@
 import exceljs from 'exceljs';
 import { z } from 'zod';
 
+import type {
+  DecisionTableType,
+  HitPolicy,
+  TableSchemaItem,
+} from '../components/decision-table/context/dt-store.context';
 import { NodeKind } from './schema';
 import { saveFile } from './file-helpers';
 
-// PORTING: upstream types `HitPolicy`/`TableSchemaItem` from
-// ../components/decision-table/context/dt-store.context and
-// `DecisionGraphType`/`DecisionTableType` from ../index (dg-types); none of
-// those modules exist yet. Minimal local stand-ins below — swap to the real
-// imports when decision-table / decision-graph land.
-type HitPolicy = 'first' | 'collect';
-
-type TableSchemaItem = {
-  id: string;
-  name: string;
-  field?: string;
-  defaultValue?: string;
-};
-
-type DecisionTableType = {
-  hitPolicy: HitPolicy | string;
-  passThrough?: boolean;
-  inputField?: string | null;
-  outputPath?: string | null;
-  executionMode?: 'single' | 'loop';
-  inputs: TableSchemaItem[];
-  outputs: TableSchemaItem[];
-  rules: Record<string, string>[];
-};
-
+// PORTING: upstream types `DecisionGraphType` from ../index; decision-graph
+// hasn't landed yet — minimal local stand-in below, swap when it does.
 type DecisionGraphType = {
   nodes: { id: string; content?: DecisionTableType }[];
 };
