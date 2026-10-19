@@ -4,7 +4,7 @@ import { computed } from 'vue';
 
 import Stack from '../stack.vue';
 import Select from '../ui/Select.vue';
-import { useExpressionStoreRaw } from './context/expression-store';
+import { useExpressionStoreRaw } from './context/expression-store.context';
 
 const expressionStore = useExpressionStoreRaw();
 

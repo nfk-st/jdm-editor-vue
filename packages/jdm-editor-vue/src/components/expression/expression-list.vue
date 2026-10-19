@@ -11,8 +11,8 @@ import { type UseDraggableOptions, useDraggable } from 'vue-draggable-plus';
 
 import { isWasmAvailable } from '../../helpers/wasm';
 import Button from '../ui/Button.vue';
-import type { ExpressionEntry } from './context/expression-store';
-import { useExpressionStoreRaw } from './context/expression-store';
+import type { ExpressionEntry } from './context/expression-store.context';
+import { useExpressionStoreRaw } from './context/expression-store.context';
 import ExpressionItem from './expression-item.vue';
 
 const store = useExpressionStoreRaw();

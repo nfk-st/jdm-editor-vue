@@ -27,11 +27,11 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
       disabled && 'grl-btn--disabled',
       block && 'grl-btn--block',
     ]"
-    v-bind="$attrs"
     type="button"
     :disabled="disabled"
     @click="(e) => emit('click', e)"
     @blur="(e) => emit('blur', e)"
+    v-bind="$attrs"
   >
     <span v-if="$slots.icon" class="grl-btn__icon"><slot name="icon" /></span>
     <slot />

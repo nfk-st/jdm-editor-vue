@@ -46,7 +46,7 @@ git -C /tmp/jdm-editor checkout 283bb11da324e0aaa641c790de9dd888ea2d2832
   | `useState`/`useReducer` | `ref` / `computed` / `shallowRef` |
   | `useEffect(fn, [deps])` | `watch`/`watchEffect`/`onMounted` |
   | zustand `create()` store | provide/inject composable, same state shape & action names |
-  | React context (`X.context.tsx`) | `x-provider.ts` (provide + `useX` inject) |
+  | React context (`X.context.tsx`) | keep the filename, drop the suffix's framework: `X.context.tsx` → `X.context.ts` (store + provide/inject in one file, e.g. `expression-store.context.ts`). Provider-only components may use `x-provider.ts` |
   | `.tsx` component | `.vue` SFC (`<script setup lang="ts">`) |
   | render props (`renderPanel`, `cellRenderer`) | named slots (`#panel-*`, `#cell`, `#node-*`) |
   | `components?: CustomNodeType[]` | same prop; `Component` instead of `React.FC` |

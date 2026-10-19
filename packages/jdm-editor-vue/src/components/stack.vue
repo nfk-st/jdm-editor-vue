@@ -28,14 +28,18 @@ export default defineComponent({
       return !props.reversed ? 'column' : 'column-reverse';
     });
 
+    // React appends px to numeric style values; Vue assigns them raw
+    // (invalid → ignored), so numeric gap/height/width are px-ified here.
+    const px = (v: string | number) => (typeof v === 'number' ? `${v}px` : v);
+
     const computedStyle = computed(() => ({
       display: 'flex',
       flexDirection: flexDirection.value,
       justifyContent: !props.horizontal ? props.verticalAlign : props.horizontalAlign,
       alignItems: !props.horizontal ? props.horizontalAlign : props.verticalAlign,
-      height: props.height,
-      width: props.width,
-      gap: props.gap,
+      height: px(props.height),
+      width: px(props.width),
+      gap: px(props.gap),
       flexGrow: props.grow ? 1 : undefined,
     }));
 

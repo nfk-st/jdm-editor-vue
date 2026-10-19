@@ -11,8 +11,8 @@ import ConfirmAction from '../confirm-action.vue';
 import DiffIcon from '../diff-icon.vue';
 import DiffCodeEditor from '../shared/diff-ce.vue';
 import DiffAutosizeTextArea from '../shared/diff-text-area.vue';
-import type { ExpressionEntry } from './context/expression-store';
-import { useExpressionStoreRaw } from './context/expression-store';
+import type { ExpressionEntry } from './context/expression-store.context';
+import { useExpressionStoreRaw } from './context/expression-store.context';
 import ExpressionItemContextMenu from './expression-item-context-menu.vue';
 
 export type ExpressionItemProps = {
@@ -50,6 +50,7 @@ const ResultOverlay = defineComponent({
 });
 
 // upstream: const LivePreview = React.memo<{ id: string; value: string }>
+// (Vue re-renders cheaply on dep change — no memoization needed)
 const LivePreview = defineComponent({
   name: 'LivePreview',
   props: {

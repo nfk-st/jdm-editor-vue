@@ -80,23 +80,6 @@ const noPreviewText = computed(() => props.noPreviewText ?? 'Run simulation to s
 </template>
 
 <style lang="scss">
-// PORTING: antd Typography.Text replacement — plain spans styled with tokens
-// (type='secondary' / type='danger' / ellipsis map to the modifiers below).
-.grl-typography {
-  color: var(--grl-color-text);
-
-  &.grl-typography--secondary {
-    color: var(--grl-color-text-secondary);
-  }
-
-  &.grl-typography--danger {
-    color: var(--grl-color-error);
-  }
-
-  &.grl-typography--ellipsis {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-}
+// .grl-typography (+ modifiers) lives in src/styles.scss — shared across
+// modules (expression, spaced-text, ce-preview, …).
 </style>

@@ -65,7 +65,11 @@ const label = computed(() =>
   <Tooltip :open="tooltipOpen" :content="isConfirming ? confirmText : text">
     <Button v-bind="$attrs" type="text" :danger="isConfirming" :disabled="disabled" @click="onClick" @blur="onBlur">
       <template #icon>
-        <slot name="icon"><Trash :size="14" /></slot>
+        <slot name="icon">
+          <!-- PORTING: lucide-vue-next size is number-only; upstream's '1em'
+             equals the button's font size. -->
+          <Trash :size="14" />
+        </slot>
       </template>
       {{ label }}
     </Button>

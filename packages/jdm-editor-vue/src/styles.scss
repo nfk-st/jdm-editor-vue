@@ -12,8 +12,7 @@
 // ── Ported from upstream styles.scss (verbatim unless noted) ──────────────
 
 :root {
-  --mono-font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
-    monospace;
+  --mono-font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
   --grl-transition: 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
   --grl-transition-quick: 0.1s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
@@ -75,6 +74,26 @@
 }
 
 // ── Diff display classes ──────────────────────────────────────────────────
+
+// antd Typography.Text replacement — plain elements with token modifiers
+// (type='secondary' / type='danger' / ellipsis). Shared across modules.
+.grl-typography {
+  color: var(--grl-color-text);
+
+  &.grl-typography--secondary {
+    color: var(--grl-color-text-secondary);
+  }
+
+  &.grl-typography--danger {
+    color: var(--grl-color-error);
+  }
+
+  &.grl-typography--ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
 
 .text-added {
   color: var(--grl-color-success);

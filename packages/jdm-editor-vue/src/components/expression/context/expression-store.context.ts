@@ -91,6 +91,9 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
     disabled: false,
     debugIndex: 0,
     addRowAbove: (index = 0, data?: Partial<ExpressionEntry>) => {
+      // PORTING(P3): upstream's body ignores its own `data` param
+      // (createExpression() with no args); we honor it — typed superset,
+      // kept because dt-store/dg-store follow this file as template.
       set(
         produce<ExpressionStore>((draft) => {
           draft.expressions.splice(index, 0, createExpression(data));
@@ -99,6 +102,7 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
       );
     },
     addRowBelow: (index?: number, data?: Partial<ExpressionEntry>) => {
+      // PORTING(P3): as above — upstream ignores `data`; we honor it.
       set(
         produce<ExpressionStore>((draft) => {
           index = index ?? draft.expressions.length - 1;
@@ -156,11 +160,15 @@ export const provideExpressionStore = (): ExpressionStoreInternal => {
   return store;
 };
 
+// PORTING(P5): upstream defaults the context to `{} as any` — every selector
+// call crashes without a provider. We create a real detached store instead:
+// a silent no-op rather than a crash. Deliberate, friendlier failure mode.
 export const useExpressionStoreRaw = (): ExpressionStoreInternal =>
   inject(ExpressionStoreKey, () => createExpressionStore(), true);
 
 // PORTING: upstream's useExpressionStore(selector) re-renders on slice change;
-// here it returns a ComputedRef of the selected slice.
+// here it returns a ComputedRef of the selected slice. Upstream's optional
+// `equals` param is dropped (Vue reactivity tracks structurally).
 export const useExpressionStore = <T>(selector: (state: ExpressionStore) => T): ComputedRef<T> =>
   computed(() => selector(useExpressionStoreRaw()));
 

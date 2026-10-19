@@ -4,8 +4,8 @@ import { Variable, VariableType, type VariableType as VariableTypeType } from '@
 import { type PropType, computed, defineComponent, watch } from 'vue';
 
 import { isWasmAvailable, useWasmReady } from '../../helpers/wasm';
-import type { ExpressionStore } from './context/expression-store';
-import { useExpressionStoreRaw } from './context/expression-store';
+import type { ExpressionStore } from './context/expression-store.context';
+import { expressionEqual, useExpressionStoreRaw } from './context/expression-store.context';
 import type { ExpressionControllerProps } from './expression-controller.vue';
 
 export type ExpressionProps = {
@@ -37,7 +37,9 @@ const SimulateDataSync = defineComponent({
       () => props.debug,
       (debug) => {
         const currentState = expressionStoreRaw.getState();
-        if (currentState.debug === debug) {
+        // upstream guards with deep equal() — a rebuilt-but-equal debug
+        // object must not churn setState
+        if (expressionEqual(currentState.debug, debug)) {
           return;
         }
 
@@ -109,7 +111,7 @@ const SimulateDataSync = defineComponent({
 // PORTING(DnD): upstream wraps everything in react-dnd's DndProvider (its only
 // purpose was row reordering, now vue-draggable-plus in expression-list) and
 // mounts children only after the container ref exists (client-only stance).
-import { provideExpressionStore } from './context/expression-store';
+import { provideExpressionStore } from './context/expression-store.context';
 import ExpressionCommandBar from './expression-command-bar.vue';
 import ExpressionController from './expression-controller.vue';
 import ExpressionList from './expression-list.vue';
@@ -121,6 +123,10 @@ const props = withDefaults(
       inputVariableType?: ExpressionProps['inputVariableType'];
       debug?: ExpressionProps['debug'];
       hideCommandBar?: boolean;
+      // PORTING(P2): upstream's public `manager?: DragDropManager` (react-dnd)
+      // shared a DnD context with decision-graph's tab wrapper. Deprecated
+      // stub: accepted and ignored — Sortable lists self-coordinate.
+      manager?: unknown;
     } & ExpressionControllerProps
   >(),
   { hideCommandBar: false },

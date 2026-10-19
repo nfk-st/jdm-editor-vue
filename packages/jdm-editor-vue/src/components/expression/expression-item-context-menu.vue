@@ -4,7 +4,7 @@
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuRoot, ContextMenuTrigger } from 'reka-ui';
 
 import SpacedText from '../spaced-text.vue';
-import { useExpressionStore } from './context/expression-store';
+import { useExpressionStore } from './context/expression-store.context';
 
 const props = defineProps<{ index: number }>();
 
@@ -12,7 +12,7 @@ const store = useExpressionStore(({ addRowAbove, addRowBelow, disabled }) => ({ 
 </script>
 
 <template>
-  <ContextMenuRoot>
+  <ContextMenuRoot :disabled="store.disabled">
     <ContextMenuTrigger as-child class="expression-item-context-menu__trigger"><slot /></ContextMenuTrigger>
     <ContextMenuPortal>
       <ContextMenuContent class="grl-context-menu" :style="{ minWidth: '200px' }">
