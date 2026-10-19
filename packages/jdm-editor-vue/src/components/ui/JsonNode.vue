@@ -149,7 +149,10 @@ const VNodeRender: FunctionalComponent<{ render: () => VNodeChild }> = (renderPr
     >
       {{ nodeTypeIndicator }} {{ itemString }}
     </span>
-    <ul v-if="expanded" class="grl-json-tree__children">
+    <!-- PORTING(review-5): react-json-tree keeps children mounted
+         (display:none) so descendant expansion state survives collapse —
+         v-show, not v-if. -->
+    <ul v-show="expanded" class="grl-json-tree__children">
       <JsonNode
         v-for="entry in entries"
         :key="entry.key"

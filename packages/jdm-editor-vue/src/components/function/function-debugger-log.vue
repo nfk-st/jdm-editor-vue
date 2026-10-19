@@ -24,7 +24,7 @@ export type JsonTheme = {
 // returning functions so this file keeps upstream's helper names 1:1;
 // antd theme.useToken → useThemeMode().
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuRoot, ContextMenuTrigger } from 'reka-ui';
-import { computed, h, type VNodeChild } from 'vue';
+import { type VNodeChild, computed, h } from 'vue';
 
 import { copyToClipboard } from '../../helpers/utility';
 import { useThemeMode } from '../../theme';
@@ -72,41 +72,43 @@ const treeTheme = computed<JsonTreeTheme>(() => ({
   base0D: 'var(--grl-color-text-base)',
 }));
 
-const objectRenderer = (jsonTheme: JsonTheme) => (data: any, nodeType: string): VNodeChild => {
-  if (nodeType === 'Object') {
-    const objectData = data as Record<string, any>;
-    const objectEntries = Object.entries(objectData);
-    const renders = objectEntries.reduce(
-      (acc: VNodeChild[], [key, value], currentIndex) => [
-        ...acc,
-        h('span', { key }, [
-          `${key}: `,
-          valueRenderer(jsonTheme)(stringifyJsonData(value), value),
-          currentIndex !== objectEntries.length - 1 && ', ',
-        ]),
-      ],
-      [] satisfies VNodeChild[],
-    );
+const objectRenderer =
+  (jsonTheme: JsonTheme) =>
+  (data: any, nodeType: string): VNodeChild => {
+    if (nodeType === 'Object') {
+      const objectData = data as Record<string, any>;
+      const objectEntries = Object.entries(objectData);
+      const renders = objectEntries.reduce(
+        (acc: VNodeChild[], [key, value], currentIndex) => [
+          ...acc,
+          h('span', { key }, [
+            `${key}: `,
+            valueRenderer(jsonTheme)(stringifyJsonData(value), value),
+            currentIndex !== objectEntries.length - 1 && ', ',
+          ]),
+        ],
+        [] satisfies VNodeChild[],
+      );
 
-    return [' {', renders, '}'];
-  } else if (nodeType === 'Array') {
-    const arrayData = data as any[];
-    const renders = arrayData.reduce(
-      (acc, value, currentIndex) => [
-        ...acc,
-        h('span', { key: currentIndex }, [
-          valueRenderer(jsonTheme)(stringifyJsonData(value), value),
-          currentIndex !== arrayData.length - 1 && ', ',
-        ]),
-      ],
-      [] satisfies VNodeChild[],
-    );
+      return [' {', renders, '}'];
+    } else if (nodeType === 'Array') {
+      const arrayData = data as any[];
+      const renders = arrayData.reduce(
+        (acc, value, currentIndex) => [
+          ...acc,
+          h('span', { key: currentIndex }, [
+            valueRenderer(jsonTheme)(stringifyJsonData(value), value),
+            currentIndex !== arrayData.length - 1 && ', ',
+          ]),
+        ],
+        [] satisfies VNodeChild[],
+      );
 
-    return [arrayData.length > 2 ? `(${arrayData.length})` : '', ' [', renders, ']'];
-  } else {
-    return null;
-  }
-};
+      return [arrayData.length > 2 ? `(${arrayData.length})` : '', ' [', renders, ']'];
+    } else {
+      return null;
+    }
+  };
 
 const stringifyJsonData = (value: unknown): string => {
   switch (true) {
@@ -119,26 +121,28 @@ const stringifyJsonData = (value: unknown): string => {
   }
 };
 
-const valueRenderer = (jsonTheme: JsonTheme) => (valueAsStr: unknown, value: unknown): VNodeChild => {
-  const valueAsString = valueAsStr as string;
-  if (typeof value === 'string') {
-    if (valueAsString.startsWith('"Error:')) {
-      return h('span', { style: { color: jsonTheme.error } }, valueAsString.slice(1, -1));
+const valueRenderer =
+  (jsonTheme: JsonTheme) =>
+  (valueAsStr: unknown, value: unknown): VNodeChild => {
+    const valueAsString = valueAsStr as string;
+    if (typeof value === 'string') {
+      if (valueAsString.startsWith('"Error:')) {
+        return h('span', { style: { color: jsonTheme.error } }, valueAsString.slice(1, -1));
+      }
+
+      if (valueAsString.startsWith('"Info:')) {
+        return h('span', { style: { color: jsonTheme.info } }, valueAsString.slice(1, -1));
+      }
+
+      return h('span', { style: { color: jsonTheme.string } }, valueAsString);
+    } else if (typeof value === 'boolean') {
+      return h('span', { style: { color: jsonTheme.constants } }, valueAsString);
+    } else if (typeof value === 'number') {
+      return h('span', { style: { color: jsonTheme.number } }, valueAsString);
     }
 
-    if (valueAsString.startsWith('"Info:')) {
-      return h('span', { style: { color: jsonTheme.info } }, valueAsString.slice(1, -1));
-    }
-
-    return h('span', { style: { color: jsonTheme.string } }, valueAsString);
-  } else if (typeof value === 'boolean') {
-    return h('span', { style: { color: jsonTheme.constants } }, valueAsString);
-  } else if (typeof value === 'number') {
-    return h('span', { style: { color: jsonTheme.number } }, valueAsString);
-  }
-
-  return valueAsString;
-};
+    return valueAsString;
+  };
 
 const lens = (obj: any, path: (string | number)[]) => path.reduce((o, key) => (o && o[key] ? o[key] : null), obj);
 

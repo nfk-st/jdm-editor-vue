@@ -151,10 +151,9 @@ new, not ported.
 
 ## Known temp debt
 
-- `DiffMetadata` / `SimulationTrace*` type stand-ins exist in THREE files
-  (expression-store.context.ts, dt-store.context.ts, code-editor) — they
-  collapse into dg-types when decision-graph lands (step 8). Do not
-  duplicate further; dg-store imports the real ones.
+- `DiffMetadata` / `SimulationTrace*` type stand-ins exist in FOUR files
+  (expression-store.context.ts, dt-store.context.ts, code-editor, function/types.ts)
+  — they collapse into dg-types when decision-graph lands (step 8, next).
 - Toasts are `console` stand-ins (upstream uses antd message). Build
   `ui/Toast` (reka-ui Toast) when the first real consumer lands
   (simulator/decision-graph).

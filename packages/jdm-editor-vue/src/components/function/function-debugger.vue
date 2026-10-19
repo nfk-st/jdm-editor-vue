@@ -2,8 +2,8 @@
 // Ported from components/function/function-debugger.tsx.
 import type { editor } from 'monaco-editor';
 
-import type { SimulationTrace, SimulationTraceDataFunction } from './types';
 import type { FunctionLibrary } from './helpers/libs';
+import type { SimulationTrace, SimulationTraceDataFunction } from './types';
 
 export enum TabKey {
   Console = 'Console',
@@ -86,13 +86,14 @@ const importLibrary = (lib: FunctionLibrary) => {
       <div class="grl-function__debugger__body">
         <!-- upstream: match(activeTab).with(Console).with(Libraries).exhaustive() -->
         <template v-if="activeTab === TabKey.Console">
-          <FunctionDebuggerLog
-            v-if="traceLog.length === 0"
-            :lines="['&quot;Info: Use console.log and run simulation to debug your code.&quot;']"
-            :ms-since-run="null"
-          />
+          <FunctionDebuggerLog v-if="traceLog.length === 0" :lines="emptyTraceLines" :ms-since-run="null" />
 
-          <FunctionDebuggerLog v-for="(log, i) in traceLog" :key="i" :lines="log.lines" :ms-since-run="log.msSinceRun" />
+          <FunctionDebuggerLog
+            v-for="(log, i) in traceLog"
+            :key="i"
+            :lines="log.lines"
+            :ms-since-run="log.msSinceRun"
+          />
         </template>
 
         <div v-else class="grl-function__libraries">

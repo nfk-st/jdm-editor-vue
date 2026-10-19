@@ -78,8 +78,13 @@ const labelOf = (item: string | TabItem): string => (typeof item === 'string' ? 
       box-shadow: inset 0 -2px 0 var(--grl-color-primary);
     }
 
+    // a11y (review-5): replace outline with a token focus ring, per the
+    // Input.vue exemplar
     &:focus-visible {
       outline: none;
+      box-shadow:
+        inset 0 -2px 0 var(--grl-color-primary),
+        0 0 0 2px var(--grl-control-outline);
     }
   }
 

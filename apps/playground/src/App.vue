@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { CodeEditor, DecisionTable, Expression, ExpressionBuilder, JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
+import {
+  CodeEditor,
+  DecisionTable,
+  Expression,
+  ExpressionBuilder,
+  Function as FunctionEditor,
+  JdmConfigProvider,
+} from '@nfk.st/jdm-editor-vue';
 import type { DecisionTableType } from '@nfk.st/jdm-editor-vue';
 import '@nfk.st/jdm-editor-vue/dist/style.css';
 import { ref } from 'vue';

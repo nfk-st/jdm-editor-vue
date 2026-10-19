@@ -39,6 +39,23 @@ const monacoOptions: editor.IStandaloneEditorConstructionOptions = {
     horizontalSliderSize: 4,
   },
 };
+
+// PORTING(review-5): extracted for testing — upstream inlines this in the
+// [error, editor] effect (function.tsx:172-179).
+export const parseErrorSource = (source: string): { line: number; errorMessage: string } | undefined => {
+  const results = /Error:(\[.*])?(:?\d+)?(:\d+)?(.*)/s.exec(source ?? '');
+  if (!results || results.length === 0) {
+    return undefined;
+  }
+
+  const line = parseFloat((results?.[2] ?? '').replace(/^:/, ''));
+  const errorMessage = results?.[4] ?? '';
+  if (!line || !errorMessage) {
+    return undefined;
+  }
+
+  return { line, errorMessage };
+};
 </script>
 
 <script setup lang="ts">
@@ -53,15 +70,14 @@ import { MarkerSeverity } from 'monaco-editor';
 import { Splitpane, Splitpanes } from 'splitpanes';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 
-import '../../helpers/monaco';
 import { type Monaco, loader } from '../../helpers/monaco';
 import { isWasmAvailable } from '../../helpers/wasm';
 import { useThemeMode } from '../../theme';
 import FunctionDebugger from './function-debugger.vue';
+import Spinner from '../ui/Spinner.vue';
 import './function.scss';
 import { variableTypeToTypescript } from './helpers/determine-type';
 import { type FunctionLibrary, functionDefinitions, functionLibraries } from './helpers/libs';
-import type { FunctionDebuggerTrace } from './types';
 
 const props = withDefaults(defineProps<FunctionProps>(), {
   disabled: false,
@@ -70,14 +86,16 @@ const props = withDefaults(defineProps<FunctionProps>(), {
   libraries: () => functionLibraries,
 });
 
+// PORTING: upstream value/onChange → modelValue + update:modelValue ONLY
+// (upstream has no second change event).
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
-  (e: 'change', value: string): void;
   (e: 'monacoReady', monaco: Monaco): void;
   (e: 'editorMount', editor: editor.IStandaloneCodeEditor): void;
 }>();
 
 const monaco = shallowRef<Monaco | null>(null);
+const monacoReady = ref(false);
 const mounted = ref(false);
 const mode = useThemeMode();
 
@@ -88,7 +106,6 @@ const decorations = shallowRef<editor.IEditorDecorationsCollection | undefined>(
 // upstream: useDebouncedCallback(onChange, 100)
 const innerChange = useDebounceFn((val: string) => {
   emit('update:modelValue', val);
-  emit('change', val);
 }, 100);
 
 const editorRef = shallowRef<editor.IStandaloneCodeEditor | undefined>(undefined);
@@ -111,6 +128,7 @@ onMounted(async () => {
 
   const instance = await loader.init();
   monaco.value = instance;
+  monacoReady.value = true;
 
   innerValue.value = props.modelValue === undefined ? props.defaultValue : props.modelValue;
   mounted.value = true;
@@ -119,11 +137,11 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize);
   decorations.value?.clear();
-  editorRef.value?.dispose();
-  diffEditorRef.value?.dispose();
 });
 
-// upstream [monaco, libraries] effect: compiler options + lib typedefs
+// upstream [monaco, libraries] effect: compiler options + lib typedefs.
+// NOTE (review-5): upstream's own body uses the functionLibraries CONSTANT
+// here, not the libraries prop (function.tsx:100) — quirk kept 1:1.
 watch(
   () => [monaco.value, props.libraries] as const,
   ([instance]) => {
@@ -230,16 +248,12 @@ watch(
         return;
       }
 
-      const results = /Error:(\[.*])?(:?\d+)?(:\d+)?(.*)/s.exec(props.error.data.source ?? '');
-      if (!results || results.length === 0) {
+      const parsed = parseErrorSource(props.error.data.source ?? '');
+      if (!parsed) {
         return;
       }
 
-      const line = parseFloat((results?.[2] ?? '').replace(/^:/, ''));
-      const errorMessage = results?.[4] ?? '';
-      if (!line || !errorMessage) {
-        return;
-      }
+      const { line, errorMessage } = parsed;
 
       const model = instance.editor.getModels()[0];
       if (!model) {
@@ -290,7 +304,25 @@ watch(
 
 const monacoTheme = computed(() => (mode.value === 'dark' ? 'vs-dark' : 'light'));
 
+const disposeEditors = () => {
+  editorRef.value?.getModel()?.dispose();
+  editorRef.value?.dispose();
+  editorRef.value = undefined;
+  const diff = diffEditorRef.value;
+  if (diff) {
+    diff.getModel()?.original?.dispose();
+    diff.getModel()?.modified?.dispose();
+    diff.dispose();
+    diffEditorRef.value = undefined;
+  }
+};
+
+onBeforeUnmount(disposeEditors);
+
 // Editor / DiffEditor lifecycle — replaces @monaco-editor/react components.
+// PORTING(review-5): @monaco-editor/react re-syncs `value`/`options` props
+// into the model on every render; direct monaco needs explicit watchers
+// (below) or external v-model writes go stale.
 const createEditors = () => {
   const instance = monaco.value;
   if (!instance) return;
@@ -326,10 +358,49 @@ const createEditors = () => {
   }
 };
 
+// (re)create on init + on previousValue branch toggle; the v-if container
+// swap orphans the old editor's DOM node, so dispose first (review-5).
 watch(
   () => [monaco.value, props.previousValue] as const,
-  () => createEditors(),
+  () => {
+    disposeEditors();
+    createEditors();
+  },
   { flush: 'post' },
+);
+
+// value sync: external modelValue writes must reach the model (review-5 —
+// upstream's Editor wrapper does this via its value prop effect).
+watch(innerValue, (value) => {
+  if (value === undefined) return;
+  const editor = editorRef.value;
+  if (editor && editor.getValue() !== value) {
+    editor.setValue(value);
+  }
+  const diff = diffEditorRef.value;
+  const modified = diff?.getModel()?.modified;
+  if (modified && modified.getValue() !== value) {
+    modified.setValue(value);
+  }
+});
+
+// original side of the diff syncs with previousValue (review-5)
+watch(
+  () => props.previousValue,
+  (previous) => {
+    const original = diffEditorRef.value?.getModel()?.original;
+    if (original && previous !== undefined && original.getValue() !== previous) {
+      original.setValue(previous);
+    }
+  },
+);
+
+// readOnly re-applied like upstream's options prop (review-5)
+watch(
+  () => [props.disabled, props.permission] as const,
+  ([disabled, permission]) => {
+    editorRef.value?.updateOptions({ readOnly: disabled || permission !== 'edit:full' });
+  },
 );
 
 // theme switching (upstream passes theme per editor via props)
@@ -347,16 +418,19 @@ const rootStyle = computed(() => ({
 <template>
   <div class="grl-function" :data-theme="mode" :style="rootStyle">
     <!-- PORTING: react-resizable-panels → splitpanes; PanelGroup's autoSaveId
-         (layout persistence) has no splitpanes equivalent — dropped. -->
+         (layout persistence) has no splitpanes equivalent — dropped. Second
+         pane matches upstream (minSize only, no fixed size). -->
     <Splitpanes class="grl-function__content">
       <Splitpane :size="70" :min-size="50">
-        <div v-if="previousValue" ref="diffContainer" class="grl-function__editor-host" />
-        <div v-else ref="editorContainer" class="grl-function__editor-host" />
+        <!-- upstream: loading={<Spin size='large'/>} while monaco boots -->
+        <Spinner v-if="!monacoReady" size="large" />
+        <div v-if="previousValue" v-show="monacoReady" ref="diffContainer" class="grl-function__editor-host" />
+        <div v-else v-show="monacoReady" ref="editorContainer" class="grl-function__editor-host" />
       </Splitpane>
-      <Splitpane v-if="!disableDebug" :min-size="25" :size="30">
+      <Splitpane v-if="!disableDebug" :min-size="25">
         <FunctionDebugger
           :libraries="functionLibraries"
-          :trace="trace as FunctionDebuggerTrace"
+          :trace="trace"
           :editor="editorRef"
           :editor-value="modelValue"
           :disabled="disabled || permission !== 'edit:full'"

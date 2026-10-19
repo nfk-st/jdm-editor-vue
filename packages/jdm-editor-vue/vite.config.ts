@@ -11,6 +11,15 @@ export default defineConfig({
   resolve: {
     dedupe: ['@lezer/common', '@lezer/lr', '@lezer/highlight', 'vue'],
   },
+  test: {
+    environment: 'jsdom',
+    alias: [
+      {
+        find: /^monaco-editor$/,
+        replacement: fileURLToPath(new URL('./src/monaco-test-stub.ts', import.meta.url)),
+      },
+    ],
+  },
   build: {
     target: 'esnext',
     sourcemap: true,
