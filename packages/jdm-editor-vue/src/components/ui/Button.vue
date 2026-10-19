@@ -10,8 +10,10 @@ withDefaults(
     disabled?: boolean;
     size?: 'default' | 'small';
     block?: boolean;
+    // antd parity: loading spinner state
+    loading?: boolean;
   }>(),
-  { type: 'default', danger: false, disabled: false, size: 'default', block: false },
+  { type: 'default', danger: false, disabled: false, size: 'default', block: false, loading: false },
 );
 
 const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', event: FocusEvent): void }>();
@@ -34,6 +36,7 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     v-bind="$attrs"
   >
     <span v-if="$slots.icon" class="grl-btn__icon"><slot name="icon" /></span>
+    <span v-if="loading" class="grl-btn__spinner" />
     <slot />
   </button>
 </template>
@@ -143,6 +146,24 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
   &__icon {
     display: inline-flex;
     align-items: center;
+  }
+
+  // antd loading parity — token spinner
+  &__spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentcolor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: grl-btn-spin 0.6s linear infinite;
+  }
+}
+
+@keyframes grl-btn-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
