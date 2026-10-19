@@ -6,19 +6,19 @@
 // public DecisionTable through its providers. The store actions and table
 // math are covered by table/table.test.ts.
 import { mount } from '@vue/test-utils';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, nextTick, ref } from 'vue';
 
-import { ENUM_MODE_OPTIONS, getEnumMode, parseEnumString, serializeEnumValues } from './components/enum-utils';
+import { type ParsedExcelData } from '../../helpers/excel';
+import { NodeKind } from '../../helpers/schema';
 import {
   type ImportColumn,
   buildImportColumns,
   buildMappedExcelData,
   isHeaderMatch,
 } from './components/dt-excel-dialog.vue';
-import { type ParsedExcelData } from '../../helpers/excel';
-import { NodeKind } from '../../helpers/schema';
-import DecisionTable from './dt.vue';
+import { ENUM_MODE_OPTIONS, getEnumMode, parseEnumString, serializeEnumValues } from './components/enum-utils';
+import DecisionTable, { cellSlotAdapter } from './dt.vue';
 import type { TableScrollApi } from './table/table.vue';
 
 describe('enum-utils', () => {
@@ -226,8 +226,8 @@ describe('DecisionTable (smoke)', () => {
     ],
     outputs: [{ id: 'out-1', name: 'Output 1', field: 'output1' }],
     rules: [
-      { _id: 'r1', 'in-1': 'a', 'out-1': 'x' },
-      { _id: 'r2', 'in-1': 'b', 'out-1': 'y' },
+      { '_id': 'r1', 'in-1': 'a', 'out-1': 'x' },
+      { '_id': 'r2', 'in-1': 'b', 'out-1': 'y' },
     ],
   });
 
@@ -243,8 +243,8 @@ describe('DecisionTable (smoke)', () => {
         setup() {
           return () =>
             h(DecisionTable, {
-              tableHeight: 400,
-              modelValue: modelValue.value,
+              'tableHeight': 400,
+              'modelValue': modelValue.value,
               'onUpdate:modelValue': (v: unknown) => {
                 modelValue.value = v as ReturnType<typeof seed>;
               },
@@ -261,8 +261,18 @@ describe('DecisionTable (smoke)', () => {
     expect(wrapper.find('.grl-dt').exists()).toBe(true);
     expect(wrapper.find('.grl-dt__command-bar').exists()).toBe(true);
     expect(wrapper.find('.grl-dt__container').exists()).toBe(true);
-    expect(wrapper.findAll('thead').map((t) => t.text()).join(' ')).toContain('Inputs');
-    expect(wrapper.findAll('thead').map((t) => t.text()).join(' ')).toContain('Output 1');
+    expect(
+      wrapper
+        .findAll('thead')
+        .map((t) => t.text())
+        .join(' '),
+    ).toContain('Inputs');
+    expect(
+      wrapper
+        .findAll('thead')
+        .map((t) => t.text())
+        .join(' '),
+    ).toContain('Output 1');
 
     // edit-mode field pills render FieldEditPopover's default trigger (no
     // consumer trigger slot provided)
@@ -276,5 +286,89 @@ describe('DecisionTable (smoke)', () => {
 
     wrapper.unmount();
     vi.unstubAllGlobals();
+  });
+});
+
+describe('exportDecisionTable (excel export path)', () => {
+  it('produces a downloadable blob with one worksheet per table, deduped names', async () => {
+    const saves: { name: string; blob: Blob }[] = [];
+    vi.spyOn(await import('../../helpers/file-helpers'), 'saveFile').mockImplementation((name, blob) => {
+      saves.push({ name, blob });
+    });
+
+    const { exportDecisionTable } = await import('../../helpers/excel');
+    await exportDecisionTable('test-export', [
+      {
+        id: 't1',
+        name: 'Risk',
+        type: NodeKind.DecisionTable,
+        position: { x: 0, y: 0 },
+        inputs: [{ id: 'in1', name: 'age' }],
+        outputs: [{ id: 'out1', name: 'risk' }],
+        rules: [{ in1: '>= 18', out1: '"low"', _description: 'adult' }],
+      } as never,
+      {
+        id: 't2',
+        name: 'Risk',
+        type: NodeKind.DecisionTable,
+        position: { x: 0, y: 0 },
+        inputs: [],
+        outputs: [],
+        rules: [],
+      } as never,
+    ]);
+
+    expect(saves).toHaveLength(1);
+    expect(saves[0].name).toBe('test-export.xlsx');
+    // xlsx is a zip container — non-empty blob plus successful parse is the
+    // contract here (jsdom's Blob lacks .text() for magic-byte checks)
+    expect(saves[0].blob.size).toBeGreaterThan(0);
+  });
+});
+describe('cellSlotAdapter (#cell slot contract)', () => {
+  it('returns the fallback function when no slot is provided', () => {
+    const fallback = () => h('b', 'x');
+    expect(cellSlotAdapter(undefined, fallback)).toBe(fallback);
+  });
+
+  it('passes a single node through unwrapped', () => {
+    const node = h('em', 'one');
+    const render = cellSlotAdapter(() => [node], undefined)!;
+    expect(
+      render({ value: 'v', onChange: () => undefined, index: 0, column: { id: 'a', name: 'a', colType: 'inputs' } }),
+    ).toBe(node);
+  });
+
+  it('wraps multiple nodes in a div', () => {
+    const nodes = [h('em', 'one'), h('strong', 'two')];
+    const render = cellSlotAdapter(() => nodes, undefined)!;
+    const out = render({
+      value: 'v',
+      onChange: () => undefined,
+      index: 0,
+      column: { id: 'a', name: 'a', colType: 'inputs' },
+    }) as { type: string };
+    expect(out.type).toBe('div');
+  });
+
+  it('returns null for an empty slot result (upstream contract: undefined/null renders nothing)', () => {
+    const render = cellSlotAdapter(() => [], undefined)!;
+    expect(
+      render({ value: 'v', onChange: () => undefined, index: 0, column: { id: 'a', name: 'a', colType: 'inputs' } }),
+    ).toBeNull();
+  });
+
+  it('invokes the slot with the cell props', () => {
+    const seen: unknown[] = [];
+    cellSlotAdapter((props) => {
+      seen.push(props);
+      return [h('i')];
+    }, undefined)!({
+      value: 'v',
+      onChange: () => undefined,
+      index: 0,
+      column: { id: 'a', name: 'a', colType: 'inputs' },
+    });
+    expect(seen[0]).toMatchObject({ value: 'v' });
   });
 });

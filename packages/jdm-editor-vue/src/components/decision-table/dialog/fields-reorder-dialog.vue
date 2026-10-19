@@ -85,32 +85,36 @@ const submit = () => props.onSuccess?.(columns.value);
     :get-container="getContainer"
     @update:open="(o) => !o && props.onDismiss?.()"
   >
-    <Stack :gap="8" horizontal-align="stretch">
-      <!-- PORTING: Sortable needs a real parent element for its items —
+    <!-- PORTING: upstream's antd Form makes Enter submit (okButtonProps);
+         a native form restores that here. -->
+    <form @submit.prevent="submit">
+      <Stack :gap="8" horizontal-align="stretch">
+        <!-- PORTING: Sortable needs a real parent element for its items —
            upstream's Stack IS the list; ours wraps an inner flex column. -->
-      <div ref="listRef" class="grl-dt__fields-reorder__list">
-        <!-- antd Card → token-styled stand-in (additive class, styled below) -->
-        <div
-          v-for="column in columns"
-          :key="column.id"
-          :data-col-id="column.id"
-          class="grl-dt__fields-reorder__card"
-          :style="{ opacity: draggingId === column.id ? 0 : 1 }"
-        >
-          <div class="grl-dt__fields-reorder__item">
-            <Stack horizontal vertical-align="center">
-              <div class="grl-dt__fields-reorder__handle">=</div>
-              <Stack :gap="0" grow>
-                <span class="grl-typography">{{ column.name }}</span>
-                <span class="grl-typography grl-typography--secondary" :style="{ fontSize: '12px' }">
-                  {{ column.field }}
-                </span>
+        <div ref="listRef" class="grl-dt__fields-reorder__list">
+          <!-- antd Card → token-styled stand-in (additive class, styled below) -->
+          <div
+            v-for="column in columns"
+            :key="column.id"
+            :data-col-id="column.id"
+            class="grl-dt__fields-reorder__card"
+            :style="{ opacity: draggingId === column.id ? 0 : 1 }"
+          >
+            <div class="grl-dt__fields-reorder__item">
+              <Stack horizontal vertical-align="center">
+                <div class="grl-dt__fields-reorder__handle">=</div>
+                <Stack :gap="0" grow>
+                  <span class="grl-typography">{{ column.name }}</span>
+                  <span class="grl-typography grl-typography--secondary" :style="{ fontSize: '12px' }">
+                    {{ column.field }}
+                  </span>
+                </Stack>
               </Stack>
-            </Stack>
+            </div>
           </div>
         </div>
-      </div>
-    </Stack>
+      </Stack>
+    </form>
     <template #footer>
       <Button @click="props.onDismiss?.()">Cancel</Button>
       <Button type="primary" @click="submit">Update</Button>

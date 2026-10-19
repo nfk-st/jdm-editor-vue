@@ -197,8 +197,6 @@ import { ArrowLeft, GripVertical, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { type PropType, computed, defineComponent, h, ref, watch } from 'vue';
 import { type UseDraggableOptions, useDraggable } from 'vue-draggable-plus';
 
-import { useDecisionTableDialog } from '../context/dt-dialog.context';
-import { useDecisionTableState } from '../context/dt-store.context';
 import ConfirmAction from '../../confirm-action.vue';
 import Button from '../../ui/Button.vue';
 import Checkbox from '../../ui/Checkbox.vue';
@@ -206,6 +204,8 @@ import Modal from '../../ui/Modal.vue';
 import Select from '../../ui/Select.vue';
 import Switch from '../../ui/Switch.vue';
 import Tooltip from '../../ui/Tooltip.vue';
+import { useDecisionTableDialog } from '../context/dt-dialog.context';
+import { useDecisionTableState } from '../context/dt-store.context';
 import InputFieldEdit from './input-field-edit.vue';
 import OutputFieldEdit from './output-field-edit.vue';
 
@@ -322,9 +322,9 @@ const ImportColumnRow = defineComponent({
       return h(
         'div',
         {
-          class: 'grl-dt-excel-row',
+          'class': 'grl-dt-excel-row',
           'data-col-id': props.col.id,
-          style: {
+          'style': {
             display: 'grid',
             gridTemplateColumns: '24px 36px 1fr 12px 1fr 28px 28px 28px',
             gap: '8px',
@@ -343,8 +343,8 @@ const ImportColumnRow = defineComponent({
             () => h(GripVertical, { size: 14, style: { color: 'var(--grl-color-text-tertiary)' } }),
           ),
           h(Switch, {
-            size: 'small',
-            modelValue: !props.disabled,
+            'size': 'small',
+            'modelValue': !props.disabled,
             'onUpdate:modelValue': (value: boolean) => emit('toggle', value),
           }),
           h(
@@ -376,24 +376,21 @@ const ImportColumnRow = defineComponent({
           ),
           h(ArrowLeft, { size: 12, style: { color: 'var(--grl-color-primary)' } }),
           h(Select, {
-            allowClear: true,
-            style: { width: '100%' },
-            placeholder: 'Select Excel column',
-            modelValue: props.col.excelHeaderId,
-            disabled: props.disabled,
+            'allowClear': true,
+            'style': { width: '100%' },
+            'placeholder': 'Select Excel column',
+            'modelValue': props.col.excelHeaderId,
+            'disabled': props.disabled,
             'onUpdate:modelValue': (value: string) => emit('excelHeaderChange', value || undefined),
-            options: excelOptions,
+            'options': excelOptions,
           }),
           h('div', { style: { display: 'flex', justifyContent: 'center' } }, () =>
-            h(
-              Tooltip,
-              { content: 'Wrap values in quotes' },
-              () =>
-                h(Checkbox, {
-                  disabled: props.disabled,
-                  modelValue: props.wrapChecked,
-                  'onUpdate:modelValue': (value: boolean) => emit('wrapChange', value),
-                }),
+            h(Tooltip, { content: 'Wrap values in quotes' }, () =>
+              h(Checkbox, {
+                'disabled': props.disabled,
+                'modelValue': props.wrapChecked,
+                'onUpdate:modelValue': (value: boolean) => emit('wrapChange', value),
+              }),
             ),
           ),
           props.section === 'input'

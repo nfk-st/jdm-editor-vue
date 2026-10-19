@@ -1,7 +1,9 @@
 <script lang="ts">
 // Ported from components/decision-table/dt.tsx — the public DecisionTable.
-import type { Ref } from 'vue';
+import type { Ref, VNode } from 'vue';
+import { h } from 'vue';
 
+import type { TableCellProps } from './context/dt-store.context';
 import type { DecisionTableContextProps } from './context/dt-store.context';
 import type { DecisionTableEmptyType } from './dt-empty.vue';
 
@@ -20,6 +22,24 @@ export type DecisionTableProps = {
   scrollApiRef?: Ref<TableScrollApi | null>;
 } & DecisionTableContextProps &
   DecisionTableEmptyType;
+
+// The #cell slot adapter, extracted for testing (jsdom's zero-height
+// containers virtualize all body rows away, so end-to-end slot rendering
+// can't be asserted there — the adapter's contract is the unit).
+export const cellSlotAdapter = (
+  slot: ((props: TableCellProps) => VNode[]) | undefined,
+  fallback: ((props: TableCellProps) => VNode | null | undefined) | undefined,
+): ((cellProps: TableCellProps) => VNode | null | undefined) | undefined => {
+  if (!slot) {
+    return fallback;
+  }
+
+  return (cellProps: TableCellProps) => {
+    const nodes = slot(cellProps) ?? [];
+    if (!nodes.length) return null;
+    return nodes.length === 1 ? nodes[0] : h('div', nodes);
+  };
+};
 </script>
 
 <script setup lang="ts">
@@ -28,12 +48,11 @@ export type DecisionTableProps = {
 // dropped per PORTING.md's DnD map. The `ref.current &&` + setMounted gate is
 // kept as a mounted ref so the dialog container ref exists before children
 // render (expression.vue's client-only stance).
-import { computed, defineComponent, h, onMounted, reactive, ref, watch, useSlots } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref, useSlots, watch } from 'vue';
 
 import { type DictionaryMap, provideDictionaries } from '../../theme';
 import { DecisionTableDialogProvider } from './context/dt-dialog.context';
 import { DecisionTableProvider, useDecisionTableState } from './context/dt-store.context';
-import type { TableCellProps } from './context/dt-store.context';
 import DecisionTableDialogs from './dialog/dt-dialogs.vue';
 import DecisionTableCommandBar from './dt-command-bar.vue';
 import DecisionTableEmpty from './dt-empty.vue';
@@ -73,17 +92,9 @@ const emptyProps = computed(() => {
 // still rides through emptyProps); the Vue-idiomatic #cell slot adapts onto
 // it (PORTING.md's render-props → slots rule; dt-empty.vue's porting note).
 const slots = useSlots();
-const cellRenderer = computed<DecisionTableEmptyType['cellRenderer']>(() => {
-  if (!slots.cell) {
-    return props.cellRenderer;
-  }
-
-  return (cellProps: TableCellProps) => {
-    const nodes = slots.cell?.(cellProps) ?? [];
-    if (!nodes.length) return null;
-    return nodes.length === 1 ? nodes[0] : h('div', nodes);
-  };
-});
+const cellRenderer = computed<DecisionTableEmptyType['cellRenderer']>(() =>
+  cellSlotAdapter(slots.cell as never, props.cellRenderer),
+);
 
 // upstream: const DictionaryBridge = ({ children }) => {
 //   const dictionaries = useDecisionTableState((s) => s.dictionaries) ?? {};

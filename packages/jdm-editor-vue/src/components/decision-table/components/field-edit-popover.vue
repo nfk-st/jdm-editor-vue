@@ -6,8 +6,8 @@
 // Typography.Text → token-styled span; antd Button → ui/Button; React's
 // `trigger` prop and `children` → #trigger and default slots;
 // onKeyDownCapture → @keydown.capture.
-import { ChevronDownIcon } from 'lucide-vue-next';
 import clsx from 'clsx';
+import { ChevronDownIcon } from 'lucide-vue-next';
 
 import ConfirmAction from '../../confirm-action.vue';
 import Stack from '../../stack.vue';

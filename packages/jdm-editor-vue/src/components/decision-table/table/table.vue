@@ -381,6 +381,10 @@ const dragOptions = computed<UseDraggableOptions<Record<string, string>>>(() => 
     const index = readVirtualIndex(evt.related as HTMLElement | undefined);
     const row = index == null ? undefined : rows.value[index];
     drop.id = row?.id ?? null;
+    // PORTING: upstream derives direction from the pointer delta
+    // (getDifferenceFromInitialOffset().y); Sortable exposes insertion side
+    // (willInsertAfter) — same in the common case, differs dragging down
+    // onto a target's upper half.
     drop.direction = evt.willInsertAfter ? 'down' : 'up';
     return true;
   },
