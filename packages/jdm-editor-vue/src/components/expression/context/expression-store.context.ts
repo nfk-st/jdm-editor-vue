@@ -1,14 +1,14 @@
 // Ported from components/expression/context/expression-store.context.tsx.
-// PORTING: zustand `create()` → reactive store + provide/inject; `set(produce(...))`
-// → `set()` helper applying immer results back onto the reactive object, so
-// upstream action bodies stay literal. A small subscribe(prevState) mechanism
-// replaces zustand's store.subscribe for the controller's onChange bridge.
+// PORTING: zustand `create()` → MiniStore (helpers/mini-store.ts — the
+// machinery extracted from this file after review round 3); upstream action
+// bodies stay literal (immer produce flows through setState).
 import type { Variable, VariableType } from '@gorules/zen-engine-wasm';
 import equal from 'fast-deep-equal/es6/react';
 import { produce } from 'immer';
-import { type ComputedRef, type InjectionKey, computed, inject, provide, reactive } from 'vue';
+import { computed, inject, provide, type ComputedRef, type InjectionKey } from 'vue';
 
 import type { GetNodeDataResult } from '../../../helpers/node-data';
+import { createMiniStore, type MiniStore } from '../../../helpers/mini-store';
 
 // PORTING: stand-ins for decision-graph types — swap when decision-graph lands.
 type DiffMetadata = {
@@ -54,17 +54,9 @@ export type ExpressionStore = {
   };
 };
 
-// zustand-shaped extras the raw store carries (setState/getState/subscribe).
-export type ExpressionStoreInternal = ExpressionStore & {
-  setState: (partial: Partial<ExpressionStore>) => void;
-  getState: () => ExpressionStore;
-  subscribe: (listener: (state: ExpressionStore, prevState: ExpressionStore) => void) => () => void;
-};
+export type ExpressionStoreInternal = MiniStore<ExpressionStore>;
 
 const ExpressionStoreKey: InjectionKey<ExpressionStoreInternal> = Symbol('expression-store');
-
-type Listener = (state: ExpressionStore, prevState: ExpressionStore) => void;
-type SetArg = Partial<ExpressionStore> | ((state: ExpressionStore) => Partial<ExpressionStore> | ExpressionStore);
 
 export const createExpression = (data: Partial<ExpressionEntry> = {}): ExpressionEntry => ({
   id: crypto.randomUUID(),
@@ -74,27 +66,15 @@ export const createExpression = (data: Partial<ExpressionEntry> = {}): Expressio
 });
 
 export const createExpressionStore = (): ExpressionStoreInternal => {
-  const listeners = new Set<Listener>();
-  const store = reactive({}) as ExpressionStoreInternal;
-
-  // zustand's set(): accepts a partial object or an updater (immer's curried
-  // produce is an updater); shallow prev snapshot preserves array refs for the
-  // subscribe listeners' equality checks.
-  const set = (partialOrUpdater: SetArg) => {
-    const prev: ExpressionStore = { ...store };
-    const partial = typeof partialOrUpdater === 'function' ? partialOrUpdater(store) : partialOrUpdater;
-    Object.assign(store, partial);
-    listeners.forEach((listener) => listener(store, prev));
-  };
-
-  Object.assign(store, {
+  const store = createMiniStore<ExpressionStore>(() => ({
     disabled: false,
     debugIndex: 0,
+    expressions: [] as ExpressionEntry[],
     addRowAbove: (index = 0, data?: Partial<ExpressionEntry>) => {
       // PORTING(P3): upstream's body ignores its own `data` param
       // (createExpression() with no args); we honor it — typed superset,
       // kept because dt-store/dg-store follow this file as template.
-      set(
+      store.setState(
         produce<ExpressionStore>((draft) => {
           draft.expressions.splice(index, 0, createExpression(data));
           return draft;
@@ -103,7 +83,7 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
     },
     addRowBelow: (index?: number, data?: Partial<ExpressionEntry>) => {
       // PORTING(P3): as above — upstream ignores `data`; we honor it.
-      set(
+      store.setState(
         produce<ExpressionStore>((draft) => {
           index = index ?? draft.expressions.length - 1;
           draft.expressions.splice(index + 1, 0, createExpression(data));
@@ -111,12 +91,11 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
         }),
       );
     },
-    expressions: [] as ExpressionEntry[],
     setExpressions: (expressions: ExpressionEntry[]) => {
-      set({ expressions });
+      store.setState({ expressions });
     },
     swapRows: (sourceIndex: number, targetIndex: number) => {
-      set(
+      store.setState(
         produce<ExpressionStore>((draft) => {
           const [input] = draft.expressions.splice(sourceIndex, 1);
           draft.expressions.splice(targetIndex, 0, input);
@@ -125,7 +104,7 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
       );
     },
     removeRow: (index: number) => {
-      set(
+      store.setState(
         produce<ExpressionStore>((draft) => {
           draft.expressions.splice(index, 1);
           return draft;
@@ -133,7 +112,7 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
       );
     },
     updateRow: (index: number, update: Partial<Omit<ExpressionEntry, 'id'>>) => {
-      set(
+      store.setState(
         produce<ExpressionStore>((draft) => {
           draft.expressions[index] = {
             ...draft.expressions[index],
@@ -143,13 +122,7 @@ export const createExpressionStore = (): ExpressionStoreInternal => {
         }),
       );
     },
-    setState: (partial: Partial<ExpressionStore>) => set(partial),
-    getState: (): ExpressionStore => store,
-    subscribe: (listener: Listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-  });
+  }));
 
   return store;
 };
