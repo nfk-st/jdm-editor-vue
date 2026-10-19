@@ -107,7 +107,7 @@ module is ported.
       provider supplies yet — wiring lands with decision-graph (step 8)_
 - [x] `usePersistentState` (from `helpers/use-persistent-state`)
 - [x] `helpers/schema` exports + `./dist/schema` entry
-- [ ] `components/decision-graph`: `DecisionGraph` (props: `id`, `defaultValue`, `value`, `disabled`, `viewConfig`, `components`, `onChange`, `reactFlowProOptions`→dropped?, `onReactFlowInit`→`onInit`; ref: `addNode`, …) — expand on port
+- [ ] `components/decision-graph`: `DecisionGraph` (props: `id`, `defaultValue`, `value`→modelValue, `disabled`, `viewConfig`, `components`, `onChange`; ref: `addNode`, …) — expand on port. NB: `reactFlowProOptions` prop DROPPED (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md)
 - [ ] `components/decision-table`: `DecisionTable` (props: `id`, `defaultValue`, `value`, `activeRules`, `permission`, `disabled`, `disableHitPolicy`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `cellRenderer` → `#cell` slot)
 - [x] `components/function`: `Function` (public FunctionProps incl. v-model + trace/error), `FunctionDebugger`,
   `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript

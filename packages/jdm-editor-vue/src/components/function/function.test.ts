@@ -31,7 +31,10 @@ describe('variableTypeToTypescript', () => {
   });
 
   it('maps object and array variable types', () => {
-    expect(variableTypeToTypescript(createVariableType({ a: 'x', b: 1 }))).toBe('{a:string,b:number}');
+    // object key order is wasm-map-dependent (flake fixed round-6 prep) —
+    // assert the mapped members, not the serialized order
+    const objectMapping = variableTypeToTypescript(createVariableType({ a: 'x', b: 1 }));
+    expect(objectMapping).toMatch(/^\{a:string,b:number\}$|^\{b:number,a:string\}$/);
     expect(variableTypeToTypescript(createVariableType(['a']))).toBe('string[]');
   });
 });
