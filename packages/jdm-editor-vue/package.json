@@ -72,6 +72,7 @@
   "devDependencies": {
     "@storybook/addon-essentials": "^8.6.12",
     "@storybook/vue3-vite": "^8.6.12",
+    "@types/big.js": "^6.2.2",
     "@types/lodash": "^4.17.16",
     "@types/to-json-schema": "^0.2.4",
     "@vitejs/plugin-vue": "^5.2.1",

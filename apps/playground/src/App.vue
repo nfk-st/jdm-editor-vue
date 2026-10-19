@@ -10,6 +10,10 @@ const expression = ref('age >= 18 && status == "active"');
 const builderValue = ref('count > 1');
 
 const tableIds = { in1: crypto.randomUUID(), in2: crypto.randomUUID(), out1: crypto.randomUUID() };
+const fnSource = ref(`async function handler(input) {
+  const risk = input.age > 60 ? 'high' : 'low';
+  return { risk };
+}`);
 const table = ref<DecisionTableType>({
   hitPolicy: 'first',
   inputs: [
@@ -73,6 +77,13 @@ const graph = ref({
           <DecisionTable v-model="table" :table-height="360" />
         </section>
 
+        <section class="demo demo--wide">
+          <h3>Function editor (Monaco + debugger)</h3>
+          <div class="fn-host">
+            <FunctionEditor v-model="fnSource" :input-data="{ age: 42 }" />
+          </div>
+        </section>
+
         <section class="demo muted">
           <p>DecisionGraph component ports with the decision-graph module.</p>
           <p>Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</p>
@@ -114,6 +125,13 @@ const graph = ref({
 
 .demo--wide {
   max-width: 100%;
+}
+
+.fn-host {
+  height: 420px;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 6px;
+  overflow: hidden;
 }
 .value {
   margin: 0;

@@ -109,7 +109,8 @@ module is ported.
 - [x] `helpers/schema` exports + `./dist/schema` entry
 - [ ] `components/decision-graph`: `DecisionGraph` (props: `id`, `defaultValue`, `value`, `disabled`, `viewConfig`, `components`, `onChange`, `reactFlowProOptions`→dropped?, `onReactFlowInit`→`onInit`; ref: `addNode`, …) — expand on port
 - [ ] `components/decision-table`: `DecisionTable` (props: `id`, `defaultValue`, `value`, `activeRules`, `permission`, `disabled`, `disableHitPolicy`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `cellRenderer` → `#cell` slot)
-- [ ] `components/function`: Function editor exports
+- [x] `components/function`: `Function` (public FunctionProps incl. v-model + trace/error), `FunctionDebugger`,
+  `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript
 - [x] `components/expression`: `Expression` (+ store, controller, list/item, command bar, context menu)
 - [x] `components/code-editor`: `CodeEditor` (modelValue v-model; type/lint/strict/noStyle/lazy),
       `ExpressionBuilder`, `StandardExpressionBuilder` (business barrel), `focusBuilderRoot`,
@@ -131,7 +132,7 @@ Bottom-up so every module lands with its dependencies already present:
 | 4   | `components/code-editor` (+ zen grammar wiring)  | 3084         | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect) |
 | 5   | `components/expression`                          | 753          | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip)                             |
 | 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)  |
-| 7   | `components/function`                            | 3868         | ⬜                                                                                                                          |
+| 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                       |
 | 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ⬜                                                                                                                          |
 | 9   | stories → Storybook (vue3-vite), parity review   | —            | ⬜                                                                                                                          |
 | 10  | docs site / README polish, publish prep          | —            | ⬜                                                                                                                          |

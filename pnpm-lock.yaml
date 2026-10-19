@@ -148,6 +148,9 @@ importers:
       '@storybook/vue3-vite':
         specifier: ^8.6.12
         version: 8.6.19(storybook@8.6.19(prettier@3.9.10)(supports-color@8.1.1))(vite@6.4.4(sass@1.105.2))(vue@3.5.44(typescript@5.9.3))
+      '@types/big.js':
+        specifier: ^6.2.2
+        version: 6.2.2
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.26
@@ -969,6 +972,9 @@ packages:
 
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
+
+  '@types/big.js@6.2.2':
+    resolution: {integrity: sha512-e2cOW9YlVzFY2iScnGBBkplKsrn2CsObHQ2Hiw4V1sSyiGbgWL8IyqE3zFi1Pt5o1pdAtYkDAIsF3KKUPjdzaA==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -3590,6 +3596,8 @@ snapshots:
       - supports-color
 
   '@types/argparse@1.0.38': {}
+
+  '@types/big.js@6.2.2': {}
 
   '@types/chai@5.2.3':
     dependencies:
