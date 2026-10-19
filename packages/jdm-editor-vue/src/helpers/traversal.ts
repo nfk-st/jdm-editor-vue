@@ -1,42 +1,11 @@
 import { type Edge, type Node, getIncomers, getOutgoers } from '@vue-flow/core';
 import equal from 'fast-deep-equal/es6/react';
 
-// PORTING: upstream imports `DecisionGraphType`/`DecisionNode` from ../components
-// (dg-types) and `mapToGraphNodes`/`mapToGraphEdges` from
-// ../components/decision-graph/dg-util — none ported yet. Minimal local
-// stand-ins below; swap to the real imports when decision-graph lands.
-type DecisionNode = {
-  id: string;
-  name: string;
-  type?: string;
-  position: { x: number; y: number };
-};
+// dg-types landed with decision-graph — the local stand-ins are retired.
+import type { DecisionEdge, DecisionGraphType, DecisionNode } from '../components/decision-graph/dg-types';
 
-type DecisionEdge = {
-  id: string;
-  name?: string;
-  sourceId: string;
-  targetId: string;
-  sourceHandle?: string | null;
-  targetHandle?: string | null;
-  type?: string;
-};
-
-type DecisionGraphType = {
-  nodes: DecisionNode[];
-  edges: DecisionEdge[];
-};
-
-// PORTING: local minimal stand-ins for dg-util's mapToGraphNodes/mapToGraphEdges
-// (reactflow → @vue-flow/core). The walk consults only node ids and edge
-// source/target, so the unmapped extras (markers, dimensions, data) are omitted.
-const mapToGraphNodes = (nodes: DecisionNode[]): Node[] =>
-  nodes.map((node) => ({ id: node.id, position: node.position }));
-
-const mapToGraphEdges = (edges: DecisionEdge[]): Edge[] =>
-  edges
-    .filter((edge) => edge.sourceId && edge.targetId)
-    .map((edge) => ({ id: edge.id, source: edge.sourceId, target: edge.targetId }));
+// dg-util landed with decision-graph — local mappers retired.
+import { mapToGraphEdges, mapToGraphNodes } from '../components/decision-graph/dg-util';
 
 type GraphWalkerCache = {
   digest: ReturnType<typeof decisionGraphPathDigest>;
