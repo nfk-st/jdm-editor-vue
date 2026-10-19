@@ -111,7 +111,9 @@ module is ported.
 - [ ] `components/decision-table`: `DecisionTable` (props: `id`, `defaultValue`, `value`, `activeRules`, `permission`, `disabled`, `disableHitPolicy`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `cellRenderer` → `#cell` slot)
 - [ ] `components/function`: Function editor exports
 - [ ] `components/expression`: Expression builder exports
-- [ ] `components/code-editor`: `CodeEditor` + code-editor exports
+- [x] `components/code-editor`: `CodeEditor` (modelValue v-model; type/lint/strict/noStyle/lazy),
+  `ExpressionBuilder`, `StandardExpressionBuilder` (business barrel), `focusBuilderRoot`,
+  `DiffIcon` (dg-types stand-in until #8); `diff-ce` landed (`DiffCodeEditor`)
 - [ ] `components/shared`, `diff-icon`
 
 ## Port order & status
@@ -123,7 +125,7 @@ Bottom-up so every module lands with its dependencies already present:
 | 1 | scaffold, tokens, theme, wasm | — | ✅ done |
 | 2 | `helpers/*` (16 files, ~1.1k) | 1056 | ✅ done |
 | 3 | `components/shared` (diff-* inputs) | 203 | ✅ done (diff-ce deferred to #4 — depends on code-editor) |
-| 4 | `components/code-editor` (+ zen grammar wiring) | 3084 | ⬜ |
+| 4 | `components/code-editor` (+ zen grammar wiring) | 3084 | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect) |
 | 5 | `components/expression` | 753 | ⬜ |
 | 6 | `components/decision-table` | 4039 | ⬜ |
 | 7 | `components/function` | 3868 | ⬜ |

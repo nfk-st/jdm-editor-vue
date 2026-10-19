@@ -1,7 +1,7 @@
 <script lang="ts">
 // Ported from components/shared/diff-ce.tsx.
 // PORTING: swap to barrel import ('../code-editor') when index lands.
-import type { CodeEditorProps } from '../code-editor/ce.vue';
+import type { CodeEditorProps } from '../code-editor';
 
 // PORTING: upstream `CodeEditorProps & { displayDiff; previousValue; noStyle }`
 // with the value/onChange → modelValue swap applied via CodeEditorProps itself.
@@ -19,7 +19,7 @@ export type DiffCodeEditorProps = CodeEditorProps & {
 import { computed, ref } from 'vue';
 
 // PORTING: swap to barrel import when index lands.
-import CodeEditor from '../code-editor/ce.vue';
+import { CodeEditor } from '../code-editor';
 
 defineOptions({ inheritAttrs: false });
 
@@ -63,7 +63,7 @@ defineExpose({
       :lint="false"
       disabled
       no-style
-      @update:model-value="(v) => emit('update:modelValue', v)"
+      @update:model-value="(v: string) => emit('update:modelValue', v)"
     />
   </div>
   <CodeEditor
@@ -72,6 +72,6 @@ defineExpose({
     v-bind="$attrs"
     :model-value="modelValue"
     :no-style="noStyle"
-    @update:model-value="(v) => emit('update:modelValue', v)"
+    @update:model-value="(v: string) => emit('update:modelValue', v)"
   />
 </template>

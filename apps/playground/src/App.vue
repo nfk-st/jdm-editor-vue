@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import { JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
+import { CodeEditor, ExpressionBuilder, JdmConfigProvider } from '@nfk.st/jdm-editor-vue';
 import '@nfk.st/jdm-editor-vue/dist/style.css';
 
 const mode = ref<'light' | 'dark'>('light');
+
+const expression = ref('age >= 18 && status == "active"');
+const builderValue = ref('count > 1');
 
 // Stand-in sample graph — DecisionGraph lands with the decision-graph module.
 const graph = ref({
@@ -27,9 +30,23 @@ const graph = ref({
     </header>
 
     <JdmConfigProvider :theme="{ mode }" style="flex: 1; min-height: 0">
-      <main class="canvas-placeholder">
-        <p>DecisionGraph component ports with the decision-graph module.</p>
-        <p>Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</p>
+      <main class="content">
+        <section class="demo">
+          <h3>CodeEditor (Zen expression)</h3>
+          <CodeEditor v-model="expression" type="unary" style="height: 120px" />
+          <pre class="value">{{ expression }}</pre>
+        </section>
+
+        <section class="demo">
+          <h3>ExpressionBuilder</h3>
+          <ExpressionBuilder v-model="builderValue" />
+          <pre class="value">{{ builderValue }}</pre>
+        </section>
+
+        <section class="demo muted">
+          <p>DecisionGraph component ports with the decision-graph module.</p>
+          <p>Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</p>
+        </section>
       </main>
     </JdmConfigProvider>
   </div>
@@ -51,11 +68,27 @@ const graph = ref({
 .spacer {
   flex: 1;
 }
-.canvas-placeholder {
-  display: grid;
-  place-content: center;
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow: auto;
+}
+.demo {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  height: 100%;
+  max-width: 640px;
+}
+.value {
+  margin: 0;
+  padding: 8px;
+  background: rgba(127, 127, 127, 0.1);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.muted {
   opacity: 0.65;
 }
 </style>
