@@ -10,6 +10,5 @@ export * from './helpers/schema';
 
 export * from './components';
 
-// PORTING(vue): remaining public surface lands module by module —
-//   components: decision-graph, function
-// See docs/PORTING.md for the parity checklist.
+// PORTING(vue): every upstream module has landed — see docs/PORTING.md for
+// the parity checklist.

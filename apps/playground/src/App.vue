@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import {
   CodeEditor,
+  DecisionGraph,
   DecisionTable,
   Expression,
   ExpressionBuilder,
   Function as FunctionEditor,
+  GraphSimulator,
   JdmConfigProvider,
 } from '@nfk.st/jdm-editor-vue';
-import type { DecisionTableType } from '@nfk.st/jdm-editor-vue';
+import type { DecisionGraphType, DecisionTableType } from '@nfk.st/jdm-editor-vue';
 import '@nfk.st/jdm-editor-vue/dist/style.css';
+import { Play } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const mode = ref<'light' | 'dark'>('light');
@@ -39,14 +42,26 @@ const rows = ref([
   { id: crypto.randomUUID(), key: 'score', value: 'min(age / 10, 10)' },
 ]);
 
-// Stand-in sample graph — DecisionGraph lands with the decision-graph module.
-const graph = ref({
+// Sample graph for the DecisionGraph canvas.
+const graph = ref<DecisionGraphType>({
   edges: [],
   nodes: [
-    { id: 'input', name: 'Request', type: 'input', position: { x: 80, y: 160 } },
-    { id: 'output', name: 'Response', type: 'output', position: { x: 480, y: 160 } },
+    { id: 'input', name: 'Request', type: 'inputNode', position: { x: 80, y: 160 } },
+    { id: 'output', name: 'Response', type: 'outputNode', position: { x: 480, y: 160 } },
   ],
 });
+
+// The simulator panel is registered through the store's panel machinery —
+// the same wiring upstream's storybook uses.
+const graphPanels = [
+  {
+    id: 'simulator',
+    title: 'Simulator',
+    icon: Play,
+    hideHeader: true,
+    renderPanel: GraphSimulator,
+  },
+];
 </script>
 
 <template>
@@ -91,9 +106,12 @@ const graph = ref({
           </div>
         </section>
 
-        <section class="demo muted">
-          <p>DecisionGraph component ports with the decision-graph module.</p>
-          <p>Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</p>
+        <section class="demo demo--wide">
+          <h3>DecisionGraph (Vue Flow canvas)</h3>
+          <div class="graph-host">
+            <DecisionGraph v-model="graph" :panels="graphPanels" />
+          </div>
+          <pre class="value">Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</pre>
         </section>
       </main>
     </JdmConfigProvider>
@@ -136,6 +154,13 @@ const graph = ref({
 
 .fn-host {
   height: 420px;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.graph-host {
+  height: 520px;
   border: 1px solid rgba(127, 127, 127, 0.25);
   border-radius: 6px;
   overflow: hidden;

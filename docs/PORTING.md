@@ -103,22 +103,25 @@ module is ported.
 - [x] `JdmConfigProvider` (+ `ThemeConfig`, `DictionaryMap`, `useDictionaries`)
 - [x] `ensureWasmLoaded`, `useWasmReady` (from `helpers/wasm`)
 - [x] `codemirror` (from `helpers/codemirror`)
-- [x] `useNodeType` (from `helpers/node-type`) — _ported; injects a key no
-      provider supplies yet — wiring lands with decision-graph (step 8)_
+- [x] `useNodeType` (from `helpers/node-type`) — _ported; the decision-graph
+      step-8 wiring is in place (the graph store provides the key)_
 - [x] `usePersistentState` (from `helpers/use-persistent-state`)
 - [x] `helpers/schema` exports + `./dist/schema` entry
-- [ ] `components/decision-graph`: `DecisionGraph` (props: `id`, `defaultValue`, `value`→modelValue, `disabled`, `viewConfig`, `components`, `onChange`; ref: `addNode`, …) — expand on port. NB: `reactFlowProOptions` prop DROPPED (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md)
-- [ ] `components/decision-table`: `DecisionTable` (props: `id`, `defaultValue`, `value`, `activeRules`, `permission`, `disabled`, `disableHitPolicy`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `cellRenderer` → `#cell` slot)
+- [x] `components/decision-graph`: `DecisionGraph`
+      - **props** (`DecisionGraphProps`): `id`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `disabled`, `components`, `customNodes`, `hideLeftToolbar`, `name`, `viewConfig`, `viewConfigCta`, `onViewConfigCta`, `defaultActivePanel`, `panels`, `onPanelsChange`, `simulate`, `dictionaries`, `mode`, `onChange`, `onReactFlowInit`, `onCodeExtension`, `onFunctionReady`; `manager` is a deprecated accept-and-ignore stub (upstream's react-dnd `DragDropManager`).
+      - **emits**: `update:modelValue` (upstream's `onChange`; the `onChange` prop is kept alongside it).
+      - **slots**: `#tab-bar-extra-content` (upstream's `tabBarExtraContent` ReactNode prop).
+      - **DROPPED**: `reactFlowProOptions` (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md).
+      - **ref** (`DecisionGraphRef` = `GraphRef`): the store's action surface — `setDecisionGraph`, `handleNodesChange`, `handleEdgesChange`, `setNodes`, `addNodes`, `updateNode`, `removeNodes`, `duplicateNodes`, `copyNodes`, `pasteNodes`, `setEdges`, `addEdges`, `removeEdges`, `removeEdgeByHandleId`, `setHoveredEdgeId`, `closeTab`, `openTab`, `goToNode`, `setActivePanel`, `setCompactMode`, `toggleCompactMode`, `setNodeType`, `removeNodeType`, `triggerNodeSelect` — plus `stateStore`, `serialize()`, `restore()`. NOTE: upstream v1.52 has **no** `addNode` on the public ref (the singular add is the canvas's internal `addNodeInner`, upstream graph.tsx); an earlier draft of this checklist claimed one — corrected.
+      - **module exports** (barrel mirrors upstream's `decision-graph/index.ts`): `DecisionGraph`, `GraphNode`, `GraphDecisionNode`, `GraphSimulator`, `SimulatorEditor`, `createJdmNode`, `nodeSpecification`, `NodeColor`, `NodeTypeKind`, the store/serializer hooks (`useDecisionGraphState`, `useDecisionGraphActions`, `useDecisionGraphReferences`, `useDecisionGraphListeners`, `useDecisionGraphRaw`, `useNodeDiff`, `useEdgeDiff`, `useGraphSerializer`, `useTabSerializer`), the diff helpers (`addStrikethrough`, `buildDiffString`, `compareAndUnifyLists`, `compareStringFields`, `calculateDiffGraph`, `processNodes`, `processEdges`) and the type surface (`DecisionGraphProps`, `DecisionGraphRef`, `NodeSpecification`, `MinimalNodeSpecification`, `MinimalNodeProps`, `CustomNodeSpecification`, `DecisionEdge`, `DecisionNode`, `DecisionGraphType`, `DiffMetadata`, `Diff`, `Position`, `DiffStatus`, the `Simulation*` family, `DecisionGraphSnapshot`, `TabSnapshot`, `Slice`).
 - [x] `components/function`: `Function` (public FunctionProps incl. v-model + trace/error), `FunctionDebugger`,
   `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript
 - [x] `components/expression`: `Expression` (+ store, controller, list/item, command bar, context menu)
 - [x] `components/code-editor`: `CodeEditor` (modelValue v-model; type/lint/strict/noStyle/lazy),
       `ExpressionBuilder`, `StandardExpressionBuilder` (business barrel), `focusBuilderRoot`,
       `DiffIcon` (dg-types stand-in until #8); `diff-ce` landed (`DiffCodeEditor`)
-- [x] `components/decision-table`: `DecisionTable` (modelValue v-model; tableHeight required;
-      `manager` deprecated stub; scrollContainerRef/scrollApiRef Ref props + exposed scroll surface;
-      reorder + excel dialogs; `cellRenderer` prop via `#cell` slot adapter on dt.vue)
-- [ ] `components/shared`, `diff-icon`
+- [x] `components/decision-table`: `DecisionTable` (props: `id`, `name`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `tableHeight` (required), `mountDialogsOnBody`, `disabled`, `disableHitPolicy`, `permission`, `mode`, `dictionaries`, `inputVariableType`, `debug`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `manager` deprecated accept-and-ignore stub; `scrollContainerRef`/`scrollApiRef` Ref props + exposed scroll surface; `cellRenderer` prop via the `#cell` slot adapter on dt.vue; reorder + excel dialogs)
+- [x] `components/shared`, `diff-icon`
 
 ## Port order & status
 
@@ -133,7 +136,7 @@ Bottom-up so every module lands with its dependencies already present:
 | 5   | `components/expression`                          | 753          | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip)                             |
 | 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)  |
 | 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                       |
-| 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ⬜                                                                                                                          |
+| 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels) |
 | 9   | stories → Storybook (vue3-vite), parity review   | —            | ⬜                                                                                                                          |
 | 10  | docs site / README polish, publish prep          | —            | ⬜                                                                                                                          |
 
@@ -155,9 +158,9 @@ new, not ported.
   all sites (expression-store, dt-store, dt-empty, table-row, function/types,
   helpers/traversal) import the canonical decision-graph/dg-types +
   simulator/simulation.types — the sweep is complete.
-- Toasts are `console` stand-ins (upstream uses antd message). Build
-  `ui/Toast` (reka-ui Toast) when the first real consumer lands
-  (simulator/decision-graph).
+- Toasts are `console` stand-ins (upstream uses antd message). The first real
+  consumers have landed (decision-graph's canvas + clipboard), so `ui/Toast`
+  (reka-ui Toast) is now worth building.
 - Table drop-direction uses Sortable's `willInsertAfter` (insertion side)
   where upstream reads the pointer delta — same in the common case, differs
   dragging down onto a target's upper half. Marked in table.vue.

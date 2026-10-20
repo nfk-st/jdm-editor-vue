@@ -20,6 +20,9 @@ importers:
       '@nfk.st/jdm-editor-vue':
         specifier: workspace:*
         version: link:../../packages/jdm-editor-vue
+      lucide-vue-next:
+        specifier: ^0.488.0
+        version: 0.488.0(vue@3.5.44(typescript@5.9.3))
       vue:
         specifier: ^3.5.13
         version: 3.5.44(typescript@5.9.3)

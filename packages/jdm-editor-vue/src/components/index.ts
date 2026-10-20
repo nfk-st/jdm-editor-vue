@@ -1,8 +1,8 @@
 // Ported from components/index.ts.
-// PORTING: pending modules — decision-graph (see docs/PORTING.md port order).
-// Order matches upstream: decision-table, [decision-graph], function,
+// Order matches upstream: decision-table, decision-graph, function,
 // expression, code-editor, shared, diff-icon.
 export * from './decision-table';
+export * from './decision-graph';
 export * from './function';
 export * from './expression';
 export * from './code-editor';
