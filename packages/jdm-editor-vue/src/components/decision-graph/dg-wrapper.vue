@@ -112,23 +112,28 @@ const TabContents = defineComponent({
 </script>
 
 <template>
-  <div>
-    <GraphSideToolbar v-if="!hideLeftToolbar" />
-    <div class="grl-dg__graph">
-      <GraphTabs :disabled="disableTabs">
-        <template #extra>
-          <slot name="tab-bar-extra-content" />
-        </template>
-      </GraphTabs>
+  <!-- PORTING: upstream's DecisionGraphWrapper returns a React Fragment, so
+       its three children are direct children of `.grl-dg` — which is a CSS
+       GRID with named areas ('sidebar graph component' / 'bottom bottom
+       component'). A single-root SFC would insert a wrapper element and
+       break the grid: the palette would collapse to its own width and the
+       canvas would get no width at all. A multi-root SFC renders a Fragment
+       too, so the children stay direct grid items. -->
+  <GraphSideToolbar v-if="!hideLeftToolbar" />
+  <div class="grl-dg__graph">
+    <GraphTabs :disabled="disableTabs">
+      <template #extra>
+        <slot name="tab-bar-extra-content" />
+      </template>
+    </GraphTabs>
 
-      <Graph
-        ref="graphRef"
-        :class-name="clsx([!hasActiveNode && !viewConfig?.enabled && 'active'])"
-        :on-disable-tabs="(val: boolean) => (disableTabs = val)"
-      />
-      <GraphNodes :class-name="clsx([!hasActiveNode && viewConfig?.enabled && 'active'])" />
-      <TabContents />
-    </div>
-    <DgPanel />
+    <Graph
+      ref="graphRef"
+      :class-name="clsx([!hasActiveNode && !viewConfig?.enabled && 'active'])"
+      :on-disable-tabs="(val: boolean) => (disableTabs = val)"
+    />
+    <GraphNodes :class-name="clsx([!hasActiveNode && viewConfig?.enabled && 'active'])" />
+    <TabContents />
   </div>
+  <DgPanel />
 </template>

@@ -55,7 +55,7 @@ export { SimulationSegment };
 <script setup lang="ts">
 import clsx from 'clsx';
 import { Eraser, X } from 'lucide-vue-next';
-import { Splitpane, Splitpanes } from 'splitpanes';
+import { Pane, Splitpanes } from 'splitpanes';
 import { type Component, computed, ref } from 'vue';
 
 import { usePersistentState } from '../../../helpers/use-persistent-state';
@@ -165,7 +165,7 @@ const onClear = () => {
 <template>
   <!-- PORTING: PanelGroup autoSaveId dropped (splitpanes has no equivalent). -->
   <Splitpanes class="grl-dg__simulator">
-    <Splitpane :size="30" :min-size="20" class="grl-dg__simulator__section grl-dg__simulator__request">
+    <Pane :size="30" :min-size="20" class="grl-dg__simulator__section grl-dg__simulator__request">
       <component
         :is="LeftPanel"
         :default-request="props.defaultRequest"
@@ -174,8 +174,8 @@ const onClear = () => {
         @run="(payload: unknown) => emit('run', payload as never)"
         @change="(v: string) => emit('change', v)"
       />
-    </Splitpane>
-    <Splitpane :size="20" :min-size="20" :max-size="20" class="grl-dg__simulator__section grl-dg__simulator__nodes">
+    </Pane>
+    <Pane :size="20" :min-size="20" :max-size="20" class="grl-dg__simulator__section grl-dg__simulator__nodes">
       <div class="grl-dg__simulator__section__bar grl-dg__simulator__section__bar--nodes">
         <input v-model="search" class="grl-dg__simulator__search" type="text" placeholder="Search nodes..." />
         <div class="grl-dg__simulator__section__bar__actions">
@@ -236,8 +236,8 @@ const onClear = () => {
           </div>
         </div>
       </div>
-    </Splitpane>
-    <Splitpane :size="50" :min-size="30" class="grl-dg__simulator__section grl-dg__simulator__response">
+    </Pane>
+    <Pane :size="50" :min-size="30" class="grl-dg__simulator__section grl-dg__simulator__response">
       <div class="grl-dg__simulator__section__bar grl-dg__simulator__section__bar--response">
         <Tabs
           class="grl-inline-tabs"
@@ -259,7 +259,7 @@ const onClear = () => {
       <div class="grl-dg__simulator__section__content">
         <SimulatorEditor read-only :value="responseValue" />
       </div>
-    </Splitpane>
+    </Pane>
   </Splitpanes>
 </template>
 

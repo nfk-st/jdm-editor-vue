@@ -91,7 +91,10 @@ const emptyProps = computed(() => {
 // PORTING: upstream's `cellRenderer` is a public function prop (kept — it
 // still rides through emptyProps); the Vue-idiomatic #cell slot adapts onto
 // it (PORTING.md's render-props → slots rule; dt-empty.vue's porting note).
-const slots = useSlots();
+// PORTING: the slot shape is spelled out instead of relying on Vue's
+// `Slots` index signature — the declaration rollup (vite-plugin-dts)
+// resolves `useSlots()`'s return type to `{}` and then cannot see `cell`.
+const slots = useSlots() as { cell?: (props: TableCellProps) => VNode[] };
 const cellRenderer = computed<DecisionTableEmptyType['cellRenderer']>(() =>
   cellSlotAdapter(slots.cell as never, props.cellRenderer),
 );

@@ -63,7 +63,12 @@ git -C /tmp/jdm-editor checkout 283bb11da324e0aaa641c790de9dd888ea2d2832
   `<ClientOnly>`. Importing the library under SSR must not throw — no
   module-level browser API access (see the `PORTING(SSR)` guards in
   `helpers/platform.ts` and `helpers/monaco.ts`; deliberate, documented
-  deviations from byte-identical).
+  deviations from byte-identical). "Import-safe" means nothing touches the
+  browser at **module scope**: setup-time reads (e.g. `localStorage` for the
+  store's `compactMode` and the canvas's components-panel state) happen when a
+  component mounts, so a server-rendered mount still needs `<ClientOnly>`.
+  The published bundle imports cleanly under Node — `pnpm build` then
+  `node --input-type=module -e "import('./dist/index.js')"` is the check.
 - **Token surface is upstream's** (rule above). Variables upstream defines in
   its own SCSS (`--textarea-*`, `--mono-font-family`, …) are upstream's and
   need no marking; only additions to `design-tokens.scss`'s token surface

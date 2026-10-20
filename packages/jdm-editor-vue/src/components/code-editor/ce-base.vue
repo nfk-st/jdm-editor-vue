@@ -46,7 +46,12 @@ import { Compartment, EditorState, Text } from '@codemirror/state';
 import { EditorView, placeholder as placeholderExt } from '@codemirror/view';
 import { createVariableType } from '@gorules/zen-engine-wasm';
 import clsx from 'clsx';
-import { clamp } from 'lodash';
+// PORTING(SSR): lodash is a CommonJS package. A named import
+// (`import { clamp } from 'lodash'`) type-checks and bundles fine, but
+// Node's ESM named-export detection cannot see it, so importing the built
+// library under Node throws. The default import + destructure is the
+// interop-safe form (the repo's other lodash consumers already use it).
+import lodash from 'lodash';
 import { match } from 'ts-pattern';
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 
@@ -171,7 +176,7 @@ onMounted(() => {
   // workaround — Vue has no double-mount, so cleanup simply lives in
   // onBeforeUnmount.
 
-  const clampSelection = (n: number) => clamp(n, 0, props.value?.length ?? 0);
+  const clampSelection = (n: number) => lodash.clamp(n, 0, props.value?.length ?? 0);
 
   const editorView = new EditorView({
     parent: container.value,

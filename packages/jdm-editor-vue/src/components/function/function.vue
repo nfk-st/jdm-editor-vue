@@ -66,15 +66,14 @@ export const parseErrorSource = (source: string): { line: number; errorMessage: 
 // ce-base.vue mount/dispose discipline applied to Monaco).
 import { createVariableType } from '@gorules/zen-engine-wasm';
 import { useDebounceFn, useThrottleFn } from '@vueuse/core';
-import { MarkerSeverity } from 'monaco-editor';
-import { Splitpane, Splitpanes } from 'splitpanes';
+import { Pane, Splitpanes } from 'splitpanes';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 
 import { type Monaco, loader } from '../../helpers/monaco';
 import { isWasmAvailable } from '../../helpers/wasm';
 import { useThemeMode } from '../../theme';
-import FunctionDebugger from './function-debugger.vue';
 import Spinner from '../ui/Spinner.vue';
+import FunctionDebugger from './function-debugger.vue';
 import './function.scss';
 import { variableTypeToTypescript } from './helpers/determine-type';
 import { type FunctionLibrary, functionDefinitions, functionLibraries } from './helpers/libs';
@@ -269,7 +268,13 @@ watch(
 
       instance.editor.setModelMarkers(model, 'gorules', [
         {
-          severity: MarkerSeverity.Error,
+          // PORTING(SSR): upstream imports MarkerSeverity from monaco-editor
+          // at module scope. A static value import of monaco-editor makes the
+          // library's entry un-importable under Node (the package's entry
+          // point is browser-only), so the enum is read off the Monaco
+          // instance that is already in scope here — the same value, no
+          // module-level browser dependency.
+          severity: instance.MarkerSeverity.Error,
           message: errorMessage,
           startLineNumber: range.startLineNumber,
           endLineNumber: range.endLineNumber,
@@ -421,13 +426,13 @@ const rootStyle = computed(() => ({
          (layout persistence) has no splitpanes equivalent — dropped. Second
          pane matches upstream (minSize only, no fixed size). -->
     <Splitpanes class="grl-function__content">
-      <Splitpane :size="70" :min-size="50">
+      <Pane :size="70" :min-size="50">
         <!-- upstream: loading={<Spin size='large'/>} while monaco boots -->
         <Spinner v-if="!monacoReady" size="large" />
         <div v-if="previousValue" v-show="monacoReady" ref="diffContainer" class="grl-function__editor-host" />
         <div v-else v-show="monacoReady" ref="editorContainer" class="grl-function__editor-host" />
-      </Splitpane>
-      <Splitpane v-if="!disableDebug" :min-size="25">
+      </Pane>
+      <Pane v-if="!disableDebug" :min-size="25">
         <FunctionDebugger
           :libraries="functionLibraries"
           :trace="trace"
@@ -435,7 +440,7 @@ const rootStyle = computed(() => ({
           :editor-value="modelValue"
           :disabled="disabled || permission !== 'edit:full'"
         />
-      </Splitpane>
+      </Pane>
     </Splitpanes>
   </div>
 </template>

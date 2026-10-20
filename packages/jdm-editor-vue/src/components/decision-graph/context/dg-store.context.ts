@@ -212,6 +212,11 @@ export const createDecisionGraphStoreBundle = (): DecisionGraphStoreBundle => {
     customNodes: [],
     activePanel: undefined,
     panels: [],
+    // PORTING(SSR): localStorage is read at setup time (upstream reads it in
+    // the store's initial state too). The module is still import-safe under
+    // Node — nothing touches the browser at module scope — but a component
+    // that MOUNTS on the server needs <ClientOnly>, per the client-only
+    // stance in docs/PORTING.md.
     compactMode: localStorage.getItem('jdm-compact-mode') === 'true',
     nodeTypes: {},
     globalType: {},

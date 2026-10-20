@@ -18,7 +18,23 @@ npm i @nfk.st/jdm-editor-vue
 
 ## Usage
 
+The Zen expression engine runs in WebAssembly and must be initialised before
+the editor renders — upstream's host application does this at boot, and so
+must yours. `ensureWasmLoaded()` is the exported hook:
+
+```ts
+// main.ts
+import { createApp } from 'vue';
+import { ensureWasmLoaded } from '@nfk.st/jdm-editor-vue';
+import App from './App.vue';
+
+void ensureWasmLoaded().finally(() => {
+  createApp(App).mount('#app');
+});
+```
+
 ```vue
+<!-- App.vue -->
 <script setup>
 import { ref } from 'vue';
 import { JdmConfigProvider, DecisionGraph } from '@nfk.st/jdm-editor-vue';
@@ -33,6 +49,32 @@ const graph = ref({ edges: [], nodes: [] });
   </JdmConfigProvider>
 </template>
 ```
+
+The editor is client-only (Vue Flow canvas, Monaco, CodeMirror are
+browser-bound). In Nuxt, wrap it in `<ClientOnly>`.
+
+### Monaco workers
+
+The function editor runs on Monaco's TypeScript language service, which
+needs web workers. Unlike upstream (whose `@monaco-editor/react` dependency
+provisions them), this port imports `monaco-editor` directly, so the
+consumer's bundler must provide the workers. With Vite:
+
+```ts
+// main.ts
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+
+self.MonacoEnvironment = {
+  getWorker(_: unknown, label: string) {
+    return label === 'typescript' ? new tsWorker() : new editorWorker();
+  },
+};
+```
+
+Without it the editor still renders, but Monaco's TypeScript diagnostics
+never start (the console logs `Cannot read properties of undefined (reading
+'toUrl')`).
 
 ## License
 

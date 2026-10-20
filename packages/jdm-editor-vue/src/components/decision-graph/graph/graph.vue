@@ -218,6 +218,10 @@ const state = useDecisionGraphState(({ id, disabled, components, customNodes, de
 }));
 
 // upstream: useState(() => { ... localStorage ... })
+// PORTING(SSR): localStorage is read at setup time (upstream's useState
+// initializer does the same). Import-safe under Node — the read happens on
+// mount, not at module scope — but a server-rendered mount needs
+// <ClientOnly>, per the client-only stance in docs/PORTING.md.
 const initialComponentsOpened = (): boolean => {
   const localStorageKey = localStorage.getItem(componentsOpenedKey);
   if (!localStorageKey) {

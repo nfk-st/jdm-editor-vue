@@ -37,7 +37,7 @@ export type TabJsonSchemaProps = {
 // equivalent — dropped). antd theme.useToken → useThemeMode + token vars.
 import { useThrottleFn } from '@vueuse/core';
 import { Import, Info, Paintbrush } from 'lucide-vue-next';
-import { Splitpane, Splitpanes } from 'splitpanes';
+import { Pane, Splitpanes } from 'splitpanes';
 import { match } from 'ts-pattern';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 
@@ -256,7 +256,7 @@ watch(monacoTheme, (theme) => monaco.value?.editor.setTheme(theme));
     <!-- PORTING: react-resizable-panels PanelGroup (autoSaveId dropped) →
          splitpanes. -->
     <Splitpanes class="grl-node-content-main">
-      <Splitpane>
+      <Pane>
         <div class="grl-node-content-side">
           <div class="grl-node-content-side__panel">
             <div class="grl-node-content-side__header">
@@ -317,7 +317,7 @@ watch(monacoTheme, (theme) => monaco.value?.editor.setTheme(theme));
             />
           </div>
         </div>
-      </Splitpane>
+      </Pane>
     </Splitpanes>
   </div>
 </template>

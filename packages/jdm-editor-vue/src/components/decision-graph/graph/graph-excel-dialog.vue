@@ -3,7 +3,12 @@
 // The step-selection derivations and the Done mapping are extracted as pure
 // functions for vitest coverage (PORTING.md testing rule; dt-excel-dialog
 // precedent).
-import { isEmpty } from 'lodash';
+// PORTING(SSR): lodash is a CommonJS package. A named import
+// (`import { isEmpty } from 'lodash'`) type-checks and bundles fine, but
+// Node's ESM named-export detection cannot see it, so importing the built
+// library under Node throws. The default import + destructure is the
+// interop-safe form (the repo's other lodash consumers already use it).
+import lodash from 'lodash';
 
 import type { ParsedExcelData, RuleData } from '../../../helpers/excel';
 import type { NodeKind } from '../../../helpers/schema';
@@ -215,6 +220,8 @@ export const buildMergedData = ({
     };
   });
 };
+
+const { isEmpty } = lodash;
 
 export { dataTypeConfig, isEmpty };
 </script>

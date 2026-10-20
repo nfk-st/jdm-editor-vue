@@ -24,6 +24,22 @@ let initPromise: Promise<Monaco> | null = null;
  *    instance, then `window.monaco`, then lazily importing `monaco-editor`.
  *  - `window.MonacoEnvironment` overrides are honoured because monaco-editor
  *    itself consumes them (worker provisioning); nothing is overridden here.
+ *
+ * WORKER SETUP (consumer's job): upstream gets monaco's web workers for free
+ * because @monaco-editor/react provisions them. This port imports the
+ * `monaco-editor` package directly, so the CONSUMER's bundler must provide
+ * them — a self-hosted monaco without a worker configuration logs
+ * "Cannot read properties of undefined (reading 'toUrl')" and the
+ * TypeScript language service (the function editor's lint/diagnostics) never
+ * starts. With Vite:
+ *
+ *   import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+ *   import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+ *   self.MonacoEnvironment = {
+ *     getWorker(_, label) {
+ *       return label === 'typescript' ? new tsWorker() : new editorWorker();
+ *     },
+ *   };
  */
 export const loader = {
   config: (config: LoaderConfig): void => {
