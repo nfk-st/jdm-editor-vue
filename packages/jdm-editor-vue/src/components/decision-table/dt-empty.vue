@@ -11,16 +11,10 @@ import type { VNode } from 'vue';
 import type { SchemaSelectProps } from '../../helpers/components';
 import type { GetNodeDataResult } from '../../helpers/node-data';
 import type { DictionaryMap } from '../../theme';
+// PORTING(sweep): local stand-ins retired — canonical simulator types.
+import type { SimulationTrace, SimulationTraceDataTable } from '../decision-graph/simulator/simulation.types';
 import type { DecisionTableStoreType, JdmUiMode } from './context/dt-store.context';
 import type { DecisionTableType, TableCellProps } from './context/dt-store.context';
-
-// PORTING: local stand-ins for decision-graph trace types — swap when it lands.
-type SimulationTraceDataTable = {
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  matched?: boolean;
-};
-type SimulationTrace<T> = { traceData: T };
 
 export type DecisionTableEmptyType = {
   id?: string;

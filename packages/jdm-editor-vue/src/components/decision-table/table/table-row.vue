@@ -3,6 +3,9 @@
 import type { Row } from '@tanstack/vue-table';
 import type { VirtualItem } from '@tanstack/vue-virtual';
 
+// PORTING(sweep): stand-in retired — canonical dg-types DiffMetadata.
+import type { DiffMetadata } from '../../decision-graph/dg-types';
+
 export type TableRowProps = {
   row: Row<Record<string, string>>;
   disabled?: boolean;
@@ -13,12 +16,6 @@ export type TableRowProps = {
   // and drag opacity arrive via these props instead of dnd monitors.
   dropDirection?: 'up' | 'down' | null;
   dragging?: boolean;
-};
-
-// PORTING: local stand-in for decision-graph's DiffMetadata — swap when it lands.
-type DiffMetadata = {
-  status?: string;
-  fields?: Record<string, { status: string; previousValue: string }>;
 };
 </script>
 

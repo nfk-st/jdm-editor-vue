@@ -13,24 +13,9 @@ import { type MiniStore, createMiniStore } from '../../../helpers/mini-store';
 import { type GetNodeDataResult } from '../../../helpers/node-data';
 import type { ColumnFieldType, OutputFieldType } from '../../../helpers/schema';
 import type { DictionaryMap } from '../../../theme';
-
-// PORTING: stand-ins for decision-graph types — swap when decision-graph lands.
-// Shape mirrors upstream's DiffMetadata (dg-types.ts): previousValue/indexes
-// are read by the table cells' diff display.
-type DiffMetadata = {
-  status?: 'added' | 'removed' | 'modified' | 'unchanged' | 'moved';
-  previousValue?: any;
-  previousIndex?: number;
-  currentIndex?: number;
-  fields?: Record<string, { status: string; previousValue: string }>;
-};
-type Diff = { _diff?: DiffMetadata };
-type SimulationTraceDataTable = {
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  matched?: boolean;
-};
-type SimulationTrace<T> = { traceData: T };
+// PORTING(sweep): stand-ins retired — canonical decision-graph types.
+import type { Diff, DiffMetadata } from '../../decision-graph/dg-types';
+import type { SimulationTrace, SimulationTraceDataTable } from '../../decision-graph/simulator/simulation.types';
 
 // PORTING: TableCellProps's upstream home is ../table/table-default-cell;
 // it lives here (and is re-exported from table-default-cell.vue) until

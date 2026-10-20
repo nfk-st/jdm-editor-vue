@@ -5,19 +5,17 @@
 import type { Variable, VariableType } from '@gorules/zen-engine-wasm';
 import equal from 'fast-deep-equal/es6/react';
 import { produce } from 'immer';
-import { computed, inject, provide, type ComputedRef, type InjectionKey } from 'vue';
+import { type ComputedRef, type InjectionKey, computed, inject, provide } from 'vue';
+import type { z } from 'zod';
 
+import { type MiniStore, createMiniStore } from '../../../helpers/mini-store';
 import type { GetNodeDataResult } from '../../../helpers/node-data';
-import { createMiniStore, type MiniStore } from '../../../helpers/mini-store';
+import type { expressionNodeSchema } from '../../../helpers/schema';
+// PORTING(sweep): stand-ins retired — canonical decision-graph types.
+import type { DiffMetadata } from '../../decision-graph/dg-types';
+import type { SimulationTrace, SimulationTraceDataExpression } from '../../decision-graph/simulator/simulation.types';
 
-// PORTING: stand-ins for decision-graph types — swap when decision-graph lands.
-type DiffMetadata = {
-  status?: 'added' | 'removed' | 'modified' | 'unchanged' | 'moved';
-  fields?: Record<string, { status: string; previousValue: string }>;
-};
-type SimulationTraceDataExpression = Record<string, unknown>;
-type SimulationTrace<T> = { traceData: T };
-type ExpressionSnapshot = { executionMode?: string; expressions?: { id: string; key?: string; value: string }[] };
+type ExpressionSnapshot = z.infer<typeof expressionNodeSchema>['content'];
 
 export type ExpressionEntry = {
   id: string;

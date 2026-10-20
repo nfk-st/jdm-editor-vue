@@ -10,14 +10,6 @@ export type FunctionDebuggerTrace = {
   };
 };
 
-// PORTING: SimulationTrace/SimulationTraceDataFunction live upstream in
-// components/decision-graph/simulator/simulation.types (module #8, not ported
-// yet) — one minimal shared stand-in beside the debugger types (instead of
-// per-file copies, per PORTING.md known temp debt); swap at step 8.
-export type SimulationTraceDataFunction = {
-  log?: FunctionDebuggerLogData[];
-};
-
-export type SimulationTrace<Trace = SimulationTraceDataFunction> = {
-  traceData: Trace | null;
-};
+// PORTING(sweep): SimulationTrace stand-ins retired — canonical types
+// re-exported from decision-graph's simulator (upstream imports from there).
+export type { SimulationTrace, SimulationTraceDataFunction } from '../decision-graph/simulator/simulation.types';
