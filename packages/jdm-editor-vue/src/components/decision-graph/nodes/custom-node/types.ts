@@ -72,7 +72,9 @@ type InputTypeMap = {
   text: string;
 };
 
-type InputSchema<Name extends string> = {
+// PORTING: exported for custom-node/index.ts's createJdmNode (upstream
+// declares these in index.tsx itself; our split keeps them with BaseNode).
+export type InputSchema<Name extends string> = {
   name: Name;
 } & (BoolInput | TextInput);
 
