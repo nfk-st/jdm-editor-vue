@@ -156,6 +156,34 @@ new, not ported.
   against upstream storybook completed.
 - `pnpm typecheck`, `pnpm test`, `pnpm build` green.
 - Playground app exercises the full editor.
+- No phantom named imports (see below) — and the playground must actually
+  BOOT in a browser, not just type-check.
+
+## The phantom-named-import trap
+
+A named import of a name a package does not actually export type-checks
+happily (a local `.d.ts` shim will happily declare it) but throws at runtime
+in a real ESM bundler:
+
+```
+Uncaught SyntaxError: The requested module '.../splitpanes.js' does not
+provide an export named 'Splitpane'
+```
+
+That error kills the whole application, and **no gate catches it**: `vue-tsc`
+trusts the shim, vitest's SSR transform turns named imports into property
+accesses, and `vite build` leaves external dependencies unresolved. The
+splitpanes case shipped green through all three and broke the app on load.
+
+`packages/jdm-editor-vue/scripts/check-named-imports.mjs` resolves every
+named import (and named re-export) against the package's real runtime
+exports and fails on any that does not exist. It runs as part of
+`pnpm --filter @nfk.st/jdm-editor-vue typecheck`, and standalone as
+`check:imports`.
+
+The same reasoning applies to the *type shims* the port writes for JS-only
+packages (`src/splitpanes.d.ts`): a shim must mirror the package's real
+export surface, not the surface the port wishes it had.
 
 ## Known temp debt
 

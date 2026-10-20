@@ -27,7 +27,8 @@
   "scripts": {
     "build": "vite build",
     "build:watch": "vite build --watch",
-    "typecheck": "vue-tsc --noEmit",
+    "check:imports": "node scripts/check-named-imports.mjs",
+    "typecheck": "vue-tsc --noEmit && node scripts/check-named-imports.mjs",
     "test": "vitest run"
   },
   "peerDependencies": {
