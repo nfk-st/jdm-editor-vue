@@ -9,6 +9,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { type Component } from 'vue';
 
 import { defaultFunctionValue } from '../../../function/helpers/libs';
+import TabDecisionTable from '../../graph/tab-decision-table.vue';
+import TabExpression from '../../graph/tab-expression.vue';
+import TabFunction from '../../graph/tab-function.vue';
+import TabJsonSchema from '../../graph/tab-json-schema.vue';
 import { createJdmNode } from '../custom-node';
 import GraphNode from '../graph-node.vue';
 import { NodeColor } from './colors';
@@ -256,6 +260,60 @@ describe('specification getDiffContent', () => {
     expect(modified?._diff?.fields?.inputs?.status).toBe('modified');
     expect(modified?.rules?.[0]._diff?.fields?.o1).toEqual({ previousValue: 'z', status: 'modified' });
     expect(modified?._diff?.fields?.rules?.status).toBe('modified');
+  });
+});
+
+describe('specification renderTab', () => {
+  it('renders the decision table tab', () => {
+    const tab = decisionTableSpecification.renderTab?.({ id: 'node-1' });
+
+    expect(tab?.type).toBe(TabDecisionTable);
+    expect(tab?.props).toEqual({ id: 'node-1' });
+  });
+
+  it('renders the expression tab', () => {
+    const tab = expressionSpecification.renderTab?.({ id: 'node-1' });
+
+    expect(tab?.type).toBe(TabExpression);
+    expect(tab?.props).toEqual({ id: 'node-1' });
+  });
+
+  it('renders the function tab', () => {
+    const tab = functionSpecification.renderTab?.({ id: 'node-1' });
+
+    expect(tab?.type).toBe(TabFunction);
+    expect(tab?.props).toEqual({ id: 'node-1' });
+  });
+
+  it('renders the json-schema tab in its input flavour', () => {
+    const tab = inputSpecification.renderTab?.({ id: 'node-1' });
+
+    expect(tab?.type).toBe(TabJsonSchema);
+    expect(tab?.props).toEqual({ id: 'node-1', type: 'input' });
+  });
+
+  it('renders the json-schema tab in its output flavour', () => {
+    const tab = outputSpecification.renderTab?.({ id: 'node-1' });
+
+    expect(tab?.type).toBe(TabJsonSchema);
+    expect(tab?.props).toEqual({ id: 'node-1', type: 'output' });
+  });
+
+  it('drops the react-dnd manager from every tab', () => {
+    // PORTING(DnD): upstream's renderTab received { id, manager } — react-dnd
+    // is gone, so no tab receives a manager.
+    [
+      decisionTableSpecification,
+      expressionSpecification,
+      functionSpecification,
+      inputSpecification,
+      outputSpecification,
+    ].forEach((specification) => {
+      const tab = specification.renderTab?.({ id: 'node-1' });
+
+      expect(tab).toBeTruthy();
+      expect(tab?.props).not.toHaveProperty('manager');
+    });
   });
 });
 

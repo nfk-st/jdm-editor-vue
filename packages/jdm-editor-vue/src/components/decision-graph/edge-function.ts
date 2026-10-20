@@ -5,9 +5,12 @@
 // for specification parity.
 import { h } from 'vue';
 
-import CustomEdge from './custom-edge.vue';
+import CustomEdge, { type CustomEdgeProps } from './custom-edge.vue';
 
 export const edgeFunction =
   (outer: Record<string, unknown> = {}) =>
-  (edgeProps: Record<string, unknown>) =>
-    h(CustomEdge, { ...edgeProps, ...outer });
+  (edgeProps: CustomEdgeProps) =>
+    // PORTING: upstream's `outer` bag is untyped (react-flow's outer props) and
+    // is spread over the edge props; the cast keeps that shape while the
+    // component's own props stay typed.
+    h(CustomEdge, { ...edgeProps, ...outer } as unknown as CustomEdgeProps);

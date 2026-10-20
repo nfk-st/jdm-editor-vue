@@ -1,8 +1,9 @@
 // Ported from components/decision-graph/nodes/specifications/function.specification.tsx.
 // PORTING: JSX bodies → defineComponent render functions; antd
 // Button/Tooltip/Typography → ui/Button + ui/Tooltip + .grl-typography;
-// @ant-design/icons WarningFilled → lucide CircleAlert. renderTab's
-// TabFunction is phase C (see input.specification.ts note).
+// @ant-design/icons WarningFilled → lucide CircleAlert. renderTab renders the
+// TabFunction tab (upstream's <TabFunction id={id} /> — upstream passes no
+// react-dnd `manager` here).
 import _ from 'lodash';
 import { CircleAlert } from 'lucide-vue-next';
 import { P, match } from 'ts-pattern';
@@ -13,7 +14,9 @@ import Button from '../../../ui/Button.vue';
 import Tooltip from '../../../ui/Tooltip.vue';
 import { useDecisionGraphActions, useDecisionGraphState } from '../../context/dg-store.context';
 import type { DiffMetadata } from '../../dg-types';
-// PORTING(P-C): import { TabFunction } from '../../graph/tab-function'
+// PORTING(DnD): upstream's renderTab passes no react-dnd `manager` for
+// functions (<TabFunction id={id} />) — nothing to drop here.
+import TabFunction from '../../graph/tab-function.vue';
 import GraphNode from '../graph-node.vue';
 import { NodeColor } from './colors';
 import type { MinimalNodeSpecification } from './specification-types';
@@ -33,7 +36,7 @@ export const functionSpecification: NodeSpecification<NodeFunctionData> = {
   documentationUrl: 'https://gorules.io/docs/user-manual/decision-modeling/decisions/functions',
   shortDescription: 'Javascript lambda',
   color: NodeColor.Orange,
-  renderTab: () => null,
+  renderTab: ({ id }) => h(TabFunction, { id }),
   getDiffContent: (current, previous): any => {
     const fields: DiffMetadata['fields'] = {};
     const kind = match(current)

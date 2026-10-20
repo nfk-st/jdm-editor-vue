@@ -55,3 +55,7 @@ setViewport/fitView({nodes,duration,maxZoom})`.
 - Event props → kebab-case emits (`@nodes-delete`, `@edge-mouse-enter`).
 - Upstream's `React.memo` custom-equality node wrappers — rely on vue-flow
   reactivity (no equivalent).
+- `@vue-flow/core`, `@vue-flow/background` and `@vue-flow/controls` all
+  import cleanly under Node (verified — no module-level browser access), so
+  the library stays SSR-import-safe. The canvas itself must still mount
+  `VueFlow` in `onMounted`, never at module scope.

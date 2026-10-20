@@ -30,7 +30,9 @@ const labelOf = (item: string | TabItem): string => (typeof item === 'string' ? 
     <div class="grl-tabs__bar">
       <TabsList class="grl-tabs__list">
         <TabsTrigger v-for="item in items" :key="keyOf(item)" :value="keyOf(item)" class="grl-tabs__tab">
-          {{ labelOf(item) }}
+          <!-- PORTING(additive): scoped #label slot for callers whose tab
+               labels carry more than text (graph-tabs' icon + diff + close). -->
+          <slot name="label" :item="item" :label="labelOf(item)">{{ labelOf(item) }}</slot>
         </TabsTrigger>
       </TabsList>
       <div v-if="$slots.extra" class="grl-tabs__extra"><slot name="extra" /></div>

@@ -16,10 +16,11 @@ import Button from '../../../ui/Button.vue';
 import Modal from '../../../ui/Modal.vue';
 import { useDecisionGraphActions, useDecisionGraphState } from '../../context/dg-store.context';
 import type { Diff, DiffMetadata } from '../../dg-types';
-// PORTING(P-C): upstream imports TabJsonSchema from '../../graph/tab-json-schema'
-// and renders <TabJsonSchema id={id} manager={manager} type={'input'} /> — the
-// graph tabs are phase C; restore
-// `renderTab: ({ id }) => h(TabJsonSchema, { id, type: 'input' })` when they land.
+// PORTING(DnD): upstream's renderTab also passed react-dnd's `manager`
+// (<TabJsonSchema id={id} manager={manager} type={'input'} />) — dropped with
+// react-dnd (docs/PORTING.md dependency map); the tab component takes the id
+// and the type only.
+import TabJsonSchema from '../../graph/tab-json-schema.vue';
 import type { DecisionNodeMenuItem } from '../decision-node.vue';
 import GraphNode from '../graph-node.vue';
 import { NodeColor } from './colors';
@@ -44,7 +45,7 @@ export const inputSpecification: NodeSpecification<NodeInputData> = {
       schema: '',
     },
   }),
-  renderTab: () => null,
+  renderTab: ({ id }) => h(TabJsonSchema, { id, type: 'input' }),
   renderNode: defineComponent({
     name: 'InputNode',
     inheritAttrs: false,

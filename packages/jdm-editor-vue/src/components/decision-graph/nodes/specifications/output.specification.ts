@@ -1,7 +1,8 @@
 // Ported from components/decision-graph/nodes/specifications/output.specification.tsx.
 // PORTING: JSX renderNode body → defineComponent render function (h());
-// antd Button → ui/Button. renderTab's TabJsonSchema is phase C (see
-// input.specification.ts note).
+// antd Button → ui/Button. renderTab renders the TabJsonSchema tab in its
+// 'output' flavour (upstream's <TabJsonSchema id={id} manager={manager}
+// type={'output'} /> — see the PORTING(DnD) note on the import).
 import { produce } from 'immer';
 import _ from 'lodash';
 import { ArrowRightFromLine } from 'lucide-vue-next';
@@ -12,6 +13,11 @@ import { type outputNodeSchema } from '../../../../helpers/schema';
 import Button from '../../../ui/Button.vue';
 import { useDecisionGraphActions } from '../../context/dg-store.context';
 import type { Diff, DiffMetadata } from '../../dg-types';
+// PORTING(DnD): upstream's renderTab also passed react-dnd's `manager`
+// (<TabJsonSchema id={id} manager={manager} type={'output'} />) — dropped with
+// react-dnd (docs/PORTING.md dependency map); the tab component takes the id
+// and the type only.
+import TabJsonSchema from '../../graph/tab-json-schema.vue';
 import GraphNode from '../graph-node.vue';
 import { NodeColor } from './colors';
 import type { MinimalNodeSpecification } from './specification-types';
@@ -30,7 +36,7 @@ export const outputSpecification: NodeSpecification<NodeOutputData> = {
   documentationUrl: 'https://gorules.io/docs/user-manual/decision-modeling/decisions',
   shortDescription: 'Outputs the context',
   generateNode: () => ({ name: 'response', content: { schema: '' } }),
-  renderTab: () => null,
+  renderTab: ({ id }) => h(TabJsonSchema, { id, type: 'output' }),
   renderNode: defineComponent({
     name: 'OutputNode',
     inheritAttrs: false,

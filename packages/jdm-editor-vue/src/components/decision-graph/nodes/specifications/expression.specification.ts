@@ -2,7 +2,8 @@
 // PORTING: JSX renderNode/renderSettings bodies → defineComponent render
 // functions (h()); antd Form.Item → .grl-form-item markup (label + control);
 // DiffInput/DiffRadio emit values directly (upstream read e.target.value).
-// renderTab's TabExpression is phase C (see input.specification.ts note).
+// renderTab renders the TabExpression tab (upstream's <TabExpression
+// id={id} manager={manager} /> — see the PORTING(DnD) note on the import).
 import { VariableType } from '@gorules/zen-engine-wasm';
 import equal from 'fast-deep-equal/es6/react';
 import { produce } from 'immer';
@@ -18,7 +19,10 @@ import Button from '../../../ui/Button.vue';
 import { useDecisionGraphActions, useDecisionGraphState, useNodeDiff } from '../../context/dg-store.context';
 import { type Diff, type DiffMetadata } from '../../dg-types';
 import { compareAndUnifyLists, compareStringFields } from '../../diff/comparison';
-// PORTING(P-C): import { TabExpression } from '../../graph/tab-expression'
+// PORTING(DnD): upstream's renderTab also passed react-dnd's `manager`
+// (<TabExpression id={id} manager={manager} />) — dropped with react-dnd
+// (docs/PORTING.md dependency map); the tab component takes the id only.
+import TabExpression from '../../graph/tab-expression.vue';
 import GraphNode from '../graph-node.vue';
 import type { NodeDecisionTableData } from './decision-table.specification';
 import type { MinimalNodeSpecification } from './specification-types';
@@ -49,7 +53,7 @@ export const expressionSpecification: NodeSpecification<NodeExpressionData> = {
   displayName: 'Expression',
   documentationUrl: 'https://gorules.io/docs/user-manual/decision-modeling/decisions/expression',
   shortDescription: 'Mapping utility',
-  renderTab: () => null,
+  renderTab: ({ id }) => h(TabExpression, { id }),
   getDiffContent: (current, previous) => {
     const newContent = produce(current, (draft) => {
       const fields: DiffMetadata['fields'] = {};

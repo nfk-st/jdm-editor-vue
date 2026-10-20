@@ -2,7 +2,8 @@
 // PORTING: JSX renderNode/renderSettings bodies → defineComponent render
 // functions (h()); antd Form.Item/Space → .grl-form-item markup;
 // DiffInput/DiffRadio emit values directly (upstream read e.target.value).
-// renderTab's TabDecisionTable is phase C (see input.specification.ts note).
+// renderTab renders the TabDecisionTable tab (upstream's <TabDecisionTable
+// id={id} manager={manager} /> — see the PORTING(DnD) note on the import).
 import { VariableType } from '@gorules/zen-engine-wasm';
 import equal from 'fast-deep-equal/es6/react';
 import { produce } from 'immer';
@@ -18,7 +19,10 @@ import Button from '../../../ui/Button.vue';
 import { useDecisionGraphActions, useDecisionGraphState, useNodeDiff } from '../../context/dg-store.context';
 import type { Diff, DiffMetadata } from '../../dg-types';
 import { compareAndUnifyLists } from '../../diff/comparison';
-// PORTING(P-C): import { TabDecisionTable } from '../../graph/tab-decision-table'
+// PORTING(DnD): upstream's renderTab also passed react-dnd's `manager`
+// (<TabDecisionTable id={id} manager={manager} />) — dropped with react-dnd
+// (docs/PORTING.md dependency map); the tab component takes the id only.
+import TabDecisionTable from '../../graph/tab-decision-table.vue';
 import GraphNode from '../graph-node.vue';
 import type { MinimalNodeSpecification } from './specification-types';
 import { NodeKind } from './specification-types';
@@ -44,7 +48,7 @@ export const decisionTableSpecification: NodeSpecification<NodeDecisionTableData
   displayName: 'Decision table',
   documentationUrl: 'https://gorules.io/docs/user-manual/decision-modeling/decisions/decision-tables',
   shortDescription: 'Rules spreadsheet',
-  renderTab: () => null,
+  renderTab: ({ id }) => h(TabDecisionTable, { id }),
   getDiffContent: (current, previous) => {
     return produce(current, (draft) => {
       const fields: DiffMetadata['fields'] = {};
