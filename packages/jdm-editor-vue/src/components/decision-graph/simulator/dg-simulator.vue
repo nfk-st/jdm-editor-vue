@@ -293,8 +293,9 @@ const onClear = () => {
 </template>
 
 <style lang="scss">
-// antd Spin.spinning → an overlay stand-in (antd draws a spinner; the port
-// dims the content instead — there is no spinner primitive in ui/).
+// PORTING: antd's <Spin spinning> draws a spinner over the content; the
+// port dims the content instead. (ui/Spinner.vue exists — it is used
+// elsewhere — but antd's Spin is a full overlay, not a spinner element.)
 .grl-dg__simulator__loading {
   position: relative;
   height: 100%;

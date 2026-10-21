@@ -18,8 +18,9 @@ commit `283bb11da324e0aaa641c790de9dd888ea2d2832`).
 ### Added
 
 - **Components** — `DecisionGraph`, `DecisionTable`, `Expression`, `Function`,
-  `CodeEditor`, `ExpressionBuilder`, `StandardExpressionBuilder`,
-  `GraphSimulator`, `JdmConfigProvider`.
+  `CodeEditor`, `ExpressionBuilder`, `GraphSimulator`, `JdmConfigProvider`.
+  (`StandardExpressionBuilder` is internal — upstream does not export it
+  either.)
 - **Utilities** — `ensureWasmLoaded()`, `useWasmReady()`, `provideDictionaries()`,
   `useDictionaries()`, `useThemeMode()`, `useProvideThemeMode()`,
   `usePersistentState()`, `useNodeType()`, `codemirror`.
@@ -74,7 +75,7 @@ The pre-ship review found defects that no gate caught. All are fixed:
 - reactflow's "React Flow" attribution is not reproduced — Vue Flow is MIT and
   carries none.
 
-See [docs/PORTING.md](https://github.com/nfk-st/goruleditor/blob/main/docs/PORTING.md)
+See [docs/PORTING.md](https://github.com/nfk-st/goruleditor/blob/master/docs/PORTING.md)
 for the full parity checklist and the deliberate deviations from upstream.
 
 [Unreleased]: https://github.com/nfk-st/goruleditor/compare/v0.1.0...HEAD

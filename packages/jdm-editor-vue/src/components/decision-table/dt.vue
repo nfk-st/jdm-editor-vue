@@ -111,13 +111,18 @@ const DictionaryBridge = defineComponent({
   setup(_, { slots }) {
     const dictionaries = useDecisionTableState((s) => s.dictionaries);
     const provided = reactive<DictionaryMap>({});
+    // PORTING: `deep` matters — the provider hands over a REACTIVE HOLDER
+    // whose identity never changes (only its contents do), so a shallow
+    // watch never fired again and the dictionaries stayed frozen at mount.
+    // Upstream's useMemo re-ran because React's context value is a new
+    // object per render.
     watch(
       dictionaries,
       (d) => {
         for (const key of Object.keys(provided)) delete provided[key];
         Object.assign(provided, d ?? {});
       },
-      { immediate: true },
+      { immediate: true, deep: true },
     );
     provideDictionaries(provided);
     return () => slots.default?.();

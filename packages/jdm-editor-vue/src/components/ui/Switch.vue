@@ -45,12 +45,19 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: '
   transition: var(--grl-transition);
   cursor: pointer;
 
-  &:hover:not(.grl-switch--disabled) {
+  // antd: the UNCHECKED track darkens to colorTextTertiary on hover, and a
+  // CHECKED one goes to colorPrimaryHover. The grey hover must not reach
+  // the checked switch (it outranks the checked rule on specificity).
+  &[data-state='unchecked']:hover:not(.grl-switch--disabled) {
     background-color: var(--grl-color-text-tertiary);
   }
 
   &[data-state='checked'] {
     background-color: var(--grl-color-primary);
+
+    &:hover:not(.grl-switch--disabled) {
+      background-color: var(--grl-color-primary-hover);
+    }
   }
 
   &--small {

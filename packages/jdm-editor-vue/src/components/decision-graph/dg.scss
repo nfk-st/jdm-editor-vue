@@ -554,6 +554,16 @@
       }
     }
 
+    // PORTING(vue-flow): reactflow places a handle with
+    // `left: -4px; transform: translate(0, -50%)`; vue-flow's base is
+    // `left: 0; transform: translate(-50%, -50%)`. The offsets below are
+    // reactflow's, so the base transform is restored first — otherwise the
+    // handles sit ~3.5px further out and jump inward on the hover scale.
+    .vue-flow__handle-left,
+    .vue-flow__handle-right {
+      transform: translate(0, -50%);
+    }
+
     .vue-flow__handle-left {
       left: -3px !important;
 
@@ -588,12 +598,14 @@
     }
   }
 
-  // PORTING(vue-flow): vue-flow renders the visible path BEFORE the
-  // transparent interaction path, so the adjacent-sibling combinator cannot
-  // reach it — :has() selects it from the hovered interaction path instead.
-  .vue-flow__edge:has(.vue-flow__edge-interaction:hover) .vue-flow__edge-path,
+  // PORTING: upstream's rule (`.react-flow__edge-path-selector:hover +
+  // .react-flow__edge-path, .react-flow__edge-path:hover`) never fires in
+  // reactflow 11 either — the 50-wide transparent interaction path sits
+  // over the visible one and captures every hover, so an edge is never
+  // "hovered" while its visible path is. Porting the RULE literally would
+  // be a change in behaviour (upstream never recolours an edge), so it is
+  // not reproduced here.
   .vue-flow__edge-path:hover {
-    stroke: var(--grl-color-primary-border-hover);
     cursor: pointer;
   }
 

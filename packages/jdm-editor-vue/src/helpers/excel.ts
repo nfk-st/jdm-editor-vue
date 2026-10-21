@@ -1,6 +1,7 @@
 import exceljs from 'exceljs';
 import { z } from 'zod';
 
+import type { DecisionGraphType } from '../components/decision-graph/dg-types';
 import type {
   DecisionTableType,
   HitPolicy,
@@ -8,13 +9,6 @@ import type {
 } from '../components/decision-table/context/dt-store.context';
 import { saveFile } from './file-helpers';
 import { NodeKind } from './schema';
-
-// PORTING: upstream types `DecisionGraphType` from ../index; decision-graph
-// has landed (step 8), so the minimal local stand-in below was swapped for
-// the real import.
-type DecisionGraphType = {
-  nodes: { id: string; content?: DecisionTableType }[];
-};
 
 type DecisionTableNode = {
   id: string;

@@ -53,7 +53,12 @@ defineExpose({ textArea: textAreaRef });
       :disabled="disabled"
       :read-only="readOnly"
       class="current-input"
-      @change="(v) => emit('update:modelValue', v)"
+      @change="
+        (v) => {
+          emit('update:modelValue', v);
+          emit('change', v);
+        }
+      "
     />
   </div>
   <AutosizeTextArea
@@ -65,6 +70,11 @@ defineExpose({ textArea: textAreaRef });
     :placeholder="placeholder"
     :disabled="disabled"
     :read-only="readOnly"
-    @change="(v) => emit('update:modelValue', v)"
+    @change="
+      (v) => {
+        emit('update:modelValue', v);
+        emit('change', v);
+      }
+    "
   />
 </template>

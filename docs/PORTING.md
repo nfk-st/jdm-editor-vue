@@ -131,7 +131,7 @@ module is ported.
 ### The additive public surface
 
 Upstream's public surface is 119 names. The port exports those, except
-`DictionaryProvider` (see above), **plus 18 names upstream does not
+`DictionaryProvider` (see above), **plus 19 names upstream does not
 export**. Each is marked `// PORTING(additive):` in its barrel and listed
 here, so the difference is declared rather than accidental:
 
@@ -267,14 +267,17 @@ ones that were not are recorded below.
   21 of the 22 call sites were affected.
 - **The dictionaries were frozen at mount.** `provide()` runs once per
   setup, so a dictionary loaded later never reached the expression
-  builders. The provider now hands over a reactive holder.
+  builders. The provider now hands over a reactive holder — and the
+  decision table's bridge watches it DEEPLY (the holder's identity never
+  changes, only its contents).
 - **The multi-select chip's remove icon** was hidden until hover — antd's
   is always visible (the opacity rule belongs to the select's _clear_
   icon). It is also omitted entirely when the select is disabled, like
   rc-select's `closable = !disabled`.
 - **Numeric inline styles were dropped.** React appends `px` to a numeric
   style value; Vue does not, so `fontSize: 12` reached the DOM as the
-  invalid `font-size: 12`.
+  invalid `font-size: 12`. Every DOM style of that shape was given its
+  unit — including the diff icon's 3px dot.
 
 ### Fixed — the data and the types
 
@@ -287,7 +290,9 @@ ones that were not are recorded below.
 - **The shipped types referenced a phantom binding.** The declaration
   rollup turned `typeof import('monaco-editor')` into
   `import { monacoEditor } from 'monaco-editor'` — a name the package does
-  not export.
+  not export. (One rollup defect remains: vue's `$nextTick: nextTick` is
+  written as a value in a type position, so the shipped types need
+  `skipLibCheck` — see Known temp debt.)
 - **The public `JdmConfigProviderProps` type was missing.**
 - **The run payload could hold a Vue proxy** — `structuredClone` of it
   throws `DataCloneError`.
@@ -313,6 +318,68 @@ ones that were not are recorded below.
   the gates first, and skips a version that is already published.
 - **The import guard missed `.js` sources** and never checked default
   imports. It now does both.
+
+### The deviations this round added
+
+Every one is marked `// PORTING:` in the code; they are listed here
+because PORTING.md's rule is "marked AND listed":
+
+- **`.grl-dg .switch`** — upstream's `.switch` is a top-level rule and
+  reaches every `.switch` element on the host's page. The port scopes it
+  to the editor.
+- **The empty node body collapses** — upstream renders the body only when
+  the node has children; Vue always has a slot, so the port collapses an
+  empty body with `:empty`.
+- **The decision table's panel defaults to 300px** — upstream's
+  `Number.parseFloat(...) ?? 300` never fires (parseFloat('') is NaN and
+  `??` does not catch NaN); the port maps NaN to 300 and keeps the
+  150-500 clamp.
+- **`Modal.confirm`** — the port's `confirm` prop focuses the OK button,
+  like antd's `Modal.confirm` (reka focuses the first focusable element).
+- **The button's size and shape classes** — `grl-btn--small` and
+  `grl-btn--round` only; the default size and shape emit nothing, so they
+  cannot collide with the type class `grl-btn--default`.
+
+### Round 2 — what the second pass found
+
+The first pass's own fixes were re-reviewed, and three of them were
+wrong. They are the most instructive part of this log:
+
+- **The published bundle did not load.** The first pass made
+  `vite.config.ts`'s `external` a function that externalised every
+  subpath of a dependency. A package WITHOUT an `exports` map resolves its
+  files by path, and Node needs the extension —
+  `fast-deep-equal/es6/react` cannot be resolved, so
+  `import('./dist/index.js')` threw. **Every gate stayed green.** The
+  check PORTING.md prescribes (`node --input-type=module -e "import(…)"`)
+  is now a script (`check:dist`), it runs in CI after the build, and
+  `prepublishOnly` runs it — a publish cannot ship a bundle that does not
+  load. Only a subpath the package's `exports` map PUBLISHES is
+  externalised.
+- **The custom node's config shape was inverted.** The first pass read
+  antd's `Form.Item` documentation instead of rc-field-form 2.4.0's
+  implementation: `getNamePath(path)` is `toArray(path)` — a string name
+  is ONE path segment, never split on dots. Upstream keeps the literal
+  key ('hello.nested.something': 'My'), exactly as its own fixture stores
+  it. The port had started rewriting the config into a nested shape that
+  upstream never writes.
+- **A danger primary button was red on red.** The first pass gave the
+  button a `shape` prop that emitted `grl-btn--default` for the default
+  shape — the same class name as the TYPE — so every button matched
+  `.grl-btn--danger.grl-btn--default` and the primary's light text was
+  replaced by the error colour. The size and the shape now emit nothing
+  for their defaults.
+
+Also fixed in round 2: the confirm modal's autofocus (a template ref on
+reka's `DialogContent` exposes the component's props, not the element, so
+`ref.value.querySelector` was not a function); the switch's checked hover
+(antd: `colorPrimaryHover`); the decision table's dictionaries (the bridge
+watched the holder shallowly, and the holder's identity never changes);
+the tooltip's empty bubble (antd's `noTitle`); the diff icon's 3px dot
+(the numeric-style sweep missed it); the popover's latent Boolean-`open`
+trap; the diff text area's swallowed `change` event; and the four stale
+"stand-in swapped" comments — the stand-ins are now ACTUALLY swapped for
+the canonical types.
 
 ### Not fixed — deliberate
 

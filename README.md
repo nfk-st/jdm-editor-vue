@@ -9,10 +9,10 @@ open-source components for crafting and designing JDM (JSON Decision Model) file
 ## Status
 
 Feature-complete port of upstream **v1.52.0**. Every upstream module is
-ported and every upstream Storybook story exists here — 57 in all, reviewed
-side by side against upstream's own Storybook. See
-[docs/PORTING.md](./docs/PORTING.md) for the parity checklist, the
-deviations from upstream, and the known limitations.
+ported and every upstream Storybook story exists here — 57 in all, and the
+two were rendered side by side (the method, and what it could not see, are
+in [docs/PORTING.md](./docs/PORTING.md)). The parity checklist, the
+deviations from upstream, and the known limitations are there too.
 
 The changelog is in
 [packages/jdm-editor-vue/CHANGELOG.md](./packages/jdm-editor-vue/CHANGELOG.md).

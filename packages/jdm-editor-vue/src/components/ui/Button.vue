@@ -39,8 +39,12 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     class="grl-btn"
     :class="[
       `grl-btn--${type}`,
-      `grl-btn--${size}`,
-      `grl-btn--${shape}`,
+      // the size and the shape get their OWN class names: `grl-btn--default`
+      // is the TYPE class, and emitting it for the default size (or shape)
+      // made every button match `.grl-btn--danger.grl-btn--default` — a red
+      // primary button rendered red text on a red background.
+      size !== 'default' && `grl-btn--${size}`,
+      shape !== 'default' && `grl-btn--${shape}`,
       danger && 'grl-btn--danger',
       (disabled || loading) && 'grl-btn--disabled',
       block && 'grl-btn--block',
@@ -117,6 +121,9 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     }
   }
 
+  // antd's DEFAULT button: the border and the text turn primary on hover.
+  // (The text and link buttons have their own hover rules above — this one
+  // must not reach them, or they get a blue border and blue text.)
   &--default:hover:not(.grl-btn--disabled) {
     border-color: var(--grl-color-primary-hover);
     color: var(--grl-color-primary-hover);
@@ -160,12 +167,16 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
       }
     }
 
-    // antd's danger button is a PRIMARY button in the error colour.
+    // antd's danger button is a PRIMARY button in the error colour, and its
+    // text stays the light solid colour (antd's colorTextLightSolid) — not
+    // the error colour, which would be red on red.
     &.grl-btn--primary {
+      color: var(--grl-color-text-solid);
       background-color: var(--grl-color-error);
       border-color: var(--grl-color-error);
 
       &:hover:not(.grl-btn--disabled) {
+        color: var(--grl-color-text-solid);
         background-color: var(--grl-color-error-hover);
         border-color: var(--grl-color-error-hover);
       }
@@ -183,6 +194,12 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
 
     &:hover {
       color: var(--grl-color-text-disabled);
+      border-color: var(--grl-color-border);
+    }
+
+    // antd's disabled button uses colorBorder, not the variant's colour
+    &.grl-btn--primary {
+      background-color: var(--grl-color-bg-container-disabled);
       border-color: var(--grl-color-border);
     }
 

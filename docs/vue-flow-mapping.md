@@ -62,3 +62,23 @@ setViewport/fitView({nodes,duration,maxZoom})`.
   import cleanly under Node (verified — no module-level browser access), so
   the library stays SSR-import-safe. The canvas itself must still mount
   `VueFlow` in `onMounted`, never at module scope.
+
+## The differences that bite
+
+Reactflow and Vue Flow agree on the API names and differ on the
+**semantics**. These are the ones that changed the port's behaviour (each
+is marked `// PORTING(vue-flow):` at the site):
+
+| Reactflow                                                           | Vue Flow                                             | Consequence                                                                             |
+| ------------------------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `isValidConnection` runs only while a connection is dragged         | it runs for EVERY edge it syncs (`createGraphEdges`) | upstream's validator rejected each synced edge against itself — no edge ever rendered   |
+| `connectionMode` defaults to `Strict`                               | it defaults to `Loose`                               | output→output and input→input drags were accepted                                       |
+| an edge's update handles need an `onEdgeUpdate` handler             | the flag alone draws them                            | the port drew handles upstream never shows                                              |
+| a node's `width`/`height` are ignored (the DOM is measured)         | they are written as inline px                        | the nodes were pinned to their first measured size                                      |
+| the class names are `react-flow__*`                                 | `vue-flow__*`                                        | the ported stylesheet matched nothing                                                   |
+| a handle is placed with `left: -4px; transform: translate(0, -50%)` | `left: 0; transform: translate(-50%, -50%)`          | the handles sat further out, and jumped on the hover scale                              |
+| the visible edge path comes first, then the interaction path        | the same order                                       | upstream's "hover the transparent path to recolour the edge" rule never fires in either |
+| `nodeTypes` is a plain map                                          | a changed component function REMOUNTS the node       | rebuilding the map on every edit remounted every node                                   |
+
+The store has no `onNodesDelete` / `onEdgesDelete`: Vue Flow 1.48 exposes
+the removals through the change events only.

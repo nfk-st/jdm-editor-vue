@@ -2,15 +2,15 @@
 import { GripVertical, MinusSquare, PlusSquare } from 'lucide-vue-next';
 import { computed, useAttrs } from 'vue';
 
+// PORTING: the local DiffStatus stand-in was swapped for
+// decision-graph/dg-types' real DiffStatus when that module landed (step 8).
+import type { DiffStatus } from './decision-graph/dg-types';
+
 // Ported from components/diff-icon.tsx (antd icons → lucide).
 // PORTING(P4): upstream spreads {...rest} (class/style/attrs) onto every
 // branch and merges consumer style AFTER the status color (consumer wins);
 // box icons size from style.fontSize (upstream default 14).
 defineOptions({ inheritAttrs: false });
-
-// PORTING: the local DiffStatus stand-in was swapped for
-// decision-graph/dg-types' real DiffStatus when that module landed (step 8).
-type DiffStatus = 'added' | 'removed' | 'modified' | 'unchanged' | 'moved';
 
 defineProps<{ status?: DiffStatus }>();
 
@@ -55,10 +55,13 @@ const mergedStyle = (color: string) => [{ color }, attrs.style];
       attrs.style,
     ]"
   >
+    <!-- PORTING(react): React appends 'px' to a numeric style value; Vue
+         does not, so `width: 3` reached the DOM as the invalid `width: 3`
+         and the dot had no size. -->
     <span
       :style="{
-        width: 3,
-        height: 3,
+        width: '3px',
+        height: '3px',
         backgroundColor: 'var(--grl-color-warning)',
         borderRadius: '50%',
       }"

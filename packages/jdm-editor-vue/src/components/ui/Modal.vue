@@ -6,7 +6,6 @@
 import { X } from 'lucide-vue-next';
 import { DialogClose } from 'reka-ui';
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
-import { ref } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -24,11 +23,14 @@ const props = withDefaults(
 
 const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
 
-const contentRef = ref<HTMLElement | null>(null);
-
-// PORTING: antd's Modal.confirm moves the focus to the OK button, so
-// Enter confirms. Reka focuses the FIRST focusable element — the Cancel
-// button — so Enter cancelled the deletion instead.
+// PORTING: antd's Modal.confirm moves the focus to the OK button, so Enter
+// confirms. Reka focuses the FIRST focusable element — the Cancel button —
+// so Enter cancelled the deletion instead.
+//
+// The event's target is the dialog element (reka's own DatePickerContent
+// pattern): a template ref on reka's DialogContent exposes the COMPONENT's
+// props plus $el (useForwardExpose), not the element — so
+// `ref.value.querySelector` is not a function.
 const onOpenAutoFocus = (event: Event) => {
   if (!props.confirm) {
     return;
@@ -36,7 +38,8 @@ const onOpenAutoFocus = (event: Event) => {
 
   event.preventDefault();
 
-  const footer = contentRef.value?.querySelector('.grl-modal__footer');
+  const content = event.target as HTMLElement | null;
+  const footer = content?.querySelector('.grl-modal__footer');
   const buttons = footer?.querySelectorAll('button');
   const ok = buttons?.[buttons.length - 1] as HTMLElement | undefined;
   ok?.focus();
@@ -48,7 +51,6 @@ const onOpenAutoFocus = (event: Event) => {
     <DialogPortal :to="getContainer ? getContainer() : undefined">
       <DialogOverlay class="grl-modal__overlay" :class="{ 'grl-modal__overlay--contained': getContainer }" />
       <DialogContent
-        ref="contentRef"
         class="grl-modal"
         :class="{ 'grl-modal--centered': centered, 'grl-modal--contained': getContainer }"
         :style="{ width: typeof width === 'number' ? `${width}px` : width }"

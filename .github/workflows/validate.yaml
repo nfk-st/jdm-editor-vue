@@ -30,6 +30,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # The published bundle must LOAD — every other gate passed while the
+      # package could not be imported at all.
+      - name: Check the built bundle
+        run: pnpm --filter @nfk.st/jdm-editor-vue check:dist
+
       - name: Type check
         run: pnpm typecheck
 

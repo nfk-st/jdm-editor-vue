@@ -57,7 +57,8 @@
     "build:watch": "vite build --watch",
     "build-storybook": "storybook build",
     "check:imports": "node scripts/check-named-imports.mjs",
-    "prepublishOnly": "vite build",
+    "check:dist": "node scripts/check-dist-import.mjs",
+    "prepublishOnly": "vite build && node scripts/check-dist-import.mjs",
     "storybook": "storybook dev -p 6006",
     "typecheck": "vue-tsc --noEmit && node scripts/check-named-imports.mjs",
     "test": "vitest run"

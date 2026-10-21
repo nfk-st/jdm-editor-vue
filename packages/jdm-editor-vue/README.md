@@ -4,7 +4,7 @@ A **Vue 3** port of GoRules' [`@gorules/jdm-editor`](https://github.com/gorules/
 open-source components for crafting and designing JDM (JSON Decision Model) files.
 
 > **Not affiliated with or endorsed by GoRules.** Derived from the upstream React
-> library (MIT); see [THIRD_PARTY_NOTICES.md](https://github.com/nfk-st/goruleditor/blob/main/THIRD_PARTY_NOTICES.md).
+> library (MIT); see [THIRD_PARTY_NOTICES.md](https://github.com/nfk-st/goruleditor/blob/master/THIRD_PARTY_NOTICES.md).
 
 Ported from upstream **v1.52.0**. Every upstream module and every upstream
 Storybook story is present.
@@ -104,7 +104,7 @@ Upstream's `value`/`onChange` pair becomes `modelValue` + `update:modelValue`
 | ------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DecisionGraph`     | The canvas: nodes, edges, tab bar, node panels, simulator.     | `modelValue`, `defaultValue`, `id`, `name`, `disabled`, `mode`, `components`, `customNodes`, `panels`, `viewConfig`, `simulate`, `dictionaries`, `onChange`                                                     |
 | `DecisionTable`     | The rules grid with its hit policy and column schema.          | `modelValue`, `defaultValue`, `tableHeight` (required), `id`, `name`, `disabled`, `disableHitPolicy`, `permission`, `mode`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`, `debug`, `dictionaries` |
-| `Expression`        | A single Zen expression with its command bar.                  | `modelValue`, `inputVariableType`, `debug`, `hideCommandBar`                                                                                                                                                    |
+| `Expression`        | A Zen expression with its command bar.                         | `modelValue`, `inputVariableType`, `debug`, `hideCommandBar`                                                                                                                                                    |
 | `Function`          | A JavaScript function in a Monaco editor, with the debugger.   | `modelValue`, `defaultValue`, `disabled`, `disableDebug`, `language`, `libraries`, `inputData`, `permission`, `previousValue`, `trace`, `error`                                                                 |
 | `CodeEditor`        | The CodeMirror editor behind the expression editors.           | `modelValue`, `type`, `maxRows`, `placeholder`, `disabled`, `lint`, `strict`, `fullHeight`, `noStyle`, `lazy`, `initialSelection`, `extension`, `livePreview`                                                   |
 | `ExpressionBuilder` | The structured expression builder.                             | `modelValue` (required), `fieldType`, `disabled`, `maxRows`                                                                                                                                                     |

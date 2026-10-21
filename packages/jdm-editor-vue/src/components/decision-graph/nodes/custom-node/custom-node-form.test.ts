@@ -1,30 +1,28 @@
 // @vitest-environment jsdom
 // The custom node's form values (PORTING: antd's rc-field-form store).
 //
-// Upstream's <Form.Item name='hello.nested.something'> keeps the value
-// NESTED in the node's config, and only the registered inputs survive an
-// edit. The port read the flat key and wrote with lodash's `_.set`, which
-// nests a name that is not already a key — and then wrote into the immer-
-// frozen object on the next edit, so the edit was silently lost.
+// rc-field-form 2.4.0's `getNamePath(path)` is `toArray(path)` — a string
+// name is ONE path segment, never split on dots. So a field named
+// 'hello.nested.something' keeps the LITERAL key, exactly as upstream's
+// own fixture stores it ('hello.nested.something': 'My'), and only the
+// registered inputs survive an edit.
+//
+// The port split the name on dots, which rewrote the config into a nested
+// shape upstream never writes — and then wrote into the immer-frozen
+// object on the next edit, so the edit was silently lost.
 import { produce } from 'immer';
 import { describe, expect, it } from 'vitest';
 
 import { collectInputValues, setFormValue } from './index';
 
 describe('custom node form values', () => {
-  it('reads a dotted name from a flat config', () => {
+  it('keeps a dotted name as a literal key', () => {
     const values = collectInputValues({ 'hello.nested.something': 'My', 'second': 'Name' }, [
       'hello.nested.something',
       'second',
     ]);
 
-    expect(values).toEqual({ hello: { nested: { something: 'My' } }, second: 'Name' });
-  });
-
-  it('reads a dotted name from a nested config', () => {
-    const values = collectInputValues({ hello: { nested: { something: 'My' } } }, ['hello.nested.something']);
-
-    expect(values).toEqual({ hello: { nested: { something: 'My' } } });
+    expect(values).toEqual({ 'hello.nested.something': 'My', 'second': 'Name' });
   });
 
   it('keeps only the registered inputs', () => {
@@ -32,7 +30,7 @@ describe('custom node form values', () => {
       'hello.nested.something',
     ]);
 
-    expect(values).toEqual({ hello: { nested: { something: 'My' } } });
+    expect(values).toEqual({ 'hello.nested.something': 'My' });
   });
 
   it('writes into a frozen config without losing the edit', () => {
@@ -43,7 +41,7 @@ describe('custom node form values', () => {
     });
 
     const first = setFormValue({ ...frozen.config }, 'hello.nested.something', 'My');
-    expect(first).toEqual({ second: 'Name', hello: { nested: { something: 'My' } } });
+    expect(first).toEqual({ 'second': 'Name', 'hello.nested.something': 'My' });
 
     // the store freezes that too
     const frozenAgain = produce<{ config: Record<string, unknown> }>({ config: {} }, (draft) => {
@@ -51,8 +49,8 @@ describe('custom node form values', () => {
     });
 
     const second = setFormValue({ ...frozenAgain.config }, 'hello.nested.something', 'Bye');
-    expect(second).toEqual({ second: 'Name', hello: { nested: { something: 'Bye' } } });
+    expect(second).toEqual({ 'second': 'Name', 'hello.nested.something': 'Bye' });
     // the frozen object was not touched
-    expect((frozenAgain.config as Record<string, unknown>).hello).toEqual({ nested: { something: 'My' } });
+    expect((frozenAgain.config as Record<string, unknown>)['hello.nested.something']).toBe('My');
   });
 });

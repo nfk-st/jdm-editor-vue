@@ -22,7 +22,11 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
 
 <template>
   <TooltipProvider :delay-duration="delay">
-    <TooltipRoot :open="open" @update:open="(o) => emit('update:open', o)">
+    <!-- PORTING: antd's Tooltip with no title never opens (its `noTitle`
+         guard). The port's tooltip has no content guard, so a caller that
+         passes no content (upstream: `title={!hasInputNode ? '…' :
+         undefined}`) would get an empty bubble. -->
+    <TooltipRoot :open="open" :disabled="!content && !$slots.content" @update:open="(o) => emit('update:open', o)">
       <TooltipTrigger as-child class="grl-tooltip__trigger"><slot /></TooltipTrigger>
       <TooltipPortal>
         <TooltipContent class="grl-tooltip" :side-offset="6">

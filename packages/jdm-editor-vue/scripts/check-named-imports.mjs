@@ -49,9 +49,11 @@ const collectFiles = (dir) => {
 // `import { a, b } from 'pkg'` / `import type { a } from 'pkg'` /
 // `import Default, { a } from 'pkg'`
 const IMPORT_RE = /^[ \t]*import\s+(?!type\s)(?!['"])([^'"]*?)\s+from\s+['"]([^'"]+)['"]/gm;
-// `import Default from 'pkg'` — a default import of a module that has no
-// default export binds `undefined` at runtime (no throw, so it is invisible).
-const DEFAULT_IMPORT_RE = /^[ \t]*import\s+(?!type\s)(?!['"])([A-Za-z_$][\w$]*)\s+from\s+['"]([^'"]+)['"]/gm;
+// `import Default from 'pkg'` AND `import Default, { a } from 'pkg'` — a
+// default import of a module that has no default export binds `undefined`
+// at runtime (no throw, so it is invisible).
+const DEFAULT_IMPORT_RE =
+  /^[ \t]*import\s+(?!type\s)(?!['"])([A-Za-z_$][\w$]*)\s*(?:,\s*\{[^}]*\})?\s*from\s+['"]([^'"]+)['"]/gm;
 // `export { a } from 'pkg'` / `export { a as b } from 'pkg'`
 const EXPORT_RE = /^[ \t]*export\s+(?!type\s)(?!default\s)(?!star\s)([^'"]*?)\s+from\s+['"]([^'"]+)['"]/gm;
 
@@ -61,6 +63,13 @@ const defaultSpecifier = (clause) => {
   if (!before || before.includes('*')) return null;
   if (!/^[A-Za-z_$][\w$]*$/.test(before)) return null;
   return before;
+};
+
+// The default-import clause of an import statement — the part before the
+// braces (or the whole clause when there are none).
+const defaultClause = (clause) => {
+  const before = clause.split('{')[0].trim().replace(/,$/, '').trim();
+  return before && !before.includes('*') ? before : null;
 };
 
 /** The package specifiers of an import/export clause, or null for a bare/default/namespace import. */
@@ -85,6 +94,9 @@ const collectNamedImports = () => {
 
   const record = (spec, names, file) => {
     if (spec.startsWith('.') || spec.startsWith('/')) return; // relative
+    // a Vite query (?raw, ?url) is a FILE, not a module — there are no
+    // named exports to check
+    if (spec.includes('?')) return;
     if (!names.length) return;
     if (!found.has(spec)) found.set(spec, new Map());
     const bag = found.get(spec);
@@ -124,11 +136,15 @@ const collectDefaultImports = () => {
 
   for (const file of collectFiles(SRC_DIR)) {
     const source = readFileSync(file, 'utf8');
-    for (const match of source.matchAll(DEFAULT_IMPORT_RE)) {
-      const name = defaultSpecifier(match[1]);
+    for (const match of source.matchAll(IMPORT_RE)) {
+      // `import Default, { a } from 'pkg'` — the default binding sits
+      // before the braces
+      const name = defaultClause(match[1]);
       if (!name) continue;
       const spec = match[2];
       if (spec.startsWith('.') || spec.startsWith('/')) continue;
+      // a Vite query (?raw, ?url) is a FILE, not a module
+      if (spec.includes('?')) continue;
       if (!found.has(spec)) found.set(spec, new Set());
       found.get(spec).add(file);
     }
@@ -162,6 +178,8 @@ for (const [spec, files] of [...defaultImports].sort()) {
   const exports = await runtimeExports(spec);
 
   if (!exports) {
+    // the check cannot decide — it must not pass silently
+    unverifiable.push(spec);
     continue;
   }
 

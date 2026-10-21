@@ -3,23 +3,8 @@
 // SimulationTrace ← components/decision-graph/simulator/simulation.types.
 // Those modules have landed (step 8), so the local stand-ins below were
 // swapped for the real imports.
-type DecisionNode = {
-  id: string;
-  name: string;
-  type?: string;
-};
-
-type DecisionGraphType = {
-  nodes: DecisionNode[];
-  edges: unknown[];
-};
-
-type SimulationTrace = {
-  input: unknown | null;
-  output: unknown | null;
-  name: string;
-  id: string;
-};
+import type { DecisionGraphType, DecisionNode } from '../components/decision-graph/dg-types';
+import type { SimulationTrace } from '../components/decision-graph/simulator/simulation.types';
 
 type NodeDataParams = {
   trace: Record<string, SimulationTrace>;

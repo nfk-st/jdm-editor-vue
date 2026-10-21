@@ -1,13 +1,4 @@
-// PORTING: upstream imports `DecisionTableStoreType` from
-// ../components/decision-table/context/dt-store.context. That module has
-// landed (step 6), so the local minimal state stand-in below was swapped
-// for the real import.
-type DecisionTableStoreState = {
-  decisionTable: {
-    inputs: any[];
-    outputs: any[];
-  };
-};
+import type { DecisionTableStoreType } from '../components/decision-table/context/dt-store.context';
 
 export type SchemaSelectProps = {
   field: string;
@@ -40,7 +31,7 @@ export const getPath = (key: string, items: SchemaSelectProps[]): string[] | und
   }
 };
 
-export const columnIdSelector = (x: string) => (state: DecisionTableStoreState) =>
+export const columnIdSelector = (x: string) => (state: DecisionTableStoreType['state']) =>
   [
     ...state.decisionTable.inputs.map((i: any) => ({
       ...i,

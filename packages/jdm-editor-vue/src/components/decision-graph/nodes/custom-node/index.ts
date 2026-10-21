@@ -5,7 +5,6 @@
 // valuePropName) → a path-aware local values object (dotted names resolve
 // nested, matching the CreateDynamicType shape); antd theme token fontSizeSM
 // → 12px (the token's value).
-import _ from 'lodash';
 import { ChevronDown } from 'lucide-vue-next';
 import { match } from 'ts-pattern';
 import { type PropType, computed, defineComponent, h, ref } from 'vue';
@@ -21,46 +20,38 @@ import type { BaseNode, CustomNodeSpecification, InputSchema } from './types';
 export type { BaseNode, CustomNodeSpecification } from './types';
 export type { CheckboxControl, JdmControl, TextControl } from './controls';
 
-// PORTING(antd): rc-field-form (antd's form store) resolves a field name
-// like 'a.b' into a PATH: the value is stored NESTED under
-// config.a.b, and `getFieldsValue()` returns the nested shape for the
-// REGISTERED fields only. Upstream's <Form.Item name='hello.nested.something'>
-// therefore ends up in the node's config as a nested object, and the other
-// config keys are dropped.
+// PORTING(antd): rc-field-form 2.4.0's `getNamePath(path)` is
+// `toArray(path)` — a string name is ONE path segment, never split on
+// dots. So a field named 'hello.nested.something' stores its value under
+// the LITERAL key 'hello.nested.something' — exactly as upstream's own
+// fixture does ('hello.nested.something': 'My'). The port had split the
+// name on dots, which rewrote the node's config into a nested shape that
+// upstream never writes (and that upstream then reads back as undefined).
 //
-// The port read the flat key instead and wrote with lodash's `_.set`, which
-// nests a name that is not already a key — and then wrote INTO the frozen
-// (immer) object on the next edit, so the edit was silently lost. These two
-// helpers port the form store's shape and make the write immutable.
+// `getFieldsValue()` returns the REGISTERED fields only, so the config
+// after an edit holds the registered inputs and nothing else.
+//
+// The write is immutable: the stored config is frozen by immer, so writing
+// into it lost the edit.
 export const setFormValue = (
   target: Record<string, unknown>,
-  path: string,
+  name: string,
   value: unknown,
-): Record<string, unknown> => {
-  const [head, ...rest] = path.split('.');
-
-  if (!rest.length) {
-    return { ...target, [head]: value };
-  }
-
-  const child =
-    typeof target[head] === 'object' && target[head] !== null ? (target[head] as Record<string, unknown>) : {};
-
-  return { ...target, [head]: setFormValue(child, rest.join('.'), value) };
-};
+): Record<string, unknown> => ({ ...target, [name]: value });
 
 // PORTING(antd): the form's initial values are the node's config, read
-// through the field's name path, and only the registered fields are kept.
+// through the field's (literal) name, and only the registered fields are
+// kept.
 export const collectInputValues = (
   config: Record<string, unknown> | undefined,
   names: string[],
 ): Record<string, unknown> => {
   const values: Record<string, unknown> = {};
+  const source = config ?? {};
 
   for (const name of names) {
-    const value = _.get(config ?? {}, name);
-    if (value !== undefined) {
-      Object.assign(values, setFormValue(values, name, value));
+    if (source[name] !== undefined) {
+      values[name] = source[name];
     }
   }
 
@@ -159,7 +150,8 @@ export const createJdmNode = <
                       'form',
                       { class: 'grl-dn__cn__form', onSubmit: (e: Event) => e.preventDefault() },
                       (n?.inputs || []).map(({ name, control, label }) => {
-                        const value = _.get(formValues.value, name);
+                        // the name is a literal key (see collectInputValues)
+                        const value = formValues.value[name];
 
                         const formItem = match({ control })
                           .with({ control: 'text' }, () =>

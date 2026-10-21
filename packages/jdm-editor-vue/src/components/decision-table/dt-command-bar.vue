@@ -39,7 +39,7 @@ const debugIndex = useDecisionTableState(({ debugIndex }) => debugIndex);
 const { listenerStore, stateStore } = useDecisionTableRaw();
 
 // PORTING: upstream used ts-pattern's P.array() here; its narrowing fights
-// our stand-in trace typing — plain Array.isArray keeps identical semantics.
+// the port's trace typing — plain Array.isArray keeps identical semantics.
 const traceData = useDecisionTableState(({ debug }) => debug?.trace?.traceData);
 const traceCount = computed(() => (Array.isArray(traceData.value) ? traceData.value.length : null));
 

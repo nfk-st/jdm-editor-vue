@@ -19,6 +19,11 @@ withDefaults(
     side: 'bottom',
     align: 'center',
     sideOffset: 4,
+    // PORTING: an absent Boolean prop is cast to false by Vue, and reka's
+    // PopoverRoot is only uncontrolled when `open` is undefined — so a
+    // popover without an explicit `open` would be controlled-and-closed.
+    // The default keeps it undefined (the Tooltip's fix).
+    open: undefined,
   },
 );
 

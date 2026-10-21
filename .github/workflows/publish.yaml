@@ -36,6 +36,11 @@ jobs:
           pnpm typecheck
           pnpm test
 
+      # The published bundle must LOAD — every other gate passed while the
+      # package could not be imported at all.
+      - name: Check the built bundle
+        run: pnpm --filter @nfk.st/jdm-editor-vue check:dist
+
       # A version that is already on the registry must not be published
       # again — npm answers 403 and the whole run fails.
       - name: Skip a version that is already published
