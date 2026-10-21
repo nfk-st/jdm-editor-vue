@@ -18,13 +18,7 @@ const onChange = (e: Event) => {
 
 <template>
   <label class="grl-checkbox" :class="{ 'grl-checkbox--disabled': disabled }">
-    <input
-      class="grl-checkbox__input"
-      type="checkbox"
-      :checked="modelValue"
-      :disabled="disabled"
-      @change="onChange"
-    />
+    <input class="grl-checkbox__input" type="checkbox" :checked="modelValue" :disabled="disabled" @change="onChange" />
     <span class="grl-checkbox__label"><slot /></span>
   </label>
 </template>

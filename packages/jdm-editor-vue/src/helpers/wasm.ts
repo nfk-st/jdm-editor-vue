@@ -1,5 +1,5 @@
 import initWasm, { isReady } from '@gorules/zen-engine-wasm';
-import { readonly, ref, type Ref } from 'vue';
+import { type Ref, readonly, ref } from 'vue';
 
 let wasmAvailable = false;
 let wasmInitPromise: Promise<void> | null = null;

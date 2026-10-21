@@ -16,7 +16,7 @@ _Avoid_: flow, diagram, workflow
 A single step in a Decision Graph. Has a kind (Input, Output, Expression, Decision Table, Switch, Function) and a user-editable name.
 
 **Node Kind** vs **Node Type**:
-*Kind* is the domain category of a node (Switch, Expression, …). *Type* is an upstream code artifact used for schema-inferred nodes (Inferred Input / Inferred Output). Prefer *kind* in prose.
+_Kind_ is the domain category of a node (Switch, Expression, …). _Type_ is an upstream code artifact used for schema-inferred nodes (Inferred Input / Inferred Output). Prefer _kind_ in prose.
 _Avoid_: using "type" for kind
 
 **Edge**:

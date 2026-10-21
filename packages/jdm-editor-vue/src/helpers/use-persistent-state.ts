@@ -1,4 +1,4 @@
-import { shallowRef, watch, type Ref } from 'vue';
+import { type Ref, shallowRef, watch } from 'vue';
 
 const memoryCache: Record<string, unknown> = {};
 

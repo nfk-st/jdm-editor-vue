@@ -1,23 +1,23 @@
 // Logic-core coverage for helpers/* (PORTING.md testing rule — module #2).
 // Framework-agnostic helpers tested directly; composables under jsdom.
 // @vitest-environment jsdom
-import { effectScope, nextTick, ref, type Ref } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { type Ref, effectScope, nextTick, ref } from 'vue';
 
-import { composeRefs } from './compose-refs';
 import { getPath, recursiveSelect } from './components';
+import { composeRefs } from './compose-refs';
 import { omit } from './omit';
+import { platform } from './platform';
 import {
-  columnEnumSchema,
-  columnFieldTypeSchema,
   CustomKind,
   DECISION_GRAPH_CONTENT_TYPE,
   NodeKind,
+  columnEnumSchema,
+  columnFieldTypeSchema,
   outputFieldTypeSchema,
 } from './schema';
-import { createGraphWalker } from './traversal';
 import { getTrace } from './trace';
-import { platform } from './platform';
+import { createGraphWalker } from './traversal';
 import { usePersistentState } from './use-persistent-state';
 import { get as getPathValue } from './utility';
 
@@ -154,10 +154,7 @@ describe('platform', () => {
 });
 
 describe('components (schema selectors)', () => {
-  const items = [
-    { field: 'a', items: [{ field: 'b' }, { field: 'c', items: [{ field: 'd' }] }] },
-    { field: 'e' },
-  ];
+  const items = [{ field: 'a', items: [{ field: 'b' }, { field: 'c', items: [{ field: 'd' }] }] }, { field: 'e' }];
 
   it('recursiveSelect descends selectors', () => {
     expect(recursiveSelect(['a', 'c', 'd'], items)?.field).toBe('d');

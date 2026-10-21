@@ -112,15 +112,9 @@ module is ported.
       step-8 wiring is in place (the graph store provides the key)_
 - [x] `usePersistentState` (from `helpers/use-persistent-state`)
 - [x] `helpers/schema` exports + `./dist/schema` entry
-- [x] `components/decision-graph`: `DecisionGraph`
-      - **props** (`DecisionGraphProps`): `id`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `disabled`, `components`, `customNodes`, `hideLeftToolbar`, `name`, `viewConfig`, `viewConfigCta`, `onViewConfigCta`, `defaultActivePanel`, `panels`, `onPanelsChange`, `simulate`, `dictionaries`, `mode`, `onChange`, `onReactFlowInit`, `onCodeExtension`, `onFunctionReady`; `manager` is a deprecated accept-and-ignore stub (upstream's react-dnd `DragDropManager`).
-      - **emits**: `update:modelValue` (upstream's `onChange`; the `onChange` prop is kept alongside it).
-      - **slots**: `#tab-bar-extra-content` (upstream's `tabBarExtraContent` ReactNode prop).
-      - **DROPPED**: `reactFlowProOptions` (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md).
-      - **ref** (`DecisionGraphRef` = `GraphRef`): the store's action surface — `setDecisionGraph`, `handleNodesChange`, `handleEdgesChange`, `setNodes`, `addNodes`, `updateNode`, `removeNodes`, `duplicateNodes`, `copyNodes`, `pasteNodes`, `setEdges`, `addEdges`, `removeEdges`, `removeEdgeByHandleId`, `setHoveredEdgeId`, `closeTab`, `openTab`, `goToNode`, `setActivePanel`, `setCompactMode`, `toggleCompactMode`, `setNodeType`, `removeNodeType`, `triggerNodeSelect` — plus `stateStore`, `serialize()`, `restore()`. NOTE: upstream v1.52 has **no** `addNode` on the public ref (the singular add is the canvas's internal `addNodeInner`, upstream graph.tsx); an earlier draft of this checklist claimed one — corrected.
-      - **module exports** (barrel mirrors upstream's `decision-graph/index.ts`): `DecisionGraph`, `GraphNode`, `GraphDecisionNode`, `GraphSimulator`, `SimulatorEditor`, `createJdmNode`, `nodeSpecification`, `NodeColor`, `NodeTypeKind`, the store/serializer hooks (`useDecisionGraphState`, `useDecisionGraphActions`, `useDecisionGraphReferences`, `useDecisionGraphListeners`, `useDecisionGraphRaw`, `useNodeDiff`, `useEdgeDiff`, `useGraphSerializer`, `useTabSerializer`), the diff helpers (`addStrikethrough`, `buildDiffString`, `compareAndUnifyLists`, `compareStringFields`, `calculateDiffGraph`, `processNodes`, `processEdges`) and the type surface (`DecisionGraphProps`, `DecisionGraphRef`, `NodeSpecification`, `MinimalNodeSpecification`, `MinimalNodeProps`, `CustomNodeSpecification`, `DecisionEdge`, `DecisionNode`, `DecisionGraphType`, `DiffMetadata`, `Diff`, `Position`, `DiffStatus`, the `Simulation*` family, `DecisionGraphSnapshot`, `TabSnapshot`, `Slice`).
+- [x] `components/decision-graph`: `DecisionGraph` - **props** (`DecisionGraphProps`): `id`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `disabled`, `components`, `customNodes`, `hideLeftToolbar`, `name`, `viewConfig`, `viewConfigCta`, `onViewConfigCta`, `defaultActivePanel`, `panels`, `onPanelsChange`, `simulate`, `dictionaries`, `mode`, `onChange`, `onReactFlowInit`, `onCodeExtension`, `onFunctionReady`; `manager` is a deprecated accept-and-ignore stub (upstream's react-dnd `DragDropManager`). - **emits**: `update:modelValue` (upstream's `onChange`; the `onChange` prop is kept alongside it). - **slots**: `#tab-bar-extra-content` (upstream's `tabBarExtraContent` ReactNode prop). - **DROPPED**: `reactFlowProOptions` (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md). - **ref** (`DecisionGraphRef` = `GraphRef`): the store's action surface — `setDecisionGraph`, `handleNodesChange`, `handleEdgesChange`, `setNodes`, `addNodes`, `updateNode`, `removeNodes`, `duplicateNodes`, `copyNodes`, `pasteNodes`, `setEdges`, `addEdges`, `removeEdges`, `removeEdgeByHandleId`, `setHoveredEdgeId`, `closeTab`, `openTab`, `goToNode`, `setActivePanel`, `setCompactMode`, `toggleCompactMode`, `setNodeType`, `removeNodeType`, `triggerNodeSelect` — plus `stateStore`, `serialize()`, `restore()`. NOTE: upstream v1.52 has **no** `addNode` on the public ref (the singular add is the canvas's internal `addNodeInner`, upstream graph.tsx); an earlier draft of this checklist claimed one — corrected. - **module exports** (barrel mirrors upstream's `decision-graph/index.ts`): `DecisionGraph`, `GraphNode`, `GraphDecisionNode`, `GraphSimulator`, `SimulatorEditor`, `createJdmNode`, `nodeSpecification`, `NodeColor`, `NodeTypeKind`, the store/serializer hooks (`useDecisionGraphState`, `useDecisionGraphActions`, `useDecisionGraphReferences`, `useDecisionGraphListeners`, `useDecisionGraphRaw`, `useNodeDiff`, `useEdgeDiff`, `useGraphSerializer`, `useTabSerializer`), the diff helpers (`addStrikethrough`, `buildDiffString`, `compareAndUnifyLists`, `compareStringFields`, `calculateDiffGraph`, `processNodes`, `processEdges`) and the type surface (`DecisionGraphProps`, `DecisionGraphRef`, `NodeSpecification`, `MinimalNodeSpecification`, `MinimalNodeProps`, `CustomNodeSpecification`, `DecisionEdge`, `DecisionNode`, `DecisionGraphType`, `DiffMetadata`, `Diff`, `Position`, `DiffStatus`, the `Simulation*` family, `DecisionGraphSnapshot`, `TabSnapshot`, `Slice`).
 - [x] `components/function`: `Function` (public FunctionProps incl. v-model + trace/error), `FunctionDebugger`,
-  `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript
+      `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript
 - [x] `components/expression`: `Expression` (+ store, controller, list/item, command bar, context menu)
 - [x] `components/code-editor`: `CodeEditor` (modelValue v-model; type/lint/strict/noStyle/lazy),
       `ExpressionBuilder`, `StandardExpressionBuilder` (business barrel), `focusBuilderRoot`,
@@ -132,18 +126,18 @@ module is ported.
 
 Bottom-up so every module lands with its dependencies already present:
 
-| #   | Module                                           | Upstream LOC | Status                                                                                                                      |
-| --- | ------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| 1   | scaffold, tokens, theme, wasm                    | —            | ✅ done                                                                                                                     |
-| 2   | `helpers/*` (16 files, ~1.1k)                    | 1056         | ✅ done                                                                                                                     |
-| 3   | `components/shared` (diff-* inputs)              | 203          | ✅ done (diff-ce deferred to #4 — depends on code-editor)                                                                   |
-| 4   | `components/code-editor` (+ zen grammar wiring)  | 3084         | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect) |
-| 5   | `components/expression`                          | 753          | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip)                             |
-| 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)  |
-| 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                       |
+| #   | Module                                           | Upstream LOC | Status                                                                                                                                             |
+| --- | ------------------------------------------------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | scaffold, tokens, theme, wasm                    | —            | ✅ done                                                                                                                                            |
+| 2   | `helpers/*` (16 files, ~1.1k)                    | 1056         | ✅ done                                                                                                                                            |
+| 3   | `components/shared` (diff-* inputs)              | 203          | ✅ done (diff-ce deferred to #4 — depends on code-editor)                                                                                          |
+| 4   | `components/code-editor` (+ zen grammar wiring)  | 3084         | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect)                        |
+| 5   | `components/expression`                          | 753          | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip)                                                    |
+| 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)                         |
+| 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                                               |
 | 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels) |
-| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (57 stories; the parity review against upstream's own storybook is below)                                                    |
-| 10  | docs site / README polish, publish prep          | —            | ⬜                                                                                                                          |
+| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (57 stories; the parity review against upstream's own storybook is below)                                                                  |
+| 10  | docs site / README polish, publish prep          | —            | ⬜                                                                                                                                                 |
 
 Testing rule: each module lands with vitest coverage of its logic core
 (pure functions, store reducers) — upstream has no tests, so this coverage is
@@ -217,7 +211,7 @@ re-litigated. Each is a choice, not an accident.
   its own build and hosting, and is deliberately NOT part of the port.
 - **The port stops at the library.** The playground is a demo, not a
   product; its quality bar is "it boots and exercises the editor".
-- **Behaviour parity, not improvement.** A port that renders *better* than
+- **Behaviour parity, not improvement.** A port that renders _better_ than
   upstream is drift, not progress. Deviations are allowed only when marked
   and listed.
 
@@ -243,7 +237,7 @@ exports and fails on any that does not exist. It runs as part of
 `pnpm --filter @nfk.st/jdm-editor-vue typecheck`, and standalone as
 `check:imports`.
 
-The same reasoning applies to the *type shims* the port writes for JS-only
+The same reasoning applies to the _type shims_ the port writes for JS-only
 packages (`src/splitpanes.d.ts`): a shim must mirror the package's real
 export surface, not the surface the port wishes it had.
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'reka-ui';
+
 // antd Popover replacement — reka-ui Popover with a controlled `open`
 // (upstream passes open/onOpenChange to antd's Popover).
 // New file (no upstream counterpart beyond antd itself), hence PascalCase.
 defineOptions({ inheritAttrs: false });
-
-import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'reka-ui';
 
 withDefaults(
   defineProps<{

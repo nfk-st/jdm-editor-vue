@@ -7,10 +7,5 @@
       "@nfk.st/jdm-editor-vue": ["../../packages/jdm-editor-vue/src/index.ts"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "vite.config.ts",
-    "../../packages/jdm-editor-vue/src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.vue", "vite.config.ts", "../../packages/jdm-editor-vue/src/**/*.d.ts"]
 }

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue';
 
 import { ensureWasmLoaded } from '../helpers/wasm';
-import { provideDictionaries, useProvideThemeMode, type DictionaryMap, type ThemeConfig } from './index';
+import { type DictionaryMap, type ThemeConfig, provideDictionaries, useProvideThemeMode } from './index';
 
 const props = defineProps<{
   theme?: ThemeConfig;

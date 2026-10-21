@@ -1,6 +1,6 @@
-export { default as JdmConfigProvider } from './JdmConfigProvider.vue';
+import { type InjectionKey, type Ref, computed, inject, provide, readonly, ref } from 'vue';
 
-import { computed, inject, provide, readonly, ref, type InjectionKey, type Ref } from 'vue';
+export { default as JdmConfigProvider } from './JdmConfigProvider.vue';
 
 export type JdmThemeMode = 'light' | 'dark';
 

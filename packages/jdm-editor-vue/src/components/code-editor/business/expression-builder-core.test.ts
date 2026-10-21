@@ -14,8 +14,8 @@ import { ExpressionBuilder, initSync } from '@gorules/zen-engine-wasm';
 import { mount } from '@vue/test-utils';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { nextTick } from 'vue';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { nextTick } from 'vue';
 
 import ExpressionBuilderVue from './expression-builder.vue';
 
@@ -62,8 +62,7 @@ const lastEmitted = (wrapper: ReturnType<typeof mountBuilder>) =>
 
 const kindOf = (wrapper: ReturnType<typeof mountBuilder>) => dropdownOf(wrapper).props('kind') as string;
 
-const hasCodeEditor = (wrapper: ReturnType<typeof mountBuilder>) =>
-  wrapper.find('.eb-code .cm-editor').exists();
+const hasCodeEditor = (wrapper: ReturnType<typeof mountBuilder>) => wrapper.find('.eb-code .cm-editor').exists();
 
 describe('useExpressionState wasm round-trip', () => {
   beforeAll(() => {

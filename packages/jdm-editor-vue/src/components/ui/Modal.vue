@@ -3,9 +3,9 @@
 // `open` (upstream drives modals via open props), #default body, #footer.
 // PORTING(additive): `getContainer` (antd prop of the same name) portals the
 // dialog into a custom element; `centered` matches antd's centered layout.
+import { X } from 'lucide-vue-next';
 import { DialogClose } from 'reka-ui';
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
-import { X } from 'lucide-vue-next';
 
 withDefaults(
   defineProps<{
@@ -30,8 +30,12 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
         :class="{ 'grl-modal--centered': centered, 'grl-modal--contained': getContainer }"
         :style="{ width: typeof width === 'number' ? `${width}px` : width }"
       >
-        <DialogTitle v-if="title || $slots.title" class="grl-modal__title"><slot name="title">{{ title }}</slot></DialogTitle>
-        <DialogDescription v-if="$slots.description" class="grl-modal__description"><slot name="description" /></DialogDescription>
+        <DialogTitle v-if="title || $slots.title" class="grl-modal__title"
+          ><slot name="title">{{ title }}</slot></DialogTitle
+        >
+        <DialogDescription v-if="$slots.description" class="grl-modal__description"
+          ><slot name="description"
+        /></DialogDescription>
         <div class="grl-modal__body">
           <slot />
         </div>

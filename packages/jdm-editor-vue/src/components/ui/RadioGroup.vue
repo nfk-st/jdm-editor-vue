@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // antd Radio.Group replacement — Reka UI RadioGroup over {label, value} options.
 // `itemClass` lets callers (e.g. DiffRadio) tag individual options.
-import { RadioGroupRoot, RadioGroupItem, RadioGroupIndicator } from 'reka-ui';
+import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot } from 'reka-ui';
 
 defineProps<{
   modelValue?: string;
@@ -28,12 +28,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
       }
     "
   >
-    <label
-      v-for="option in options || []"
-      :key="option.value"
-      class="grl-radio"
-      :class="itemClass?.(option)"
-    >
+    <label v-for="option in options || []" :key="option.value" class="grl-radio" :class="itemClass?.(option)">
       <RadioGroupItem class="grl-radio__input" :value="option.value" :disabled="disabled">
         <RadioGroupIndicator class="grl-radio__dot" />
       </RadioGroupItem>

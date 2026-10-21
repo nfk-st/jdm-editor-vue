@@ -1,5 +1,5 @@
 import vue from '@vitejs/plugin-vue';
-import { fileURLToPath, URL } from 'node:url';
+import { URL, fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import wasm from 'vite-plugin-wasm';

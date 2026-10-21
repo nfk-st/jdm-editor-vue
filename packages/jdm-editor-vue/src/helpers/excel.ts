@@ -6,8 +6,8 @@ import type {
   HitPolicy,
   TableSchemaItem,
 } from '../components/decision-table/context/dt-store.context';
-import { NodeKind } from './schema';
 import { saveFile } from './file-helpers';
+import { NodeKind } from './schema';
 
 // PORTING: upstream types `DecisionGraphType` from ../index; decision-graph
 // hasn't landed yet — minimal local stand-in below, swap when it does.

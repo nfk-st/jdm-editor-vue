@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { onMounted, ref, watch } from 'vue';
+
 // Ported from components/autosize-text-area.tsx — contentEditable div with
 // CSS-driven max-rows sizing (styles in src/styles.scss, .grl-textarea-input).
 // PORTING(P3): emits only `change` (upstream invokes only onChange);
 // maxRows is required, as upstream.
 defineOptions({ inheritAttrs: false });
-
-import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
   maxRows: number;
