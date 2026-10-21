@@ -18,6 +18,11 @@ npm i @nfk.st/jdm-editor-vue
 `vue` is a peer dependency (`^3.5.13` — `@vueuse/core`, a runtime
 dependency, requires Vue 3.5.13 or newer).
 
+The shipped types need `skipLibCheck` (as most Vue libraries do): the
+declaration rollup writes Vue's `DefineComponent` type arguments out in
+full, and Vue 3.5's `GlobalComponents` does not satisfy that
+declaration's own constraint.
+
 ## Usage
 
 ### 1. Load the Zen engine
