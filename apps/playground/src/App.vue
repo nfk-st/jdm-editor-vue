@@ -9,10 +9,10 @@ import {
   GraphSimulator,
   JdmConfigProvider,
 } from '@nfk.st/jdm-editor-vue';
-import type { DecisionGraphType, DecisionTableType } from '@nfk.st/jdm-editor-vue';
+import type { DecisionGraphType, DecisionTableType, Simulation } from '@nfk.st/jdm-editor-vue';
 import '@nfk.st/jdm-editor-vue/dist/style.css';
 import { Play } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { defineComponent, h, ref } from 'vue';
 
 const mode = ref<'light' | 'dark'>('light');
 
@@ -53,13 +53,45 @@ const graph = ref<DecisionGraphType>({
 
 // The simulator panel is registered through the store's panel machinery —
 // the same wiring upstream's storybook uses.
+const simulate = ref<Simulation | undefined>(undefined);
+
+const runSimulation = async ({ graph, context }: { graph: DecisionGraphType; context: unknown }) => {
+  try {
+    const response = await fetch('https://editor.gorules.io/api/simulate', {
+      method: 'POST',
+      body: JSON.stringify({ content: graph, context }),
+      headers: { 'content-type': 'application/json' },
+    });
+
+    const responseJson = await response.json();
+    simulate.value = { result: { ...responseJson, snapshot: graph } } as Simulation;
+  } catch (err) {
+    simulate.value = {
+      error: {
+        title: 'Simulation failed',
+        message: err instanceof Error ? err.message : String(err),
+        data: {},
+      },
+    };
+  }
+};
+
+// Upstream registers the simulator as `renderPanel: () => <GraphSimulator
+// onRun={…} />` — a closure that binds the handler. The panel machinery
+// renders `renderPanel` with no props, so the Vue equivalent is a small
+// wrapper component that closes over it.
+const SimulatorPanel = defineComponent({
+  name: 'SimulatorPanel',
+  setup: () => () => h(GraphSimulator, { onRun: runSimulation }),
+});
+
 const graphPanels = [
   {
     id: 'simulator',
     title: 'Simulator',
     icon: Play,
     hideHeader: true,
-    renderPanel: GraphSimulator,
+    renderPanel: SimulatorPanel,
   },
 ];
 </script>
@@ -109,7 +141,7 @@ const graphPanels = [
         <section class="demo demo--wide">
           <h3>DecisionGraph (Vue Flow canvas)</h3>
           <div class="graph-host">
-            <DecisionGraph v-model="graph" :panels="graphPanels" />
+            <DecisionGraph v-model="graph" :panels="graphPanels" :simulate="simulate" />
           </div>
           <pre class="value">Current graph JSON: {{ graph.nodes.length }} nodes / {{ graph.edges.length }} edges</pre>
         </section>

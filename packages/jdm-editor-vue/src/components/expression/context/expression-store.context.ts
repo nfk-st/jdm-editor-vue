@@ -140,7 +140,13 @@ export const useExpressionStoreRaw = (): ExpressionStoreInternal =>
 // PORTING: upstream's useExpressionStore(selector) re-renders on slice change;
 // here it returns a ComputedRef of the selected slice. Upstream's optional
 // `equals` param is dropped (Vue reactivity tracks structurally).
-export const useExpressionStore = <T>(selector: (state: ExpressionStore) => T): ComputedRef<T> =>
-  computed(() => selector(useExpressionStoreRaw()));
+// PORTING(fix): the store is captured OUTSIDE the computed — Vue 3.5's
+// inject() returns undefined (even with a fallback) when a computed is
+// re-evaluated outside setup/render, which is the lesson the dg-store
+// already applies (dg-store.context.ts).
+export const useExpressionStore = <T>(selector: (state: ExpressionStore) => T): ComputedRef<T> => {
+  const store = useExpressionStoreRaw();
+  return computed(() => selector(store));
+};
 
 export { equal as expressionEqual };

@@ -46,6 +46,11 @@
   --grl-color-text-secondary: rgba(0, 0, 0, 0.65);
   --grl-color-text-placeholder: rgba(0, 0, 0, 0.25);
   --grl-color-text-disabled: rgba(0, 0, 0, 0.25);
+  // upstream antd's colorTextLightSolid / colorBgSpotlight — the ui/
+  // primitives referenced these with a literal fallback before; they are
+  // antd's own token names, so defining them restores upstream's surface.
+  --grl-color-text-inverse: #ffffff;
+  --grl-color-bg-spotlight: rgba(0, 0, 0, 0.85);
   --grl-control-outline: rgba(5, 145, 255, 0.1);
 
   // ── Mode-hardcoded (upstream theme.tsx literals) ───────────────────────
@@ -57,10 +62,11 @@
   --grl-decision-table-selected-row: #f4faff;
 
   // ── Typography / shape ─────────────────────────────────────────────────
-  --grl-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial,
-    sans-serif;
+  --grl-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
   --grl-line-height: 1.5714;
   --grl-border-radius: 6px;
+  // upstream antd's borderRadiusSM.
+  --grl-border-radius-sm: 4px;
 
   --grl-primary-color: var(--grl-color-primary);
   --grl-primary-color-bg: var(--grl-color-primary-bg);
@@ -72,8 +78,11 @@
   --node-color-green: #10ac84;
 
   // ── Additive (not in upstream's surface; ours only) ─────────────────────
-  --grl-box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
-    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  --grl-box-shadow:
+    0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  // text on a solid/primary surface — always light, in both modes. Distinct
+  // from --grl-color-text-inverse, which flips with the spotlight surface.
+  --grl-color-text-solid: #ffffff;
 
   color: var(--grl-color-text);
   font-family: var(--grl-font-family);
@@ -115,6 +124,12 @@
     --grl-color-text-secondary: rgba(255, 255, 255, 0.65);
     --grl-color-text-placeholder: rgba(255, 255, 255, 0.25);
     --grl-color-text-disabled: rgba(255, 255, 255, 0.25);
+    // antd darkAlgorithm's colorBgMask / colorTextLightSolid / colorBgSpotlight.
+    // colorTextLightSolid flips in the dark algorithm because colorBgSpotlight
+    // does — the tooltip's foreground is always the inverse of its surface.
+    --grl-color-bg-mask: rgba(255, 255, 255, 0.45);
+    --grl-color-text-inverse: rgba(0, 0, 0, 0.85);
+    --grl-color-bg-spotlight: rgba(255, 255, 255, 0.85);
     --grl-control-outline: rgba(22, 104, 220, 0.15);
 
     --grl-color-border: #424242;
@@ -124,8 +139,8 @@
     --grl-decision-table-output: #091422;
     --grl-decision-table-selected-row: #121720;
 
-    --grl-box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.32), 0 3px 6px -4px rgba(0, 0, 0, 0.36),
-      0 9px 28px 8px rgba(0, 0, 0, 0.2);
+    --grl-box-shadow:
+      0 6px 16px 0 rgba(0, 0, 0, 0.32), 0 3px 6px -4px rgba(0, 0, 0, 0.36), 0 9px 28px 8px rgba(0, 0, 0, 0.2);
 
     color-scheme: dark;
   }

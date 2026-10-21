@@ -20,14 +20,14 @@ export type SimulatorRequestPanelProps = {
   defaultRequest?: string;
   hasInputNode?: boolean;
   loading?: boolean;
+  // PORTING: upstream's optional callback props. The Run button is rendered
+  // only when `onRun` is provided (upstream: `{onRun && …}`), so the
+  // availability is carried by the prop itself.
+  onRun?: (payload: { graph: DecisionGraphType; context: unknown }) => void;
+  onChange?: (contextJson: string) => void;
 };
 
 const props = defineProps<SimulatorRequestPanelProps>();
-
-const emit = defineEmits<{
-  (e: 'change', contextJson: string): void;
-  (e: 'run', payload: { graph: DecisionGraphType; context: unknown }): void;
-}>();
 
 const requestValue = ref(props.defaultRequest);
 const { stateStore, actions } = useDecisionGraphRaw();
@@ -58,7 +58,7 @@ watch(
 const onRun = () => {
   try {
     const parsed = (requestValue.value || '').trim().length === 0 ? null : json5.parse(requestValue.value || '');
-    emit('run', { graph: stateStore.getState().decisionGraph, context: parsed });
+    props.onRun?.({ graph: stateStore.getState().decisionGraph, context: parsed });
   } catch {
     // PORTING: antd notification.error → console
     console.error('Invalid format', 'Unable to format request, invalid JSON format');
@@ -76,7 +76,7 @@ const onRun = () => {
     </Tooltip>
     <div class="grl-dg__simulator__section__bar__actions">
       <Tooltip
-        v-if="true"
+        v-if="props.onRun"
         :content="
           !hasInputNode
             ? 'Request node is required to run the graph. Drag-and-drop it from the Components panel.'
@@ -92,11 +92,11 @@ const onRun = () => {
   </div>
   <div class="grl-dg__simulator__section__content">
     <SimulatorEditor
-      :value="requestValue"
-      @change="
+      :model-value="requestValue"
+      @update:model-value="
         (text) => {
           requestValue = text;
-          emit('change', text ?? '');
+          props.onChange?.(text ?? '');
         }
       "
     />

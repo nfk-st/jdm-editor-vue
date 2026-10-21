@@ -226,7 +226,7 @@ const display = computed(() => (props.modelValue ? props.modelValue.format('YYYY
 
     &[data-selected] {
       background-color: var(--grl-color-primary);
-      color: #fff;
+      color: var(--grl-color-text-solid);
     }
 
     &[data-today] {

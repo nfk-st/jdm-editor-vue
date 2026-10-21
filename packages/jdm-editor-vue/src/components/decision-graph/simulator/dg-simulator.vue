@@ -63,6 +63,7 @@ import Button from '../../ui/Button.vue';
 import Tabs from '../../ui/Tabs.vue';
 import Tooltip from '../../ui/Tooltip.vue';
 import { useDecisionGraphRaw, useDecisionGraphState } from '../context/dg-store.context';
+import type { DecisionGraphType } from '../dg-types';
 import { NodeKind } from '../nodes/specifications/specification-types';
 import type { SimulationTrace } from './simulation.types';
 import SimulatorEditor from './simulator-editor.vue';
@@ -72,6 +73,14 @@ export type GraphSimulatorProps = {
   loading?: boolean;
   defaultRequest?: string;
   leftPanel?: Component;
+  // PORTING: upstream's optional callback props. They are kept as props so
+  // the Run and Clear affordances can be gated on "is a handler attached" —
+  // upstream does that with `{onRun && …}` / `{onClear && …}`. Declaring
+  // them also means a Vue `@run` / `@clear` listener lands on the same prop,
+  // so both call styles work and one check covers either.
+  onRun?: (payload: { graph: DecisionGraphType; context: unknown }) => void;
+  onClear?: () => void;
+  onChange?: (contextJson: string) => void;
 };
 
 const props = withDefaults(defineProps<GraphSimulatorProps>(), { loading: false });
@@ -79,7 +88,7 @@ const props = withDefaults(defineProps<GraphSimulatorProps>(), { loading: false 
 const emit = defineEmits<{
   (e: 'clear'): void;
   (e: 'change', contextJson: string): void;
-  (e: 'run', payload: { graph: never; context: unknown }): void;
+  (e: 'run', payload: { graph: DecisionGraphType; context: unknown }): void;
 }>();
 
 const [search, setSearch] = usePersistentState<string>('simulation.search', '');
@@ -104,6 +113,21 @@ const selectedNode = ref<string>('graph');
 
 const LeftPanel = computed(() => props.leftPanel ?? SimulatorRequestPanel);
 
+// PORTING: upstream renders the Run and Clear affordances only when the
+// matching callback prop is provided (`{onRun && …}` / `{onClear && …}`).
+// Because `onRun` / `onClear` are declared props, a Vue `@run` / `@clear`
+// listener lands on the same prop — one check covers both call styles.
+const hasRunHandler = computed(() => !!props.onRun);
+const hasClearHandler = computed(() => !!props.onClear);
+
+const handleRun = (payload: { graph: DecisionGraphType; context: unknown }) => emit('run', payload);
+const handleChange = (contextJson: string) => emit('change', contextJson);
+
+// PORTING: upstream's useMemo declares [simulate, search] as its
+// dependencies while the body reads viewConfig and nodeTypes, so upstream's
+// trace list went stale when the view config changed. Ours tracks them, so
+// the list recomputes. (The same stale-closure fix is applied in
+// graph-tabs.vue.)
 const traces = computed<Array<SimulationTrace & { nodeId: string }>>(() => {
   const simulate = simulatorState.value.simulate;
   if (!simulate) {
@@ -171,15 +195,15 @@ const onClear = () => {
         :default-request="props.defaultRequest"
         :loading="props.loading"
         :has-input-node="simulatorState.hasInputNode"
-        @run="(payload: unknown) => emit('run', payload as never)"
-        @change="(v: string) => emit('change', v)"
+        :on-run="hasRunHandler ? handleRun : undefined"
+        :on-change="handleChange"
       />
     </Pane>
     <Pane :size="20" :min-size="20" :max-size="20" class="grl-dg__simulator__section grl-dg__simulator__nodes">
       <div class="grl-dg__simulator__section__bar grl-dg__simulator__section__bar--nodes">
         <input v-model="search" class="grl-dg__simulator__search" type="text" placeholder="Search nodes..." />
         <div class="grl-dg__simulator__section__bar__actions">
-          <Tooltip content="Clear">
+          <Tooltip v-if="hasClearHandler" content="Clear">
             <Button size="small" type="text" @click="onClear">
               <template #icon><Eraser :size="12" /></template>
             </Button>
@@ -257,7 +281,7 @@ const onClear = () => {
         </Tabs>
       </div>
       <div class="grl-dg__simulator__section__content">
-        <SimulatorEditor read-only :value="responseValue" />
+        <SimulatorEditor read-only :model-value="responseValue" />
       </div>
     </Pane>
   </Splitpanes>

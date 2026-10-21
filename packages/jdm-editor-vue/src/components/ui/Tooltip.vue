@@ -36,21 +36,21 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
   max-width: 264px;
   padding: 6px 8px;
   font-size: 12px;
-  color: var(--grl-color-text-inverse, #fff);
-  background-color: rgba(0, 0, 0, 0.85);
-  border-radius: var(--grl-border-radius-sm, 4px);
+  color: var(--grl-color-text-inverse);
+  background-color: var(--grl-color-bg-spotlight);
+  border-radius: var(--grl-border-radius-sm);
   box-shadow: var(--grl-box-shadow);
 
   .grl-root[data-mode='dark'] & {
-    color: rgba(0, 0, 0, 0.85);
-    background-color: rgba(255, 255, 255, 0.85);
+    color: var(--grl-color-text-inverse);
+    background-color: var(--grl-color-bg-spotlight);
   }
 
   &__arrow {
-    fill: rgba(0, 0, 0, 0.85);
+    fill: var(--grl-color-bg-spotlight);
 
     .grl-root[data-mode='dark'] & {
-      fill: rgba(255, 255, 255, 0.85);
+      fill: var(--grl-color-bg-spotlight);
     }
   }
 }

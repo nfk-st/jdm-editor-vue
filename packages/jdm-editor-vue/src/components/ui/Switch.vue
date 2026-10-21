@@ -20,10 +20,12 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: '
     :class="[size === 'small' && 'grl-switch--small', disabled && 'grl-switch--disabled']"
     :model-value="modelValue"
     :disabled="disabled"
-    @update:model-value="(v: boolean) => {
-      emit('update:modelValue', v);
-      emit('change', v);
-    }"
+    @update:model-value="
+      (v: boolean) => {
+        emit('update:modelValue', v);
+        emit('change', v);
+      }
+    "
   >
     <SwitchThumb class="grl-switch__thumb" />
   </SwitchRoot>
@@ -36,14 +38,10 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: '
   width: 44px;
   height: 22px;
   padding: 2px;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: var(--grl-color-bg-mask);
   border-radius: 999px;
   transition: var(--grl-transition);
   cursor: pointer;
-
-  .grl-root[data-mode='dark'] & {
-    background-color: rgba(255, 255, 255, 0.45);
-  }
 
   &[data-state='checked'] {
     background-color: var(--grl-color-primary);
@@ -58,18 +56,14 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: '
     cursor: not-allowed;
     opacity: 0.65;
 
-    .grl-root[data-mode='dark'] & {
-      background-color: rgba(255, 255, 255, 0.25);
-    }
-
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: var(--grl-color-text-disabled);
   }
 
   &__thumb {
     display: block;
     width: 18px;
     height: 18px;
-    background-color: #fff;
+    background-color: var(--grl-color-text-solid);
     border-radius: 50%;
     transition: transform var(--grl-transition);
     will-change: transform;

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 // antd Button replacement — token-styled, supports the variants the port uses
 // (text/link/default), danger state, icon slot, small/default sizes.
+// PORTING: antd swallows clicks while `loading` (its handleClick returns
+// early). The port also sets the disabled attribute, so a loading button is
+// inert to both pointer and keyboard — the semantics the REVIEW-PROMPT's
+// ui/ primitive bar asks for.
 defineOptions({ inheritAttrs: false });
 
 withDefaults(
@@ -26,11 +30,11 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
       `grl-btn--${type}`,
       `grl-btn--${size}`,
       danger && 'grl-btn--danger',
-      disabled && 'grl-btn--disabled',
+      (disabled || loading) && 'grl-btn--disabled',
       block && 'grl-btn--block',
     ]"
     type="button"
-    :disabled="disabled"
+    :disabled="disabled || loading"
     @click="(e) => emit('click', e)"
     @blur="(e) => emit('blur', e)"
     v-bind="$attrs"

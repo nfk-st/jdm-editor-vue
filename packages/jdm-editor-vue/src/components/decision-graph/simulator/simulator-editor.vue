@@ -12,12 +12,19 @@ import { copyToClipboard } from '../../../helpers/utility';
 import { useThemeMode } from '../../../theme';
 import Spinner from '../../ui/Spinner.vue';
 
+// PORTING: upstream's `value` / `onChange` pair becomes `modelValue` +
+// `update:modelValue` on our public components (PORTING.md's React → Vue
+// table); `change` is kept alongside, as in every other public component of
+// this port (ui/Input.vue exemplar).
 const props = defineProps<{
-  value?: string;
+  modelValue?: string;
   readOnly?: boolean;
 }>();
 
-const emit = defineEmits<{ (e: 'change', value: string | undefined): void }>();
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string | undefined): void;
+  (e: 'change', value: string | undefined): void;
+}>();
 
 const mode = useThemeMode();
 const monaco = shallowRef<Monaco | null>(null);
@@ -41,7 +48,7 @@ onMounted(async () => {
 
   if (!container.value) return;
   editorRef.value = instance.editor.create(container.value, {
-    value: props.value ?? '',
+    value: props.modelValue ?? '',
     language: 'javascript',
     theme: monacoTheme(),
     automaticLayout: true,
@@ -65,7 +72,9 @@ onMounted(async () => {
   });
 
   editorRef.value.onDidChangeModelContent(() => {
-    emit('change', editorRef.value?.getValue());
+    const value = editorRef.value?.getValue();
+    emit('update:modelValue', value);
+    emit('change', value);
   });
 
   editorRef.value.addAction({
@@ -101,7 +110,7 @@ onBeforeUnmount(() => {
 
 // round-5 lesson: external value writes sync into the model
 watch(
-  () => props.value,
+  () => props.modelValue,
   (value) => {
     const activeEditor = editorRef.value;
     if (activeEditor && value !== undefined && activeEditor.getValue() !== value) {

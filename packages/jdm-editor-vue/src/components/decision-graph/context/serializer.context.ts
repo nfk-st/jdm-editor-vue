@@ -145,9 +145,14 @@ function useSlice<T>(
   // PORTING: upstream's React.DependencyList; unused (see file header).
   _deps?: unknown[],
 ): void {
-  // PORTING: upstream keeps the latest slice in a ref so a registration made
-  // by an earlier effect serializes with the current closure; shallowRef
-  // plays that role here.
+  // PORTING: upstream assigns `sliceRef.current = slice` on every render, so
+  // a registration made by an earlier effect serializes with the latest
+  // closure. Vue has no equivalent: setup() runs once, so the slice object
+  // handed to useGraphSerializer is created once and the ref below holds the
+  // only slice there is. The port's slices read live reactive state through
+  // `.value`, so their serialized output matches upstream's latest-closure
+  // behaviour. A slice that captured a plain (non-reactive) value would
+  // diverge — none of the port's slices do.
   const sliceRef = shallowRef(slice);
 
   watchEffect((onCleanup) => {
