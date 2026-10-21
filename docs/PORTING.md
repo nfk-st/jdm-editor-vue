@@ -444,6 +444,16 @@ was driven with a real `.xlsx` upload (CDP `DOM.setFileInputFiles`) in both
 storybooks, and the field name, the Space, the Tab and the focus now behave
 identically to upstream's.
 
+Two more deferred items fell to the same instrument:
+
+- **The handle offsets are upstream's.** The port restores reactflow's
+  `translate(0, -50%)` base (vue-flow's own is `translate(-50%, -50%)`).
+  Measured in both storybooks, on the same nodes: the handles sit at
+  dx ±109/±110, dy −14, 7×7 — identical to the pixel.
+- **The empty node body collapses.** The `:empty` rule that hides the band
+  under a child-less node holds in a real browser (`display: none`), which
+  jsdom could not confirm.
+
 The story count changed: the port now has **59 stories** (upstream's 55
 shared ids, plus `expression--disabled`, `expression--read-only` and the
 new `ui--button-states` / `ui--multi-select-tags`). The `ui/` stories are
@@ -497,12 +507,9 @@ AND listed").
 **Deferred — a browser must confirm it:**
 
 - The **Storybook has no dark-mode toggle** (upstream's preview has one),
-  so the dark parity was never reviewed side by side.
-- The **handle offsets** — the port restores reactflow's
-  `translate(0, -50%)` base (vue-flow's own is `translate(-50%, -50%)`), so
-  the handles sit where upstream's do. The pixels are unverified.
-- The **empty node body** collapses with `:empty` — spec-compliant
-  browsers agree, jsdom does not.
+  so the dark parity was never reviewed side by side. (The playground has
+  one — it is the port's own app — but the two storybooks cannot be
+  compared in the same dark state.)
 
 **Deferred — cosmetic or invisible:**
 
