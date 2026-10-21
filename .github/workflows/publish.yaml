@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    # Mirrors upstream's flow: a release commit publishes the package.
+    if: "startsWith(github.event.head_commit.message, 'chore(release)')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+
+      - name: Build
+        run: pnpm --filter @nfk.st/jdm-editor-vue build
+
+      # npm publish runs the package's prepublishOnly (vite build), so a
+      # stale dist/ can never ship.
+      - name: Publish
+        run: npm publish --access public
+        working-directory: packages/jdm-editor-vue
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

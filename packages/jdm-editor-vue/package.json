@@ -5,6 +5,21 @@
   "author": "nfk.st",
   "homepage": "https://github.com/nfk-st/goruleditor",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nfk-st/goruleditor.git",
+    "directory": "packages/jdm-editor-vue"
+  },
+  "bugs": {
+    "url": "https://github.com/nfk-st/goruleditor/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss"
+  ],
   "keywords": [
     "decision-model",
     "rules-engine",
@@ -21,6 +36,7 @@
     "dist/",
     "package.json",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "exports": {
@@ -41,6 +57,7 @@
     "build:watch": "vite build --watch",
     "build-storybook": "storybook build",
     "check:imports": "node scripts/check-named-imports.mjs",
+    "prepublishOnly": "vite build",
     "storybook": "storybook dev -p 6006",
     "typecheck": "vue-tsc --noEmit && node scripts/check-named-imports.mjs",
     "test": "vitest run"

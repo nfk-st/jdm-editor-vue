@@ -2,6 +2,7 @@ node_modules
 dist
 coverage
 *.local
+*.tgz
 .DS_Store
 storybook-static
 .vue-ts

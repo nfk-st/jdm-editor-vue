@@ -126,18 +126,18 @@ module is ported.
 
 Bottom-up so every module lands with its dependencies already present:
 
-| #   | Module                                           | Upstream LOC | Status                                                                                                                                             |
-| --- | ------------------------------------------------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | scaffold, tokens, theme, wasm                    | —            | ✅ done                                                                                                                                            |
-| 2   | `helpers/*` (16 files, ~1.1k)                    | 1056         | ✅ done                                                                                                                                            |
-| 3   | `components/shared` (diff-* inputs)              | 203          | ✅ done (diff-ce deferred to #4 — depends on code-editor)                                                                                          |
-| 4   | `components/code-editor` (+ zen grammar wiring)  | 3084         | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect)                        |
-| 5   | `components/expression`                          | 753          | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip)                                                    |
-| 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)                         |
-| 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                                               |
-| 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels) |
-| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (57 stories; the parity review against upstream's own storybook is below)                                                                  |
-| 10  | docs site / README polish, publish prep          | —            | ⬜                                                                                                                                                 |
+| #   | Module                                           | Upstream LOC | Status                                                                                                                                                              |
+| --- | ------------------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | scaffold, tokens, theme, wasm                    | —            | ✅ done                                                                                                                                                             |
+| 2   | `helpers/*` (16 files, ~1.1k)                    | 1056         | ✅ done                                                                                                                                                             |
+| 3   | `components/shared` (diff-* inputs)              | 203          | ✅ done (diff-ce deferred to #4 — depends on code-editor)                                                                                                           |
+| 4   | `components/code-editor` (+ zen grammar wiring)  | 3084         | ✅ done (business/ kept nested under code-editor/ per upstream; ui/ +Popover/InputNumber/DatePicker/TimePicker/MultiSelect)                                         |
+| 5   | `components/expression`                          | 753          | ✅ done (react-dnd → vue-draggable-plus; +stack/spaced-text/confirm-action + ui/Button/Tooltip)                                                                     |
+| 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)                                          |
+| 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                                                                |
+| 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels)                  |
+| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (57 stories; the parity review against upstream's own storybook is below)                                                                                   |
+| 10  | docs site / README polish, publish prep          | —            | ✅ done (README with the full component API; docs/ index; publish prep — LICENSE, prepublishOnly, repository, sideEffects, changelog, publish + validate workflows) |     |
 
 Testing rule: each module lands with vitest coverage of its logic core
 (pure functions, store reducers) — upstream has no tests, so this coverage is
@@ -185,6 +185,40 @@ The review also needed two harness fixes that are not port changes: the
 zen-engine wasm must be excluded from the dependency optimizer (its
 `new URL('...wasm', import.meta.url)` 404s otherwise) and awaited before
 the stories render.
+
+## Publish prep (step 10)
+
+The package publishes as `@nfk.st/jdm-editor-vue`, built by Vite in library
+mode. The manifest's `files` list is what npm ships: `dist/`,
+`package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`.
+
+**The stylesheet is a separate file.** Vite's library mode extracts the CSS
+to `dist/style.css` and does _not_ leave an import of it in `dist/index.js`,
+so the consumer imports it explicitly
+(`import '@nfk.st/jdm-editor-vue/dist/style.css'`). That makes the
+manifest's `sideEffects` field load-bearing.
+
+Upstream declares `"sideEffects": "None"` — a glob that matches nothing,
+i.e. webpack's `false`. Measured on a scratch consumer (webpack 5,
+`css-loader`), with the package installed from the packed tarball:
+
+| `sideEffects`               | Bundled output | `--grl-*` rules survive |
+| --------------------------- | -------------- | ----------------------- |
+| `["**/*.css", "**/*.scss"]` | 95,603 B       | yes                     |
+| `false`                     | **44 B**       | **no**                  |
+
+With `false`, webpack drops the CSS import as an unused side-effect-free
+module and the consumer gets an **unstyled editor**. The port therefore
+declares the stylesheets as side-effectful.
+
+The other publish-prep changes: `LICENSE` copied into the package (the
+`files` list promised it; the tarball shipped without it),
+`prepublishOnly: "vite build"` (a publish can no longer ship a stale
+`dist/`), `repository` + `bugs`, `publishConfig.access: "public"` (a scoped
+package otherwise defaults to restricted and the publish fails), a
+keep-a-changelog `CHANGELOG.md` at 0.1.0, and CI: `validate.yaml` runs the
+gates, `publish.yaml` publishes on a `chore(release)` commit (upstream's
+trigger).
 
 ## Definition of done
 
