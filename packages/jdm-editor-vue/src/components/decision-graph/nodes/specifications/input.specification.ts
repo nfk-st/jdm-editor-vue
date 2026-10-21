@@ -100,6 +100,9 @@ export const inputSpecification: NodeSpecification<NodeInputData> = {
             'open': deleteModalOpen.value,
             'title': 'Delete node',
             'width': 416,
+            // PORTING: antd's modal.confirm focuses the OK button (so Enter
+            // confirms). The port's ui/Modal does that with `confirm`.
+            'confirm': true,
             'onUpdate:open': (o: boolean) => (deleteModalOpen.value = o),
           },
           {
