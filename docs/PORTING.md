@@ -339,6 +339,14 @@ because PORTING.md's rule is "marked AND listed":
 - **The button's size and shape classes** — `grl-btn--small` and
   `grl-btn--round` only; the default size and shape emit nothing, so they
   cannot collide with the type class `grl-btn--default`.
+- **The handle's base rules are `:where()`-wrapped** — upstream writes
+  `&__handle` INSIDE `.react-flow`, which SASS concatenates into
+  `.react-flow__handle` (a (0,2,0) rule), so upstream's hover background
+  colour (0,3,0) is LIVE. The retarget used a descendant selector instead
+  (`.react-flow .vue-flow__handle`, (0,3,0)), which ties with the hover
+  rule and comes later: the hover background was dead. `:where()` keeps the
+  specificity at upstream's (0,2,0) while still matching the nested
+  element — and the connecting background stays dead, as upstream's is.
 
 ### Round 2 — what the second pass found
 

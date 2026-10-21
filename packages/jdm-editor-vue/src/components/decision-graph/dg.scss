@@ -547,7 +547,15 @@
   // the handles had no size or colour, the edges had no hover zone, the
   // panel had no border and the controls were unstyled.
   .react-flow {
-    .vue-flow__handle {
+    // PORTING(vue-flow): upstream wrote `&__handle` INSIDE `.react-flow`,
+    // which SASS concatenates into `.react-flow__handle` — a (0,2,0) rule
+    // under `.grl-dg`. The retarget used a descendant selector instead
+    // (`.react-flow .vue-flow__handle`, (0,3,0)), which TIES with the
+    // hover rule above and comes later: the hover's background colour was
+    // dead, while upstream's is live. `:where()` keeps the specificity at
+    // (0,2,0) — the same as upstream's — while still matching the nested
+    // element.
+    :where(.vue-flow__handle) {
       border: 1px solid var(--grl-color-primary-border);
       background-color: var(--grl-color-primary-bg);
       height: 7px;
@@ -566,7 +574,7 @@
       }
     }
 
-    .vue-flow__handle-left {
+    :where(.vue-flow__handle-left) {
       left: -3px !important;
 
       &::after {
@@ -576,7 +584,7 @@
       }
     }
 
-    .vue-flow__handle-right {
+    :where(.vue-flow__handle-right) {
       right: -3px !important;
 
       &::after {
@@ -589,7 +597,7 @@
     // vue-flow's transparent, wide hover path — reactflow's equivalent is
     // `.react-flow__edge-interaction` (upstream's `&__edge-path-selector` is
     // a reactflow v10 leftover that matched nothing in v11 either).
-    .vue-flow__edge-interaction {
+    :where(.vue-flow__edge-interaction) {
       fill: none;
       stroke: transparent;
       stroke-width: 50;
