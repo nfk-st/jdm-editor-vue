@@ -5,12 +5,24 @@
   "author": "nfk.st",
   "homepage": "https://github.com/nfk-st/goruleditor",
   "license": "MIT",
-  "keywords": ["decision-model", "rules-engine", "jdm", "gorules", "zen", "vue"],
+  "keywords": [
+    "decision-model",
+    "rules-engine",
+    "jdm",
+    "gorules",
+    "zen",
+    "vue"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist/", "package.json", "README.md", "LICENSE"],
+  "files": [
+    "dist/",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -27,7 +39,9 @@
   "scripts": {
     "build": "vite build",
     "build:watch": "vite build --watch",
+    "build-storybook": "storybook build",
     "check:imports": "node scripts/check-named-imports.mjs",
+    "storybook": "storybook dev -p 6006",
     "typecheck": "vue-tsc --noEmit && node scripts/check-named-imports.mjs",
     "test": "vitest run"
   },
@@ -71,7 +85,9 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^8.6.14",
     "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/vue3": "^8.6.19",
     "@storybook/vue3-vite": "^8.6.12",
     "@types/big.js": "^6.2.2",
     "@types/lodash": "^4.17.16",
