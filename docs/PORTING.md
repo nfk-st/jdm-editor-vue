@@ -201,6 +201,25 @@ the stories render.
 - Playground app exercises the full editor.
 - No phantom named imports (see below) — and the playground must actually
   BOOT in a browser, not just type-check.
+- A pre-ship external review has run against the whole port and its
+  findings are resolved (see `REVIEW-PROMPT.md`).
+
+## Scope decisions
+
+Decisions that bound this port's work, recorded here so they are not
+re-litigated. Each is a choice, not an accident.
+
+- **The "docs site" is this repo's `docs/` folder plus the README — not a
+  generated site.** `docs/PORTING.md` (the porting contract), the two ADRs
+  (the decisions) and `docs/vue-flow-mapping.md` (the reactflow→vue-flow
+  mapping) are the documentation, indexed by `docs/README.md`. A published
+  docs site (VitePress, Docusaurus, …) is a separate piece of work with
+  its own build and hosting, and is deliberately NOT part of the port.
+- **The port stops at the library.** The playground is a demo, not a
+  product; its quality bar is "it boots and exercises the editor".
+- **Behaviour parity, not improvement.** A port that renders *better* than
+  upstream is drift, not progress. Deviations are allowed only when marked
+  and listed.
 
 ## The phantom-named-import trap
 
