@@ -64,18 +64,26 @@ const SEGMENTS: { part: SegmentPart }[] = [{ part: 'hour' }, { part: 'minute' }]
 
 <template>
   <TimeFieldRoot
+    v-slot="{ segments }"
     class="grl-time-picker"
     v-bind="$attrs"
     :class="{ 'grl-time-picker--disabled': disabled }"
     :model-value="modelValue"
     :disabled="disabled"
     granularity="minute"
+    :hour-cycle="24"
     @update:model-value="onUpdate"
   >
     <TimeValueSync />
-    <template v-for="(segment, index) in SEGMENTS" :key="segment.part">
-      <TimeFieldInput :part="segment.part" class="grl-time-picker__segment" />
-      <span v-if="index === 0" class="grl-time-picker__separator">:</span>
+    <!-- PORTING(parity): reka-ui renders a segment's visible TEXT through the
+         input's default slot — the root's slot props carry the formatted
+         value per part. Rendering the inputs with no slot content left the
+         field empty, where antd's TimePicker shows the value. -->
+    <template v-for="segment in segments" :key="segment.part">
+      <TimeFieldInput v-if="segment.part !== 'literal'" :part="segment.part" class="grl-time-picker__segment">
+        {{ segment.value }}
+      </TimeFieldInput>
+      <span v-else class="grl-time-picker__separator">{{ segment.value }}</span>
     </template>
   </TimeFieldRoot>
 </template>

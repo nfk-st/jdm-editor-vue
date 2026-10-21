@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next';
+import { PopoverAnchor, PopoverContent, PopoverPortal, PopoverRoot } from 'reka-ui';
+import { computed, nextTick, ref, watch } from 'vue';
+
 // antd Select (mode='multiple'/'tags') replacement — chips + search input
 // anchored to a reka-ui Popover options list. Upstream's builders use this
 // shape of antd Select (mode, tags, tokenSeparators, showSearch+filterOption,
 // maxCount). New file (no upstream counterpart beyond antd itself), hence
 // PascalCase.
 defineOptions({ inheritAttrs: false });
-
-import { PopoverAnchor, PopoverContent, PopoverPortal, PopoverRoot } from 'reka-ui';
-import { computed, nextTick, ref, watch } from 'vue';
 
 type Option = { label: string; value: string };
 
@@ -164,7 +165,7 @@ const contentStyle = computed(() =>
             @mousedown.prevent
             @click.stop="toggleValue(value)"
           >
-            ×
+            <X :size="10" />
           </button>
         </span>
         <input
@@ -264,10 +265,21 @@ const contentStyle = computed(() =>
     background: transparent;
     cursor: pointer;
     line-height: 1;
+    // PORTING(parity): antd hides a multiple-select tag's close icon until
+    // the tag is hovered (`.ant-select-selection-item-remove` is opacity 0
+    // until the item's hover). The icon is always rendered and revealed on
+    // hover, matching it.
+    opacity: 0;
+    transition: opacity var(--grl-transition-quick);
 
     &:hover {
       color: var(--grl-color-text);
     }
+  }
+
+  &__chip:hover &__chip-remove,
+  &__chip-remove:focus-visible {
+    opacity: 1;
   }
 
   &__input {

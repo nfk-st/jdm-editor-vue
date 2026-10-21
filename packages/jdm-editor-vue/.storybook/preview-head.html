@@ -1,0 +1,17 @@
+<!-- PORTING: upstream's preview-head sets the page background and the
+     height chain (body → #storybook-root), so a component with
+     `height: 100%` fills the viewport. Without a background the page is
+     transparent and the browser's auto-dark mode repaints the story. -->
+<style>
+  html {
+    background-color: white;
+  }
+
+  body {
+    height: 100vh;
+  }
+
+  #storybook-root {
+    height: 100%;
+  }
+</style>

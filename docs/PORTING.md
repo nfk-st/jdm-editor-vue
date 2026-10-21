@@ -142,12 +142,55 @@ Bottom-up so every module lands with its dependencies already present:
 | 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)  |
 | 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                       |
 | 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels) |
-| 9   | stories → Storybook (vue3-vite), parity review   | —            | ⬜                                                                                                                          |
+| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (57 stories; the parity review against upstream's own storybook is below)                                                    |
 | 10  | docs site / README polish, publish prep          | —            | ⬜                                                                                                                          |
 
 Testing rule: each module lands with vitest coverage of its logic core
 (pure functions, store reducers) — upstream has no tests, so this coverage is
 new, not ported.
+
+## The visual parity review (step 9)
+
+Upstream's own storybook runs from the pinned clone (`pnpm storybook` in
+`/tmp/jdm-editor/packages/jdm-editor`, port 9009); this port's runs on 6007.
+Every story the two share was rendered in both and compared.
+
+**57 port stories; 55 ids shared with upstream** (the port adds
+`expression--disabled` and `expression--read-only`; upstream's ids match
+one-for-one otherwise). Of the 55:
+
+- **40 rendered identically** (same visible text, same layout).
+- **11 (the decision-graph stories) differ only by reactflow's "React Flow"
+  attribution** in the canvas corner. vue-flow has no attribution, and
+  upstream's `proOptions` was dropped deliberately — an accepted deviation.
+- **4 (the date/time builder stories) differ only in how the value is
+  expressed**: upstream's antd `DatePicker`/`TimePicker` put the value in an
+  `<input>`, whose value is not part of `innerText`, while the port's
+  reka-ui `DateField`/`TimeField` segments are text nodes. The pixels match;
+  only the extracted text differs. (The port's operator `<select>` also
+  shows a native dropdown arrow where antd's borderless select does not.)
+
+The review found and fixed four real defects:
+
+- `ui/MultiSelect.vue` rendered a chip's remove affordance as a **text
+  `×`, always visible**. antd shows a close **icon**, revealed on hover.
+  The port now renders the icon, hidden until the chip is hovered.
+- `ui/TimePicker.vue` rendered reka-ui's `TimeFieldInput` with **no slot
+  content** — reka-ui draws a segment's value through the input's default
+  slot — so the field showed an **empty box** where antd shows the time. The
+  segments now render their value.
+- `ui/TimePicker.vue` used reka-ui's default **12-hour** cycle; upstream's
+  builders use antd's `HH:mm` (24-hour). The cycle is now pinned to 24.
+- The Storybook harness could not push **live control updates** into a
+  story: `@storybook/vue3` reads them off the root vnode's props, and the
+  preview's decorator made that root the `JdmConfigProvider` (its `theme`
+  prop). The provider is now rendered without props, so the root falls back
+  to the story context's args and the Controls panel works.
+
+The review also needed two harness fixes that are not port changes: the
+zen-engine wasm must be excluded from the dependency optimizer (its
+`new URL('...wasm', import.meta.url)` 404s otherwise) and awaited before
+the stories render.
 
 ## Definition of done
 
