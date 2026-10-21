@@ -38,6 +38,31 @@ commit `283bb11da324e0aaa641c790de9dd888ea2d2832`).
   bundler must provide (this port imports `monaco-editor` directly rather than
   through `@monaco-editor/react`).
 
+### Fixed before the first publish
+
+The pre-ship review found defects that no gate caught. All are fixed:
+
+- no edge ever rendered on the canvas (vue-flow validates every edge it
+  syncs, and upstream's validator rejected each edge against itself);
+- every graph edit remounted every node, which killed the inline
+  condition editor;
+- the canvas stylesheet targeted reactflow's class names, so the handles,
+  edges, panel and controls were unstyled;
+- the portalled overlays (tooltip, modal, select, menu) resolved no design
+  tokens — the tokens live on `.grl-root` and reka teleports to `body`;
+- a tooltip without an explicit `open` could never open (Vue casts an
+  absent Boolean prop to `false`);
+- primary buttons had no style;
+- the custom node's form lost its edits (a write into the immer-frozen
+  config);
+- the shipped types referenced a phantom `monacoEditor` binding;
+- the Monaco worker snippet did not route the `javascript` label to the
+  TypeScript worker, so the function editor's language service never
+  started;
+- `reka-ui/date` — and with it the undeclared `@internationalized/date` —
+  was bundled into the published bundle;
+- the `vue` peer range allowed a version `@vueuse/core` does not support.
+
 ### Known limitations
 
 - Upstream's `inferNodeTypes` returns from the immer recipe on the first node

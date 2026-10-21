@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     branches:
-      - '**'
+      - master
 
 permissions:
   contents: write
@@ -11,6 +11,8 @@ permissions:
 jobs:
   publish:
     # Mirrors upstream's flow: a release commit publishes the package.
+    # Restricted to master — upstream's trigger accepts any branch, so a
+    # feature-branch commit could publish before review.
     if: "startsWith(github.event.head_commit.message, 'chore(release)')"
     runs-on: ubuntu-latest
     steps:
@@ -27,12 +29,30 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: pnpm
 
-      - name: Build
-        run: pnpm --filter @nfk.st/jdm-editor-vue build
+      - name: Gates
+        run: |
+          pnpm format:check
+          pnpm build
+          pnpm typecheck
+          pnpm test
+
+      # A version that is already on the registry must not be published
+      # again — npm answers 403 and the whole run fails.
+      - name: Skip a version that is already published
+        id: already
+        run: |
+          VERSION=$(node -p "require('./packages/jdm-editor-vue/package.json').version")
+          if npm view "@nfk.st/jdm-editor-vue@$VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "$VERSION is already on npm — nothing to publish."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # npm publish runs the package's prepublishOnly (vite build), so a
       # stale dist/ can never ship.
       - name: Publish
+        if: steps.already.outputs.published == 'false'
         run: npm publish --access public
         working-directory: packages/jdm-editor-vue
         env:

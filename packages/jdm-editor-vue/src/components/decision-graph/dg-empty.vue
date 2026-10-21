@@ -4,7 +4,7 @@
 // pattern). Renders nothing.
 import { useDebounceFn } from '@vueuse/core';
 import equal from 'fast-deep-equal/es6/react';
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import type { DictionaryMap } from '../../theme';
 import type { JdmUiMode } from '../decision-table/context/dt-store.context';
@@ -58,10 +58,23 @@ const openTabs = useDecisionGraphState(({ openTabs }) => openTabs);
 const activeTab = useDecisionGraphState(({ activeTab }) => activeTab);
 
 // upstream: useDebouncedCallback(onChange, 100)
+// PORTING: React's use-debounce cancels the pending call when the component
+// unmounts; @vueuse/core's debounce does not, so the change event could
+// fire after the editor was gone.
+let unmounted = false;
+
 const innerChange = useDebounceFn((graph: DecisionGraphType) => {
+  if (unmounted) {
+    return;
+  }
+
   emit('update:modelValue', graph);
   props.onChange?.(graph);
 }, 100);
+
+onBeforeUnmount(() => {
+  unmounted = true;
+});
 
 watch(
   () => props.viewConfig,

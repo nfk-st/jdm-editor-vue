@@ -1,7 +1,7 @@
 // Ported from components/decision-table/context/dt-dialog.context.tsx.
 // PORTING: React context + useState → provide/inject with a ref; setDialog
 // keeps the Dispatch<SetStateAction> shape (value or updater).
-import { type ComputedRef, type InjectionKey, type Ref, computed, inject, provide, ref } from 'vue';
+import { type InjectionKey, type Ref, inject, provide, ref } from 'vue';
 
 import type { ColumnType, TableSchemaItem } from './dt-store.context';
 
@@ -47,6 +47,3 @@ export const DecisionTableDialogProvider = (getContainer?: () => HTMLElement): T
 // detached working context — deliberate friendlier mode (same as the stores).
 export const useDecisionTableDialog = (): TableDialogContextState =>
   inject(TableDialogKey, () => DecisionTableDialogProvider(), true);
-
-export const useDialogActive = (type: TableDialogType): ComputedRef<boolean> =>
-  computed(() => useDecisionTableDialog().isDialogActive(type));

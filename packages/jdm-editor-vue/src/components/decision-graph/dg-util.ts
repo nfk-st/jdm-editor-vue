@@ -22,8 +22,13 @@ export const mapToGraphNode = (node: DecisionNode): Node => {
     id: node.id,
     type: node.type,
     position: node.position,
-    height: node[privateSymbol]?.dimensions?.height,
-    width: node[privateSymbol]?.dimensions?.width,
+    // PORTING(vue-flow): upstream maps the recorded dimensions onto the node
+    // — reactflow 11 IGNORES a node's width/height and measures the DOM, so
+    // the node keeps following its content. vue-flow writes them as inline
+    // px, which pinned every node to the size it had when it was measured:
+    // it stopped growing with its content (compact mode, a longer
+    // statement). The dimensions stay recorded in the store (upstream's
+    // record), but they are not pushed back onto the node.
     selected: node[privateSymbol]?.selected,
     data: {
       name: node.name,

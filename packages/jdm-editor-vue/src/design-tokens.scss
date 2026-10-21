@@ -23,6 +23,7 @@
   --grl-color-success-bg: #f6ffed;
   --grl-color-success-border: #b7eb8f;
   --grl-color-error: #ff4d4f;
+  --grl-color-error-hover: #ff7875;
   --grl-color-error-bg: #fff2f0;
   --grl-color-error-border: #ffccc7;
   --grl-color-warning: #faad14;
@@ -46,6 +47,8 @@
   --grl-color-text-secondary: rgba(0, 0, 0, 0.65);
   --grl-color-text-placeholder: rgba(0, 0, 0, 0.25);
   --grl-color-text-disabled: rgba(0, 0, 0, 0.25);
+  // antd's colorTextTertiary — the Switch track's hover state.
+  --grl-color-text-tertiary: rgba(0, 0, 0, 0.45);
   // upstream antd's colorTextLightSolid / colorBgSpotlight — the ui/
   // primitives referenced these with a literal fallback before; they are
   // antd's own token names, so defining them restores upstream's surface.
@@ -80,8 +83,7 @@
   // ── Additive (not in upstream's surface; ours only) ─────────────────────
   --grl-box-shadow:
     0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
-  // text on a solid/primary surface — always light, in both modes. Distinct
-  // from --grl-color-text-inverse, which flips with the spotlight surface.
+  // text on a solid/primary surface — always light, in both modes.
   --grl-color-text-solid: #ffffff;
 
   color: var(--grl-color-text);
@@ -103,6 +105,7 @@
     --grl-color-success-bg: #162312;
     --grl-color-success-border: #274916;
     --grl-color-error: #dc4446;
+    --grl-color-error-hover: #e86062;
     --grl-color-error-bg: #2a1215;
     --grl-color-error-border: #591c23;
     --grl-color-warning: #d89614;
@@ -124,12 +127,15 @@
     --grl-color-text-secondary: rgba(255, 255, 255, 0.65);
     --grl-color-text-placeholder: rgba(255, 255, 255, 0.25);
     --grl-color-text-disabled: rgba(255, 255, 255, 0.25);
-    // antd darkAlgorithm's colorBgMask / colorTextLightSolid / colorBgSpotlight.
-    // colorTextLightSolid flips in the dark algorithm because colorBgSpotlight
-    // does — the tooltip's foreground is always the inverse of its surface.
-    --grl-color-bg-mask: rgba(255, 255, 255, 0.45);
-    --grl-color-text-inverse: rgba(0, 0, 0, 0.85);
-    --grl-color-bg-spotlight: rgba(255, 255, 255, 0.85);
+    --grl-color-text-tertiary: rgba(255, 255, 255, 0.45);
+    // antd 5.21.2's dark algorithm: colorBgMask is NOT inverted (it is
+    // rgba(0,0,0,0.45) in both modes), colorTextLightSolid is colorWhite in
+    // both modes, and colorBgSpotlight becomes a SOLID neutral
+    // (getSolidColor(colorBgBase, 26) = #424242) instead of the light
+    // mode's rgba(0,0,0,0.85).
+    --grl-color-bg-mask: rgba(0, 0, 0, 0.45);
+    --grl-color-text-inverse: #ffffff;
+    --grl-color-bg-spotlight: #424242;
     --grl-control-outline: rgba(22, 104, 220, 0.15);
 
     --grl-color-border: #424242;

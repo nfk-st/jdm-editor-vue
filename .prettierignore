@@ -1,2 +1,8 @@
 # Generated — not ours to format
 pnpm-lock.yaml
+
+# Copied verbatim from upstream — the byte identity is the point
+# (docs/PORTING.md's public API parity checklist), and prettier would reflow
+# them.
+packages/jdm-editor-vue/src/components/function/helpers/zod.d.ts
+packages/jdm-editor-vue/src/components/function/helpers/http.d.ts

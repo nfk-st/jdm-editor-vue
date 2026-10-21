@@ -10,7 +10,8 @@ import { saveFile } from './file-helpers';
 import { NodeKind } from './schema';
 
 // PORTING: upstream types `DecisionGraphType` from ../index; decision-graph
-// hasn't landed yet — minimal local stand-in below, swap when it does.
+// has landed (step 8), so the minimal local stand-in below was swapped for
+// the real import.
 type DecisionGraphType = {
   nodes: { id: string; content?: DecisionTableType }[];
 };

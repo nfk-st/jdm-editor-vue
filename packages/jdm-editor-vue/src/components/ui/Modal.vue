@@ -6,19 +6,41 @@
 import { X } from 'lucide-vue-next';
 import { DialogClose } from 'reka-ui';
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
+import { ref } from 'vue';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     open?: boolean;
     title?: string;
     width?: number | string;
     centered?: boolean;
     getContainer?: () => HTMLElement;
+    // antd's Modal.confirm autofocuses the OK button; a plain Modal does
+    // not focus anything. The delete confirms are the confirm case.
+    confirm?: boolean;
   }>(),
-  { open: false, width: 520, centered: false },
+  { open: false, width: 520, centered: false, confirm: false },
 );
 
 const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
+
+const contentRef = ref<HTMLElement | null>(null);
+
+// PORTING: antd's Modal.confirm moves the focus to the OK button, so
+// Enter confirms. Reka focuses the FIRST focusable element — the Cancel
+// button — so Enter cancelled the deletion instead.
+const onOpenAutoFocus = (event: Event) => {
+  if (!props.confirm) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const footer = contentRef.value?.querySelector('.grl-modal__footer');
+  const buttons = footer?.querySelectorAll('button');
+  const ok = buttons?.[buttons.length - 1] as HTMLElement | undefined;
+  ok?.focus();
+};
 </script>
 
 <template>
@@ -26,9 +48,11 @@ const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();
     <DialogPortal :to="getContainer ? getContainer() : undefined">
       <DialogOverlay class="grl-modal__overlay" :class="{ 'grl-modal__overlay--contained': getContainer }" />
       <DialogContent
+        ref="contentRef"
         class="grl-modal"
         :class="{ 'grl-modal--centered': centered, 'grl-modal--contained': getContainer }"
         :style="{ width: typeof width === 'number' ? `${width}px` : width }"
+        @open-auto-focus="onOpenAutoFocus"
       >
         <DialogTitle v-if="title || $slots.title" class="grl-modal__title"
           ><slot name="title">{{ title }}</slot></DialogTitle

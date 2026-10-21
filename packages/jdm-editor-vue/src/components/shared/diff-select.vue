@@ -29,6 +29,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
   <div class="grl-space" :style="{ flexDirection: direction === 'vertical' ? 'column' : 'row', gap: '8px' }">
     <template v-if="displayDiff">
       <Select
+        v-bind="$attrs"
         :model-value="previousValue"
         :options="options"
         :placeholder="placeholder"

@@ -233,7 +233,9 @@ const onClear = () => {
               :class="clsx('grl-dg__simulator__nodes-list__node', selectedNode === 'graph' && 'active')"
               @click="selectedNode = 'graph'"
             >
-              <span class="grl-typography" data-role="name">
+              <!-- PORTING: upstream's Typography.Text has the `ellipsis`
+                   prop here (the node rows below carry it too). -->
+              <span class="grl-typography grl-typography--ellipsis" data-role="name">
                 <StatusIcon :status="graphStatus" />
                 Graph
               </span>
@@ -263,6 +265,9 @@ const onClear = () => {
     </Pane>
     <Pane :size="50" :min-size="30" class="grl-dg__simulator__section grl-dg__simulator__response">
       <div class="grl-dg__simulator__section__bar grl-dg__simulator__section__bar--response">
+        <!-- PORTING: upstream's antd Tabs is UNCONTROLLED — after a remount
+             it highlights "Output" whatever the persisted segment was. The
+             port keeps the segment, so the tabs are controlled. -->
         <Tabs
           class="grl-inline-tabs"
           size="small"
@@ -288,7 +293,8 @@ const onClear = () => {
 </template>
 
 <style lang="scss">
-// antd Spin.spinning → overlay stand-in
+// antd Spin.spinning → an overlay stand-in (antd draws a spinner; the port
+// dims the content instead — there is no spinner primitive in ui/).
 .grl-dg__simulator__loading {
   position: relative;
   height: 100%;

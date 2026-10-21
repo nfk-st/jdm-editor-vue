@@ -42,7 +42,6 @@ export const buildDecisionViewNodes = (
         id: node.id,
         type: node.type,
         name: node.name,
-        description: node.description,
         disabled: match(kind)
           .with(NodeKind.Function, () => false)
           .with(NodeKind.DecisionTable, () => false)
@@ -181,7 +180,8 @@ const ConfigItem = defineComponent({
     <div class="grl-dg__view__content">
       <div class="grl-dg__view__content__heading">
         <div class="grl-dg__view__content__heading__first-row">
-          <h4 class="grl-typography grl-dg__view__title" :style="{ margin: 0, marginBottom: '8px', fontSize: 20 }">
+          <!-- PORTING(react): React appends 'px' to numeric style values; Vue does not. -->
+          <h4 class="grl-typography grl-dg__view__title" :style="{ margin: 0, marginBottom: '8px', fontSize: '20px' }">
             {{ isEmpty ? 'Decision View Not Configured' : 'Decision View' }}
           </h4>
           <Button v-if="state.viewConfigCta" type="primary" @click="() => onViewConfigCta?.()">
@@ -223,7 +223,7 @@ const ConfigItem = defineComponent({
         :key="group.title"
         class="grl-dg__view__content__node-groups"
       >
-        <h5 class="grl-typography grl-dg__view__subtitle" :style="{ marginBottom: '16px', fontSize: 16 }">
+        <h5 class="grl-typography grl-dg__view__subtitle" :style="{ marginBottom: '16px', fontSize: '16px' }">
           {{ group.title }}
         </h5>
         <div class="grl-dg__view__grid">

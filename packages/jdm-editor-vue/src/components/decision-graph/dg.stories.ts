@@ -26,11 +26,12 @@
 // wrapper component that captures the handler.
 // PORTING (icons): upstream's @ant-design/icons become lucide-vue-next
 // components (the port's `icon` accepts a Component as well as a VNode).
-// PORTING (harness): the port's Storybook harness does not push LIVE
-// control updates into a story (it affects every story in this repo — see
-// the Diff story's note). Initial args and URL args do arrive, and the
-// stories that need a switch (Diff) drive it from a local button, the way
-// upstream's BusinessMode story drives its Dev / Business switch.
+// PORTING (harness): the preview's decorator renders the JdmConfigProvider
+// WITHOUT props, so @storybook/vue3's live control updates reach the story
+// (the provider's own props would otherwise become the root vnode's props,
+// and the Controls panel would drive the provider instead of the story).
+// The stories that need a switch (Diff) drive it from a local button, the
+// way upstream's BusinessMode story drives its Dev / Business switch.
 import { action } from '@storybook/addon-actions';
 import type { ComponentPropsAndSlots, Meta, StoryObj } from '@storybook/vue3';
 import json5 from 'json5';

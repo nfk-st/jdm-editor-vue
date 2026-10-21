@@ -10,6 +10,9 @@ defineOptions({ inheritAttrs: false });
 withDefaults(
   defineProps<{
     type?: 'default' | 'primary' | 'text' | 'link';
+    // antd's `shape` — 'round' is the pill button the edge's delete
+    // affordance uses.
+    shape?: 'default' | 'round';
     danger?: boolean;
     disabled?: boolean;
     size?: 'default' | 'small';
@@ -17,7 +20,15 @@ withDefaults(
     // antd parity: loading spinner state
     loading?: boolean;
   }>(),
-  { type: 'default', danger: false, disabled: false, size: 'default', block: false, loading: false },
+  {
+    type: 'default',
+    shape: 'default',
+    danger: false,
+    disabled: false,
+    size: 'default',
+    block: false,
+    loading: false,
+  },
 );
 
 const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', event: FocusEvent): void }>();
@@ -29,6 +40,7 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     :class="[
       `grl-btn--${type}`,
       `grl-btn--${size}`,
+      `grl-btn--${shape}`,
       danger && 'grl-btn--danger',
       (disabled || loading) && 'grl-btn--disabled',
       block && 'grl-btn--block',
@@ -76,6 +88,11 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     font-size: 12px;
   }
 
+  // antd shape='round'
+  &--round {
+    border-radius: 999px;
+  }
+
   // antd type='text'
   &--text {
     background-color: transparent;
@@ -105,6 +122,24 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     color: var(--grl-color-primary-hover);
   }
 
+  // antd type='primary'
+  &--primary {
+    color: var(--grl-color-text-solid);
+    background-color: var(--grl-color-primary);
+    border-color: var(--grl-color-primary);
+
+    &:hover:not(.grl-btn--disabled) {
+      color: var(--grl-color-text-solid);
+      background-color: var(--grl-color-primary-hover);
+      border-color: var(--grl-color-primary-hover);
+    }
+
+    &:active:not(.grl-btn--disabled) {
+      background-color: var(--grl-color-primary-active);
+      border-color: var(--grl-color-primary-active);
+    }
+  }
+
   &--danger {
     &.grl-btn--text,
     &.grl-btn--link {
@@ -121,6 +156,17 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
 
       &:hover:not(.grl-btn--disabled) {
         color: var(--grl-color-error-hover);
+        border-color: var(--grl-color-error-hover);
+      }
+    }
+
+    // antd's danger button is a PRIMARY button in the error colour.
+    &.grl-btn--primary {
+      background-color: var(--grl-color-error);
+      border-color: var(--grl-color-error);
+
+      &:hover:not(.grl-btn--disabled) {
+        background-color: var(--grl-color-error-hover);
         border-color: var(--grl-color-error-hover);
       }
     }

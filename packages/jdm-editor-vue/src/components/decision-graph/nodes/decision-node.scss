@@ -199,6 +199,16 @@
     padding: var(--node-horizontal-padding);
     border-top: 1px solid var(--grl-color-border);
 
+    // PORTING: upstream renders the body only when the node has children
+    // (`{children && <div className='grl-dn__body'>}`) — React's children
+    // is undefined when there is none. Vue always has a slot, so the body
+    // div was rendered for every child-less node as an empty band with a
+    // border and padding. An empty body (only the slot's comment
+    // placeholder) is collapsed.
+    &:empty {
+      display: none;
+    }
+
     &--no-footer {
       border-radius: 0 0 var(--node-border-radius) var(--node-border-radius);
     }

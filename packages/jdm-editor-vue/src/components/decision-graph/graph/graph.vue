@@ -101,8 +101,9 @@ export const createGraphEdgesState = (
 // point into flow coordinates. @vue-flow/core's screenToFlowCoordinate()
 // takes CLIENT coordinates (it subtracts the container's own rect itself),
 // so the container offset is added back here to keep upstream's math.
-// (vue-flow also applies the flow's snapToGrid while projecting — reactflow's
-// project() did not.)
+// (both sides apply the flow's snapToGrid while projecting: reactflow's
+// project() and vue-flow's screenToFlowCoordinate() share the same
+// snap-aware helper.)
 export const projectToFlowCoordinate = (instance: VueFlowStore, point: XYPosition, bounds: DOMRect): XYPosition =>
   instance.screenToFlowCoordinate({ x: point.x + bounds.left, y: point.y + bounds.top });
 </script>
@@ -111,6 +112,7 @@ export const projectToFlowCoordinate = (instance: VueFlowStore, point: XYPositio
 import { Background } from '@vue-flow/background';
 import { ControlButton, Controls } from '@vue-flow/controls';
 import {
+  ConnectionMode,
   type EdgeComponent,
   type EdgeTypesObject,
   type NodeProps,
@@ -209,13 +211,22 @@ graphReferences.value.nodesState.current = nodesState;
 graphReferences.value.edgesState.current = edgesState;
 graphReferences.value.graphClipboard.current = useGraphClipboard(reactFlowInstance, reactFlowWrapper);
 
-const state = useDecisionGraphState(({ id, disabled, components, customNodes, decisionGraph }) => ({
+const state = useDecisionGraphState(({ id, disabled, decisionGraph }) => ({
   id,
   disabled,
-  components,
-  customNodes,
   hasInputNode: (decisionGraph?.nodes || []).some((n) => n.type === NodeKind.Input),
 }));
+
+// PORTING(vue-flow): upstream's nodeTypes useMemo depends on [components,
+// customNodeRenderer] — the wrappers are rebuilt only when the component
+// list changes. A single selector that also read decisionGraph rebuilt them
+// on EVERY graph edit, and vue-flow remounts a node when its component
+// function changes identity: the inline condition editor was destroyed and
+// recreated after one keystroke. These two selectors read only the
+// properties upstream's memo depended on, so the store's per-node state
+// changes cannot invalidate them.
+const components = useDecisionGraphState((s) => s.components);
+const customNodes = useDecisionGraphState((s) => s.customNodes);
 
 // upstream: useState(() => { ... localStorage ... })
 // PORTING(SSR): localStorage is read at setup time (upstream's useState
@@ -250,11 +261,11 @@ const renderSpecificationNode =
 
 // upstream: customNodeRenderer useMemo (graph.tsx:118-159)
 const customNodeRenderer = (props: NodeProps): VNode => {
-  const node = (state.value.customNodes || []).find((node) => node.kind === props?.data?.kind) as
+  const node = (customNodes.value || []).find((node) => node.kind === props?.data?.kind) as
     CustomNodeSpecification<object, string> | undefined;
 
   if (!node) {
-    console.warn('node not found', props, state.value.customNodes);
+    console.warn('node not found', props, customNodes.value);
     return h(GraphNode, {
       id: props.id,
       specification: {
@@ -283,14 +294,21 @@ const customNodeRenderer = (props: NodeProps): VNode => {
 };
 
 // upstream: nodeTypes useMemo (graph.tsx:161-178)
+// PORTING(vue-flow): upstream's memo rebuilds the wrappers only when the
+// component list changes. The built-in specifications are a module constant,
+// so their wrappers are created ONCE — vue-flow remounts a node when its
+// component function changes identity, and rebuilding them on every graph
+// edit remounted every node (the inline condition editor died after one
+// keystroke). The host's components are re-wrapped only when that list is
+// replaced.
+const builtInNodeTypes: Record<string, Component> = Object.fromEntries(
+  Object.entries(nodeSpecification).map(([key, value]) => [key, renderSpecificationNode(value)]),
+);
+
 const nodeTypes = computed(() => {
-  const types: Record<string, Component> = {};
+  const types: Record<string, Component> = { ...builtInNodeTypes };
 
-  Object.entries(nodeSpecification).forEach(([key, value]) => {
-    types[key] = renderSpecificationNode(value);
-  });
-
-  (state.value.components || []).forEach((component) => {
+  (components.value || []).forEach((component) => {
     types[component.type] = renderSpecificationNode(component);
   });
 
@@ -324,9 +342,9 @@ const addNodeInner = async (type: string, position?: XYPosition, component?: str
   }
 
   const customSpecification = match(type)
-    .with('customNode', () => (state.value.customNodes || []).find((node) => node.kind === component))
+    .with('customNode', () => (customNodes.value || []).find((node) => node.kind === component))
     .otherwise(() => {
-      const allSpecifications = [...Object.values(nodeSpecification), ...(state.value.components || [])];
+      const allSpecifications = [...Object.values(nodeSpecification), ...(components.value || [])];
       return allSpecifications.find((s) => s.type === type);
     });
   if (!customSpecification) {
@@ -385,6 +403,23 @@ const addNodeInner = async (type: string, position?: XYPosition, component?: str
 };
 
 const isValidConnection = (connection: Connection): boolean => {
+  // PORTING(vue-flow): reactflow consults the flow-level isValidConnection
+  // ONLY while a connection is being dragged. vue-flow consults it for EVERY
+  // edge it syncs (createGraphEdges → isValidConnection(edge, …)), and
+  // rejects the edge with EDGE_INVALID when it returns false.
+  //
+  // Upstream's validator is ported verbatim below, and it rejects an edge
+  // that duplicates an existing one — but the edge being synced IS in the
+  // list, so every edge matched itself and was dropped: nothing rendered,
+  // and a drawn connection never appeared.
+  //
+  // vue-flow passes the full Edge (it carries an id) when syncing and an
+  // id-less Connection while dragging. Only the drag shape is validated;
+  // an edge that is already in the store was validated when it was drawn.
+  if ('id' in connection) {
+    return true;
+  }
+
   // Disallow self-reference
   if (connection.source === connection.target) {
     return false;
@@ -655,6 +690,15 @@ defineExpose({
     <div :style="{ width: '100%', height: '100%', position: 'relative', display: 'flex' }">
       <div tabindex="0" class="content-wrapper" @keydown="onContentKeyDown">
         <div ref="reactFlowWrapper" class="react-flow" @drop="onDrop" @dragover="onDragOver">
+          <!-- PORTING(vue-flow): reactflow's default connectionMode is
+               Strict; vue-flow's is Loose, which would accept an
+               output→output or input→input drag. Pinned to upstream's.
+               PORTING(vue-flow): upstream sets edgesUpdatable={!disabled},
+               but reactflow only draws the update handles when an
+               onEdgeUpdate handler exists — upstream has none, so no
+               handle is drawn. vue-flow draws them from the flag alone. -->
+          <!-- PORTING(vue-flow): no edge update handles — upstream has no
+                 onEdgeUpdate handler, so reactflow draws none. -->
           <VueFlow
             v-model:nodes="nodes"
             v-model:edges="edges"
@@ -668,12 +712,13 @@ defineExpose({
             :snap-grid="[5, 5]"
             :min-zoom="0.25"
             :selection-mode="SelectionMode.Partial"
+            :connection-mode="ConnectionMode.Strict"
             :node-types="nodeTypes"
             :edge-types="edgeTypes"
             :is-valid-connection="isValidConnection"
             :nodes-connectable="!state.disabled"
             :nodes-draggable="!state.disabled"
-            :edges-updatable="!state.disabled"
+            :edges-updatable="false"
             :apply-default="false"
             @pane-ready="onPaneReady"
             @nodes-change="onNodesChange"
@@ -724,7 +769,13 @@ defineExpose({
 
     <!-- PORTING: antd modal.confirm({ title: 'Delete node', okButtonProps:
          { danger: true } }) → ui/Modal with a danger OK footer button. -->
-    <Modal :open="deleteModalOpen" :title="deleteTitle" :width="416" @update:open="(o) => (deleteModalOpen = o)">
+    <Modal
+      confirm
+      :open="deleteModalOpen"
+      :title="deleteTitle"
+      :width="416"
+      @update:open="(o) => (deleteModalOpen = o)"
+    >
       <span class="grl-typography">{{ deleteDescription }}</span>
       <template #footer>
         <Button @click="deleteModalOpen = false">Cancel</Button>

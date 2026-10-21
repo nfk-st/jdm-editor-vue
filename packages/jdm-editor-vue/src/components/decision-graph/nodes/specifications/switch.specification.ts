@@ -430,8 +430,9 @@ const Popconfirm = defineComponent({
                   Button,
                   {
                     size: 'small',
+                    // upstream's antd Popconfirm defaults to okType='primary'
+                    // — the Remove button is NOT a danger button.
                     type: 'primary',
-                    danger: true,
                     onClick: () => {
                       open.value = false;
                       emit('confirm');
@@ -589,8 +590,10 @@ const SwitchHandle = defineComponent({
           !isElse &&
             h('div', { class: 'switchNode__statement__inputArea' }, [
               h(DiffCodeEditor, {
+                // PORTING(react): React appends 'px' to numeric style values; Vue
+                // does not — `fontSize: 12` was the invalid `font-size: 12`.
                 'style': {
-                  fontSize: 12,
+                  fontSize: '12px',
                   lineHeight: '20px',
                   width: '100%',
                 },
@@ -644,7 +647,7 @@ const SwitchHandleCompact = defineComponent({
           h('div', { class: clsx(['switchNode__statement__inputArea']) }, [
             h(DiffCodeEditor, {
               'style': {
-                fontSize: 12,
+                fontSize: '12px',
                 lineHeight: '20px',
                 width: '100%',
               },

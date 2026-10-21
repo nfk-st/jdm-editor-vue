@@ -52,7 +52,10 @@ setViewport/fitView({nodes,duration,maxZoom})`.
 
 - `nodeTypes` map values are Vue components (or `#node-{type}` slots).
 - `onInit` → `@pane-ready`; `onDrop/onDragOver` stay on the wrapper div.
-- Event props → kebab-case emits (`@nodes-delete`, `@edge-mouse-enter`).
+- Event props → kebab-case emits (`@edge-mouse-enter`, `@nodes-change`,
+  `@edges-change`). Vue Flow 1.48 has no `@nodes-delete` emit — the delete
+  events are `onNodesDelete` / `onEdgesDelete` on the store, not component
+  emits.
 - Upstream's `React.memo` custom-equality node wrappers — rely on vue-flow
   reactivity (no equivalent).
 - `@vue-flow/core`, `@vue-flow/background` and `@vue-flow/controls` all

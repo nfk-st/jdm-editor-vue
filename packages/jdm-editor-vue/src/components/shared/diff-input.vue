@@ -25,9 +25,11 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void; (e: 'c
 <template>
   <div v-if="displayDiff" class="diff-input-group">
     <!-- PORTING(P1): upstream strips only the change handler here; consumer
-         disabled/readOnly pass through unchanged. -->
+         disabled/readOnly pass through unchanged — and upstream spreads the
+         consumer's props on BOTH sides, so the previous side gets them too. -->
     <Input
       v-if="(previousValue || '').length > 0"
+      v-bind="$attrs"
       :model-value="previousValue"
       :placeholder="placeholder"
       :disabled="disabled"

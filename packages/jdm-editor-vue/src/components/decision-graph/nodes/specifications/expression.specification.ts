@@ -277,7 +277,8 @@ export const expressionSpecification: NodeSpecification<NodeExpressionData> = {
               'disabled': state.value.disabled,
               'displayDiff': contentDiff.value?.fields?.inputField?.status === 'modified',
               'previousValue': contentDiff.value?.fields?.inputField?.previousValue,
-              'style': { fontSize: 12, lineHeight: '20px', width: '100%' },
+              // PORTING(react): React appends 'px' to numeric style values; Vue does not.
+              'style': { fontSize: '12px', lineHeight: '20px', width: '100%' },
               'expectedVariableType': state.value.fields.executionMode === 'loop' ? { Array: 'Any' } : undefined,
               'maxRows': 4,
               'modelValue': state.value.fields.inputField ?? '',

@@ -6,9 +6,9 @@
 // `update:modelValue` (docs/PORTING.md's public-prop convention).
 // PORTING: upstream's `.storybook/preview.tsx` awaits the Zen wasm at module
 // scope, so every upstream story renders with the wasm ready. The port's
-// preview.ts is shared by all stories and cannot await, so the builder is
-// gated on the wasm being ready here — it parses the expression through the
-// wasm module on its very first render.
+// preview.ts does the same (`await ensureWasmLoaded()`), and the builder is
+// additionally gated on the wasm here — it parses the expression through
+// the wasm module on its very first render.
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/vue3';
 import { type PropType, defineComponent, h, onMounted, ref } from 'vue';

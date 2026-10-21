@@ -158,9 +158,9 @@ const contentStyle = computed(() =>
         <span v-for="value in values" :key="value" class="grl-multiselect__chip">
           <span class="grl-multiselect__chip-content">{{ labelFor(value) }}</span>
           <button
+            v-if="!disabled"
             type="button"
             class="grl-multiselect__chip-remove"
-            :disabled="disabled"
             aria-label="Remove"
             @mousedown.prevent
             @click.stop="toggleValue(value)"
@@ -265,21 +265,14 @@ const contentStyle = computed(() =>
     background: transparent;
     cursor: pointer;
     line-height: 1;
-    // PORTING(parity): antd hides a multiple-select tag's close icon until
-    // the tag is hovered (`.ant-select-selection-item-remove` is opacity 0
-    // until the item's hover). The icon is always rendered and revealed on
-    // hover, matching it.
-    opacity: 0;
-    transition: opacity var(--grl-transition-quick);
-
+    // antd's `.ant-select-selection-item-remove` carries NO opacity rule —
+    // the close icon of a multiple-select tag is ALWAYS visible. (The
+    // opacity-until-hover rule belongs to the select's CLEAR icon, not the
+    // tag's remove icon.) The icon is rendered only when the select is
+    // enabled: rc-select computes `closable = !disabled && !itemDisabled`.
     &:hover {
       color: var(--grl-color-text);
     }
-  }
-
-  &__chip:hover &__chip-remove,
-  &__chip-remove:focus-visible {
-    opacity: 1;
   }
 
   &__input {

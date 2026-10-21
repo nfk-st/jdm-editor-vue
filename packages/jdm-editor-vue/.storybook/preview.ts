@@ -12,7 +12,10 @@ import JdmConfigProvider from '../src/theme/JdmConfigProvider.vue';
 
 self.MonacoEnvironment = {
   getWorker(_: unknown, label: string) {
-    return label === 'typescript' ? new tsWorker() : new editorWorker();
+    // PORTING: monaco labels the TypeScript language service 'typescript' AND
+    // 'javascript' (the Function editor's default language is javascript) —
+    // upstream's README routes both to the ts worker.
+    return label === 'typescript' || label === 'javascript' ? new tsWorker() : new editorWorker();
   },
 };
 

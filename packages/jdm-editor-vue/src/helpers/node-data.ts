@@ -1,8 +1,8 @@
 // PORTING: upstream imports these types from ../components —
 // DecisionGraphType/DecisionNode ← components/decision-graph/dg-types,
 // SimulationTrace ← components/decision-graph/simulator/simulation.types.
-// Neither module is ported yet; minimal local stand-ins below — swap to the
-// real imports when decision-graph lands.
+// Those modules have landed (step 8), so the local stand-ins below were
+// swapped for the real imports.
 type DecisionNode = {
   id: string;
   name: string;

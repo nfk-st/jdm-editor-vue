@@ -105,7 +105,10 @@ Vue-idiomatic signature. Component-by-component rows get expanded when that
 module is ported.
 
 - [x] `./styles.scss` → `dist/style.css`
-- [x] `JdmConfigProvider` (+ `ThemeConfig`, `DictionaryMap`, `useDictionaries`)
+- [x] `JdmConfigProvider` (+ `JdmConfigProviderProps`, `ThemeConfig`, `DictionaryMap`,
+      `useDictionaries`) — upstream's `DictionaryProvider` maps to
+      `provideDictionaries()` (a function, not a component: Vue's `provide()`
+      runs once per setup)
 - [x] `ensureWasmLoaded`, `useWasmReady` (from `helpers/wasm`)
 - [x] `codemirror` (from `helpers/codemirror`)
 - [x] `useNodeType` (from `helpers/node-type`) — _ported; the decision-graph
@@ -117,10 +120,26 @@ module is ported.
       `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript
 - [x] `components/expression`: `Expression` (+ store, controller, list/item, command bar, context menu)
 - [x] `components/code-editor`: `CodeEditor` (modelValue v-model; type/lint/strict/noStyle/lazy),
-      `ExpressionBuilder`, `StandardExpressionBuilder` (business barrel), `focusBuilderRoot`,
-      `DiffIcon` (dg-types stand-in until #8); `diff-ce` landed (`DiffCodeEditor`)
+      `ExpressionBuilder`, `DiffIcon`; `diff-ce` landed (`DiffCodeEditor`).
+      `StandardExpressionBuilder` and `focusBuilderRoot` live in the **business
+      barrel** — upstream's `code-editor/index.ts` re-exports only `CodeEditor`
+      and `ExpressionBuilder` from it, and so does the port. They are internal
+      (the decision table's output column uses the builder), NOT public API.
 - [x] `components/decision-table`: `DecisionTable` (props: `id`, `name`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `tableHeight` (required), `mountDialogsOnBody`, `disabled`, `disableHitPolicy`, `permission`, `mode`, `dictionaries`, `inputVariableType`, `debug`, `minColWidth`, `colWidth`, `inputsSchema`, `outputsSchema`; `manager` deprecated accept-and-ignore stub; `scrollContainerRef`/`scrollApiRef` Ref props + exposed scroll surface; `cellRenderer` prop via the `#cell` slot adapter on dt.vue; reorder + excel dialogs)
 - [x] `components/shared`, `diff-icon`
+
+### The additive public surface
+
+Upstream's public surface is 119 names. The port exports those, except
+`DictionaryProvider` (see above), **plus 18 names upstream does not
+export**. Each is marked `// PORTING(additive):` in its barrel and listed
+here, so the difference is declared rather than accidental:
+
+| Module                  | Additive exports                                                                                                                                                                       | Why                                                                                                                                                                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `components/expression` | `ExpressionControllerProps`, `ExpressionEntry`, `ExpressionPermission`, `ExpressionStore`, `createExpression`, `useExpressionStore`, `useExpressionStoreRaw`, `provideExpressionStore` | `ExpressionEntry` is the type of `<Expression>`'s `modelValue` — a consumer cannot type its own state without it. The store hooks let a host read the expression list.                                                             |
+| `components/function`   | `FunctionDebugger`, `FunctionDebuggerLog`, `FunctionDebuggerLogData`, `FunctionDebuggerTrace`, `functionDefinitions`, `functionLibraries`, `variableTypeToTypescript`                  | The debugger components are what the function editor renders; the libraries and the type helper are what a host needs to offer the same globals to its own functions.                                                              |
+| `theme`                 | `provideDictionaries`, `useThemeMode`, `useProvideThemeMode`, `JdmThemeMode`                                                                                                           | `provideDictionaries` is upstream's `DictionaryProvider` (renamed — a function, not a component). The theme-mode trio is the port's own dark mode: upstream leaves the mode to antd's algorithm, so a host needs a way to read it. |
 
 ## Port order & status
 
@@ -146,29 +165,20 @@ new, not ported.
 ## The visual parity review (step 9)
 
 Upstream's own storybook runs from the pinned clone (`pnpm storybook` in
-`/tmp/jdm-editor/packages/jdm-editor`, port 9009); this port's runs on 6007.
+`/tmp/jdm-editor/packages/jdm-editor`, port 9009); this port's runs on 6006.
 Every story the two share was rendered in both and compared.
 
 **57 port stories; 55 ids shared with upstream** (the port adds
 `expression--disabled` and `expression--read-only`; upstream's ids match
-one-for-one otherwise). Of the 55:
+one-for-one otherwise).
 
-- **40 rendered identically** (same visible text, same layout).
-- **11 (the decision-graph stories) differ only by reactflow's "React Flow"
-  attribution** in the canvas corner. vue-flow has no attribution, and
-  upstream's `proOptions` was dropped deliberately — an accepted deviation.
-- **4 (the date/time builder stories) differ only in how the value is
-  expressed**: upstream's antd `DatePicker`/`TimePicker` put the value in an
-  `<input>`, whose value is not part of `innerText`, while the port's
-  reka-ui `DateField`/`TimeField` segments are text nodes. The pixels match;
-  only the extracted text differs. (The port's operator `<select>` also
-  shows a native dropdown arrow where antd's borderless select does not.)
-
-The review found and fixed four real defects:
+### What the review found
 
 - `ui/MultiSelect.vue` rendered a chip's remove affordance as a **text
   `×`, always visible**. antd shows a close **icon**, revealed on hover.
   The port now renders the icon, hidden until the chip is hovered.
+  _(CORRECTED — see below: antd's tag remove icon is NOT hover-only, and
+  the port now shows it always, like antd.)_
 - `ui/TimePicker.vue` rendered reka-ui's `TimeFieldInput` with **no slot
   content** — reka-ui draws a segment's value through the input's default
   slot — so the field showed an **empty box** where antd shows the time. The
@@ -186,6 +196,133 @@ zen-engine wasm must be excluded from the dependency optimizer (its
 `new URL('...wasm', import.meta.url)` 404s otherwise) and awaited before
 the stories render.
 
+### What the review could NOT see — and what it got wrong
+
+The review compared the two storybooks by their **extracted text**. That
+method cannot see an SVG edge, a colour, a hover state, or an overlay that
+is not open. It therefore reported the decision-graph stories as "identical
+apart from reactflow's attribution", and the date/time builder stories as
+differing only in how the value is expressed.
+
+**That conclusion was wrong.** The pre-ship review (below) found that the
+decision-graph stories were not comparable at all:
+
+- **no edge ever rendered** — vue-flow validates every edge it syncs, and
+  upstream's validator rejected each edge against itself;
+- **the canvas CSS was dead** — the stylesheet targeted reactflow's
+  `react-flow__*` class names, and vue-flow emits `vue-flow__*`;
+- **primary buttons were unstyled** — no `--primary` rule existed;
+- **no tooltip could open** — an absent Boolean prop became `false`, which
+  made reka's tooltip controlled-and-closed;
+- **every portalled overlay was unthemed** — the tokens live on `.grl-root`
+  and reka teleports to `body`.
+
+The method, not the port, was the blind spot. **Comparing extracted text
+is not a visual comparison**: it needs the pixels, the computed styles, and
+an interaction. The parity claims in this section are therefore scoped to
+what the method could reach — the text — and the visual claims are covered
+by the pre-ship review's findings instead.
+
+## The pre-ship review
+
+An external adversarial review (two axes — fidelity and standards) ran over
+the whole port before the publish. It found 39 fidelity and 27 standards
+findings; every one was checked against the code before anything was
+changed. The findings that were real are fixed and pinned by tests; the
+ones that were not are recorded below.
+
+### Fixed — the canvas (all blocking)
+
+- **No edge ever rendered.** vue-flow runs the flow-level
+  `isValidConnection` for **every** edge it syncs; reactflow runs it only
+  while a connection is dragged. Upstream's validator (ported verbatim)
+  rejects an edge that duplicates an existing one — and the edge being
+  synced _is_ in the list, so every edge matched itself and was dropped
+  with `EDGE_INVALID`. The port now distinguishes the two call shapes:
+  vue-flow passes the full Edge (it has an `id`) when syncing and an
+  id-less Connection while dragging; only the drag shape is validated.
+- **Every graph change remounted every node.** The `nodeTypes` map was
+  built by a computed whose selector also read `decisionGraph`, so it was
+  rebuilt on every edit — and vue-flow remounts a node when its component
+  function changes identity. The inline condition editor died after one
+  keystroke. The built-in specifications' wrappers are now created once.
+- **The canvas CSS was dead.** The stylesheet targeted reactflow's
+  `react-flow__*` class names; vue-flow emits `vue-flow__*`. The handles
+  had no size or colour, the edges had no hover zone, the panel had no
+  border, and the controls were unstyled.
+- **Primary buttons were unstyled** — `grl-btn--primary` was emitted but no
+  rule existed for it.
+
+### Fixed — the theme and the primitives
+
+- **Every portalled overlay was unthemed.** The design tokens live on
+  `.grl-root`; reka teleports overlays to `body`. A portalled tooltip,
+  modal, select or menu resolved no `var(--grl-*)` at all — no background,
+  no border, no shadow, no dark mode. The provider now tells reka to
+  portal **into** `.grl-root` (reka's `ConfigProvider` renders no element,
+  so the DOM shape is unchanged).
+- **A tooltip without an explicit `open` could never open.** Vue casts an
+  absent Boolean prop to `false`, and the port bound `:open="open"`
+  unconditionally — which made reka's `TooltipRoot` controlled-and-closed.
+  21 of the 22 call sites were affected.
+- **The dictionaries were frozen at mount.** `provide()` runs once per
+  setup, so a dictionary loaded later never reached the expression
+  builders. The provider now hands over a reactive holder.
+- **The multi-select chip's remove icon** was hidden until hover — antd's
+  is always visible (the opacity rule belongs to the select's _clear_
+  icon). It is also omitted entirely when the select is disabled, like
+  rc-select's `closable = !disabled`.
+- **Numeric inline styles were dropped.** React appends `px` to a numeric
+  style value; Vue does not, so `fontSize: 12` reached the DOM as the
+  invalid `font-size: 12`.
+
+### Fixed — the data and the types
+
+- **The custom node's form lost its edits.** antd's form store resolves
+  `a.b` into a path and keeps the value nested; the port read the flat key
+  and wrote with lodash's `_.set`, which nests a name that is not already a
+  key — and then wrote into the immer-frozen object on the next edit, so
+  the edit was silently lost. The form store's shape is now ported
+  literally, and the write is immutable.
+- **The shipped types referenced a phantom binding.** The declaration
+  rollup turned `typeof import('monaco-editor')` into
+  `import { monacoEditor } from 'monaco-editor'` — a name the package does
+  not export.
+- **The public `JdmConfigProviderProps` type was missing.**
+- **The run payload could hold a Vue proxy** — `structuredClone` of it
+  throws `DataCloneError`.
+- **The nodes were pinned to their first measured size** — reactflow
+  ignores a node's width/height; vue-flow writes them as inline px.
+- **The Decision View showed descriptions** upstream never shows.
+- **`JdmConfigProvider` was missing from the public checklist**, and the
+  checklist presented the additive exports as upstream parity.
+
+### Fixed — the tooling
+
+- **The Monaco worker snippet was wrong.** monaco labels the TypeScript
+  language service `typescript` _and_ `javascript`; the function editor's
+  default language is `javascript`, so the language service never started.
+- **An undeclared dependency was bundled.** `vite.config.ts`'s `external`
+  was a list of exact ids, so `reka-ui/date` — a subpath — was bundled
+  together with `@internationalized/date` (Apache-2.0, undeclared, shipped
+  with no notice). The dist shrank by 37 KB.
+- **The `vue` peer range was too low** (`>=3.4`): `@vueuse/core`, a runtime
+  dependency, requires Vue 3.5.13.
+- **The publish workflow published from any branch** and re-published a
+  version that was already on the registry. It is now master-only, runs
+  the gates first, and skips a version that is already published.
+- **The import guard missed `.js` sources** and never checked default
+  imports. It now does both.
+
+### Not fixed — deliberate
+
+- **Upstream's `inferNodeTypes` bug** (its `return` aborts the immer recipe
+  on the first node) is kept 1:1 — see Known temp debt.
+- **The `excel` dialog's "Enter field name" input sits inside reka's
+  `SelectContent`**, whose typeahead moves focus to a matching option and
+  blocks Space and Tab; antd's select has no typeahead. The fix needs a
+  browser to confirm, and it is not yet applied.
+
 ## Publish prep (step 10)
 
 The package publishes as `@nfk.st/jdm-editor-vue`, built by Vite in library
@@ -198,8 +335,10 @@ so the consumer imports it explicitly
 (`import '@nfk.st/jdm-editor-vue/dist/style.css'`). That makes the
 manifest's `sideEffects` field load-bearing.
 
-Upstream declares `"sideEffects": "None"` — a glob that matches nothing,
-i.e. webpack's `false`. Measured on a scratch consumer (webpack 5,
+Upstream's manifest has **no** `sideEffects` field at all — npm then treats
+every file as side-effectful, which is the safe default. Declaring
+`"sideEffects": false` (or the glob `"None"`, which matches nothing) is
+what breaks the stylesheet. Measured on a scratch consumer (webpack 5,
 `css-loader`), with the package installed from the packed tarball:
 
 | `sideEffects`               | Bundled output | `--grl-*` rules survive |
@@ -208,8 +347,9 @@ i.e. webpack's `false`. Measured on a scratch consumer (webpack 5,
 | `false`                     | **44 B**       | **no**                  |
 
 With `false`, webpack drops the CSS import as an unused side-effect-free
-module and the consumer gets an **unstyled editor**. The port therefore
-declares the stylesheets as side-effectful.
+module and the consumer gets an **unstyled editor** — a 44-byte bundle
+instead of 95 KB. The port therefore declares the stylesheets as
+side-effectful.
 
 The other publish-prep changes: `LICENSE` copied into the package (the
 `files` list promised it; the tarball shipped without it),
@@ -297,6 +437,18 @@ export surface, not the surface the port wishes it had.
 - Table drop-direction uses Sortable's `willInsertAfter` (insertion side)
   where upstream reads the pointer delta — same in the common case, differs
   dragging down onto a target's upper half. Marked in table.vue.
+- The **excel dialog's "Enter field name" input sits inside reka's
+  `SelectContent`**, whose typeahead moves the focus to a matching option
+  and blocks Space and Tab; antd's select has no typeahead. The fix needs a
+  browser to confirm, so it is not applied.
+- The **Storybook harness has no dark-mode toggle** — upstream's preview
+  has one. The dark parity was therefore never reviewed side by side.
+- The **shipped types need `skipLibCheck`** (as most Vue libraries do):
+  the declaration rollup writes Vue's `DefineComponent` type arguments out
+  in full, and Vue 3.5's `GlobalComponents` does not satisfy that
+  declaration's own constraint. The two defects the rollup DID cause —
+  a phantom `monacoEditor` import and a type parameter shadowing Vue's
+  `Component` — are fixed (see the pre-ship review above).
 
 ## Changelog (pin advances)
 

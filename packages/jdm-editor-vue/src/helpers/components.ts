@@ -1,7 +1,7 @@
 // PORTING: upstream imports `DecisionTableStoreType` from
-// ../components/decision-table/context/dt-store.context (not ported yet);
-// the local minimal state stand-in below covers the fields read here.
-// Swap back to the real import when decision-table lands.
+// ../components/decision-table/context/dt-store.context. That module has
+// landed (step 6), so the local minimal state stand-in below was swapped
+// for the real import.
 type DecisionTableStoreState = {
   decisionTable: {
     inputs: any[];

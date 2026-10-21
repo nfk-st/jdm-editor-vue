@@ -23,7 +23,8 @@ The changelog is in
 npm i @nfk.st/jdm-editor-vue
 ```
 
-`vue` is a peer dependency (`>=3.4`).
+`vue` is a peer dependency (`^3.5.13` — `@vueuse/core`, a runtime
+dependency, requires Vue 3.5.13 or newer).
 
 ## Usage
 
@@ -109,7 +110,7 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 
 self.MonacoEnvironment = {
   getWorker(_: unknown, label: string) {
-    return label === 'typescript' ? new tsWorker() : new editorWorker();
+    return label === 'typescript' || label === 'javascript' ? new tsWorker() : new editorWorker();
   },
 };
 ```
@@ -128,25 +129,25 @@ pair becomes `modelValue` + `update:modelValue` (`v-model`).
 The canvas — a decision graph of nodes and edges, with the tab bar, the node
 panels and the simulator.
 
-| Prop                                               | Type                  | Notes                                                            |
-| -------------------------------------------------- | --------------------- | ---------------------------------------------------------------- |
-| `modelValue`                                       | `DecisionGraphType`   | v-model. Upstream's `value`.                                     |
-| `defaultValue`                                     | `DecisionGraphType`   | Uncontrolled initial value.                                      |
-| `id`                                               | `string`              |                                                                  |
-| `name`                                             | `string`              | File name shown in the tab bar. Defaults to `graph.json`.        |
-| `disabled`                                         | `boolean`             | Read-only mode.                                                  |
-| `mode`                                             | `'dev' \| 'business'` | UI mode.                                                         |
-| `components`                                       | `CustomNodeType[]`    | Node specifications registered by the host.                      |
-| `customNodes`                                      | `CustomNodeType[]`    | Custom node kinds.                                               |
-| `hideLeftToolbar`                                  | `boolean`             |                                                                  |
-| `panels` / `defaultActivePanel` / `onPanelsChange` |                       | The host-registered side panels.                                 |
-| `viewConfig` / `viewConfigCta` / `onViewConfigCta` |                       | Which tabs a user may open.                                      |
-| `simulate`                                         | `Simulation`          | Simulation configuration.                                        |
-| `dictionaries`                                     | `DictionaryMap`       | Named option sets for expression building.                       |
-| `onChange`                                         | `(graph) => void`     | Kept alongside `update:modelValue`.                              |
-| `onReactFlowInit`                                  | `() => void`          | The canvas is ready.                                             |
-| `onCodeExtension` / `onFunctionReady`              |                       | Host hooks for code and function nodes.                          |
-| `manager`                                          | `unknown`             | **Deprecated, ignored.** Upstream's react-dnd `DragDropManager`. |
+| Prop                                               | Type                        | Notes                                                            |
+| -------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
+| `modelValue`                                       | `DecisionGraphType`         | v-model. Upstream's `value`.                                     |
+| `defaultValue`                                     | `DecisionGraphType`         | Uncontrolled initial value.                                      |
+| `id`                                               | `string`                    |                                                                  |
+| `name`                                             | `string`                    | File name shown in the tab bar. Defaults to `graph.json`.        |
+| `disabled`                                         | `boolean`                   | Read-only mode.                                                  |
+| `mode`                                             | `'dev' \| 'business'`       | UI mode.                                                         |
+| `components`                                       | `NodeSpecification[]`       | Node specifications registered by the host.                      |
+| `customNodes`                                      | `CustomNodeSpecification[]` | Custom node kinds.                                               |
+| `hideLeftToolbar`                                  | `boolean`                   |                                                                  |
+| `panels` / `defaultActivePanel` / `onPanelsChange` |                             | The host-registered side panels.                                 |
+| `viewConfig` / `viewConfigCta` / `onViewConfigCta` |                             | Which tabs a user may open.                                      |
+| `simulate`                                         | `Simulation`                | Simulation configuration.                                        |
+| `dictionaries`                                     | `DictionaryMap`             | Named option sets for expression building.                       |
+| `onChange`                                         | `(graph) => void`           | Kept alongside `update:modelValue`.                              |
+| `onReactFlowInit`                                  | `(instance) => void`        | The canvas is ready (the vue-flow store).                        |
+| `onCodeExtension` / `onFunctionReady`              |                             | Host hooks for code and function nodes.                          |
+| `manager`                                          | `unknown`                   | **Deprecated, ignored.** Upstream's react-dnd `DragDropManager`. |
 
 Emits `update:modelValue`. Slot `#tab-bar-extra-content` (upstream's
 `tabBarExtraContent` prop).
@@ -186,11 +187,12 @@ the scroll container and the scroll API.
 
 ### `Expression`
 
-A single Zen expression with the command bar and the context menu.
+A Zen expression with the command bar and the context menu. The value is a
+list of entries — an expression can hold more than one.
 
 | Prop                | Type                              |
 | ------------------- | --------------------------------- |
-| `modelValue`        | `string` — v-model                |
+| `modelValue`        | `ExpressionEntry[]` — v-model     |
 | `inputVariableType` | `VariableType`                    |
 | `debug`             | `{ trace, inputData?, snapshot }` |
 | `hideCommandBar`    | `boolean`                         |
@@ -233,19 +235,22 @@ The CodeMirror-based editor behind the expression editors.
 
 Emits `update:modelValue`, `stateChange` and `blur`.
 
-### `ExpressionBuilder` and `StandardExpressionBuilder`
+### `ExpressionBuilder`
 
-The structured expression builders — a visual operator/value editor rather
+The structured expression builder — a visual operator/value editor rather
 than raw Zen.
 
-| Prop         | `ExpressionBuilder`     | `StandardExpressionBuilder` |
-| ------------ | ----------------------- | --------------------------- |
-| `modelValue` | `string` (**required**) | `string` (**required**)     |
-| `fieldType`  | `ColumnFieldType`       | `OutputFieldType`           |
-| `disabled`   | `boolean`               | `boolean`                   |
-| `maxRows`    | `number` (default 3)    | `number` (default 3)        |
+| Prop         | Type              | Notes                  |
+| ------------ | ----------------- | ---------------------- |
+| `modelValue` | `string`          | **Required.** v-model. |
+| `fieldType`  | `ColumnFieldType` |                        |
+| `disabled`   | `boolean`         |                        |
+| `maxRows`    | `number`          | Defaults to 3.         |
 
-Both expose a `focus()` method through their ref.
+It exposes a `focus()` method through its ref. The sibling
+`StandardExpressionBuilder` (for output fields) is **not** part of the
+public API — upstream does not export it either; it is what the decision
+table's output column uses.
 
 ### `GraphSimulator`
 
@@ -280,7 +285,7 @@ WASM load.
 | `ensureWasmLoaded()` / `useWasmReady()`       | Initialise the Zen engine.                                                                                 |
 | `provideDictionaries()` / `useDictionaries()` | Share option sets with the editor's internals.                                                             |
 | `useThemeMode()` / `useProvideThemeMode()`    | Read or provide the light/dark mode.                                                                       |
-| `usePersistentState(key, default?)`           | A `localStorage`-backed `[ref, setter]` tuple.                                                             |
+| `usePersistentState(key, default?)`           | An in-memory `[ref, setter]` tuple, keyed (upstream's `useState` + a module cache).                        |
 | `useNodeType(id, options?)`                   | The inferred variable type of a node in the enclosing decision graph.                                      |
 | `codemirror`                                  | CodeMirror's `linter`, re-exported for host extensions.                                                    |
 | `@nfk.st/jdm-editor-vue/dist/schema`          | The zod schemas, `NodeKind`, and the field-type options — for validating JDM documents outside the editor. |

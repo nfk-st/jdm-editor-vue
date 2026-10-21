@@ -21,13 +21,59 @@ import type { BaseNode, CustomNodeSpecification, InputSchema } from './types';
 export type { BaseNode, CustomNodeSpecification } from './types';
 export type { CheckboxControl, JdmControl, TextControl } from './controls';
 
+// PORTING(antd): rc-field-form (antd's form store) resolves a field name
+// like 'a.b' into a PATH: the value is stored NESTED under
+// config.a.b, and `getFieldsValue()` returns the nested shape for the
+// REGISTERED fields only. Upstream's <Form.Item name='hello.nested.something'>
+// therefore ends up in the node's config as a nested object, and the other
+// config keys are dropped.
+//
+// The port read the flat key instead and wrote with lodash's `_.set`, which
+// nests a name that is not already a key — and then wrote INTO the frozen
+// (immer) object on the next edit, so the edit was silently lost. These two
+// helpers port the form store's shape and make the write immutable.
+export const setFormValue = (
+  target: Record<string, unknown>,
+  path: string,
+  value: unknown,
+): Record<string, unknown> => {
+  const [head, ...rest] = path.split('.');
+
+  if (!rest.length) {
+    return { ...target, [head]: value };
+  }
+
+  const child =
+    typeof target[head] === 'object' && target[head] !== null ? (target[head] as Record<string, unknown>) : {};
+
+  return { ...target, [head]: setFormValue(child, rest.join('.'), value) };
+};
+
+// PORTING(antd): the form's initial values are the node's config, read
+// through the field's name path, and only the registered fields are kept.
+export const collectInputValues = (
+  config: Record<string, unknown> | undefined,
+  names: string[],
+): Record<string, unknown> => {
+  const values: Record<string, unknown> = {};
+
+  for (const name of names) {
+    const value = _.get(config ?? {}, name);
+    if (value !== undefined) {
+      Object.assign(values, setFormValue(values, name, value));
+    }
+  }
+
+  return values;
+};
+
 export const createJdmNode = <
-  Component extends string,
+  ComponentKind extends string,
   InputName extends string,
   Inputs extends InputSchema<InputName>[],
 >(
-  n: BaseNode<Component, InputName, Inputs>,
-): CustomNodeSpecification<any, Component> => {
+  n: BaseNode<ComponentKind, InputName, Inputs>,
+): CustomNodeSpecification<any, ComponentKind> => {
   return {
     kind: n.kind,
     icon: n.icon,
@@ -63,10 +109,10 @@ export const createJdmNode = <
             // PORTING: antd Form initialValues={nodeData} snapshot taken when
             // the form area opens (upstream mounts <Form> on open).
             const formValues = ref<Record<string, unknown>>({});
+            const inputNames = (n?.inputs ?? []).map((input) => input.name);
 
             const setFieldValue = (name: string, value: unknown) => {
-              const next = { ...formValues.value };
-              _.set(next, name, value);
+              const next = setFormValue(formValues.value, name, value);
               formValues.value = next;
               updateNode(props.id, (draft) => {
                 draft.content.config = next;
@@ -96,7 +142,7 @@ export const createJdmNode = <
                             onClick: () => {
                               open.value = !open.value;
                               if (open.value) {
-                                formValues.value = { ...(nodeData.value ?? {}) };
+                                formValues.value = collectInputValues(nodeData.value, inputNames);
                               }
                             },
                           },
@@ -121,7 +167,8 @@ export const createJdmNode = <
                               'type': 'template',
                               'modelValue': (value as string) ?? '',
                               'onUpdate:modelValue': (val: string) => setFieldValue(name, val),
-                              'style': { fontSize: 12, lineHeight: '20px', width: '100%' },
+                              // PORTING(react): React appends 'px' to numeric style values; Vue does not.
+                              'style': { fontSize: '12px', lineHeight: '20px', width: '100%' },
                             }),
                           )
                           .with({ control: 'bool' }, () =>
@@ -132,16 +179,19 @@ export const createJdmNode = <
                                 'modelValue': !!value,
                                 'onUpdate:modelValue': (val: boolean) => setFieldValue(name, val),
                               },
-                              { default: () => h('span', { class: 'grl-typography', style: { fontSize: 12 } }, label) },
+                              {
+                                default: () =>
+                                  h('span', { class: 'grl-typography', style: { fontSize: '12px' } }, label),
+                              },
                             ),
                           )
                           .exhaustive();
 
                         const outerLabel = match({ control })
                           .with({ control: 'bool' }, () => null)
-                          .otherwise(() => h('span', { class: 'grl-typography', style: { fontSize: 12 } }, label));
+                          .otherwise(() => h('span', { class: 'grl-typography', style: { fontSize: '12px' } }, label));
 
-                        return h('div', { key: name, class: 'grl-form-item', style: { marginBottom: 4 } }, [
+                        return h('div', { key: name, class: 'grl-form-item', style: { marginBottom: '4px' } }, [
                           outerLabel,
                           formItem,
                         ]);

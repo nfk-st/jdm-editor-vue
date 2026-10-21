@@ -1,4 +1,21 @@
-export type Monaco = typeof import('monaco-editor');
+import type * as monacoNs from 'monaco-editor';
+
+/** The monaco-editor module surface — the `monaco` namespace. */
+export type MonacoNamespace = typeof monacoNs;
+
+/**
+ * The Monaco API the editor uses.
+ *
+ * PORTING: this is an INTERFACE, not a type alias. A type alias to
+ * `typeof import('monaco-editor')` is expanded by the declaration emit
+ * (`monacoReady: (monaco: typeof import("monaco-editor"))`), and the
+ * declaration rollup then mangles THAT into
+ * `import { monacoEditor } from 'monaco-editor'` — a name monaco-editor
+ * does not export, so the SHIPPED types referenced a phantom binding
+ * (TS2305 with skipLibCheck off, `any` with it on). An interface keeps its
+ * name through the emit, so the rollup has nothing to mangle.
+ */
+export interface Monaco extends MonacoNamespace {}
 
 declare global {
   interface Window {
@@ -37,9 +54,13 @@ let initPromise: Promise<Monaco> | null = null;
  *   import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
  *   self.MonacoEnvironment = {
  *     getWorker(_, label) {
- *       return label === 'typescript' ? new tsWorker() : new editorWorker();
+ *       return label === 'typescript' || label === 'javascript' ? new tsWorker() : new editorWorker();
  *     },
  *   };
+ *
+ * (monaco labels the TypeScript language service 'typescript' AND
+ * 'javascript' — the function editor's default language is javascript — and
+ * upstream's README routes both to the ts worker.)
  */
 export const loader = {
   config: (config: LoaderConfig): void => {

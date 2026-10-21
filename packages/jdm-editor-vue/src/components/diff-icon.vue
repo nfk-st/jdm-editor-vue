@@ -8,8 +8,8 @@ import { computed, useAttrs } from 'vue';
 // box icons size from style.fontSize (upstream default 14).
 defineOptions({ inheritAttrs: false });
 
-// PORTING: local stand-in for decision-graph/dg-types DiffStatus — swap when
-// decision-graph lands.
+// PORTING: the local DiffStatus stand-in was swapped for
+// decision-graph/dg-types' real DiffStatus when that module landed (step 8).
 type DiffStatus = 'added' | 'removed' | 'modified' | 'unchanged' | 'moved';
 
 defineProps<{ status?: DiffStatus }>();

@@ -23,8 +23,13 @@ const activePanel = computed(() =>
 );
 
 // upstream: Number.parseFloat(localStorage.getItem(heightKey) ?? '') ?? 300
+// PORTING: upstream's `?? 300` never fires — parseFloat('') is NaN and `??`
+// does not catch NaN — so the first open had no height at all (NaNpx is
+// dropped by the DOM) and the manual min/max clamp below was defeated by
+// the NaN. re-resizable always applied min 150 / max 500; this keeps that.
 const defaultHeight = computed(() => {
-  return Number.parseFloat(localStorage.getItem(heightKey) ?? '') ?? 300;
+  const stored = Number.parseFloat(localStorage.getItem(heightKey) ?? '');
+  return Number.isNaN(stored) ? 300 : stored;
 });
 
 const height = ref(Math.min(Math.max(defaultHeight.value, 150), 500));

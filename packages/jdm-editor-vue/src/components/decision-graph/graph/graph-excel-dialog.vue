@@ -637,7 +637,8 @@ const onDone = () => {
         </div>
       </template>
     </div>
-    <div :style="{ marginTop: 24, display: 'flex', alignItems: 'center' }">
+    <!-- PORTING(react): React appends 'px' to numeric style values; Vue does not. -->
+    <div :style="{ marginTop: '24px', display: 'flex', alignItems: 'center' }">
       <Button
         v-if="currentStep < (excelData || []).length - 1"
         type="primary"

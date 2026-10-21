@@ -242,7 +242,7 @@ const onConfirmDelete = () => {
     />
     <!-- PORTING: antd modal.confirm({ title: 'Delete node', okButtonProps:
          { danger: true } }) → ui/Modal with a danger OK footer button. -->
-    <Modal :open="deleteModalOpen" title="Delete node" :width="416" @update:open="(o) => (deleteModalOpen = o)">
+    <Modal confirm :open="deleteModalOpen" title="Delete node" :width="416" @update:open="(o) => (deleteModalOpen = o)">
       <span class="grl-typography">
         Are you sure you want to delete
         <span class="grl-typography" :style="{ fontWeight: 600 }">{{ name }}</span> node.

@@ -38,10 +38,16 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: '
   width: 44px;
   height: 22px;
   padding: 2px;
-  background-color: var(--grl-color-bg-mask);
+  // antd's switch track rests on colorTextQuaternary and darkens to
+  // colorTextTertiary on hover — not on colorBgMask.
+  background-color: var(--grl-color-text-placeholder);
   border-radius: 999px;
   transition: var(--grl-transition);
   cursor: pointer;
+
+  &:hover:not(.grl-switch--disabled) {
+    background-color: var(--grl-color-text-tertiary);
+  }
 
   &[data-state='checked'] {
     background-color: var(--grl-color-primary);

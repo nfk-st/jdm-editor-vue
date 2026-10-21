@@ -36,6 +36,7 @@ defineExpose({ textArea: textAreaRef });
          previous side too — only the change handler is stripped. -->
     <AutosizeTextArea
       v-if="(previousValue || '').length > 0"
+      v-bind="$attrs"
       :value="previousValue"
       :max-rows="maxRows"
       :placeholder="placeholder"

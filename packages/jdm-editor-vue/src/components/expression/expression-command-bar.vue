@@ -8,8 +8,8 @@ import { useExpressionStoreRaw } from './context/expression-store.context';
 
 const expressionStore = useExpressionStoreRaw();
 
-// PORTING: upstream used ts-pattern's P.array() here; its narrowing fights our
-// stand-in trace typing — plain Array.isArray keeps identical semantics.
+// PORTING: upstream used ts-pattern's P.array() here; its narrowing fights the
+// port's trace typing — plain Array.isArray keeps identical semantics.
 const traceCount = computed(() => {
   const data = expressionStore.debug?.trace?.traceData;
   return Array.isArray(data) ? data.length : null;

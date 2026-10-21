@@ -528,7 +528,11 @@ export const createDecisionGraphStoreBundle = (): DecisionGraphStoreBundle => {
       const { skipOnChangeEvent = false } = options;
 
       const newDecisionGraph = produce(toRaw(decisionGraph), (draft) => {
-        Object.assign(draft, graph);
+        // PORTING: `toRaw` on the base only — the INCOMING graph was copied
+        // in as-is, so a host's `v-model="ref(graph)"` left Vue's reactive
+        // proxy inside the store. The run payload is the store's graph, and
+        // structuredClone(postMessage) of a proxy throws DataCloneError.
+        Object.assign(draft, toRaw(graph));
       });
 
       edgesState?.current?.[1](mapToGraphEdges(newDecisionGraph?.edges ?? []));

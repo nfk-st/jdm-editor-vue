@@ -3,9 +3,16 @@
 // lives here — `createJdmNode` (incl. its default renderNode) is phase B and
 // lands in custom-node/index.ts, re-exporting these types. React.ReactNode →
 // VNode, React.FC → Component; react-dnd's DragDropManager is dropped
-// (docs/PORTING.md dependency map). Vue's `Component` type is imported
-// aliased (`VueComponent`) because upstream's generic param is also named
-// `Component` (it stays `Component extends string`).
+// (docs/PORTING.md dependency map).
+//
+// PORTING(names): upstream's generic parameter is named `Component` (it names
+// the node KIND, not a Vue component — CONTEXT.md's vocabulary says "kind").
+// The declaration rollup resolves Vue's `Component` type back to its own
+// name, and the type parameter then SHADOWS it: inside
+// CustomNodeSpecification the shipped `renderNode` type collapsed to the
+// string parameter (TS2315, and `any` under skipLibCheck). The parameter is
+// therefore named `ComponentKind` — the same meaning, upstream's
+// CONTEXT.md wording, and no shadowing.
 import { type VariableType } from '@gorules/zen-engine-wasm';
 import type { XYPosition } from '@vue-flow/core';
 import type { VNode, Component as VueComponent } from 'vue';
@@ -27,8 +34,8 @@ type GenerateNodeParams = {
   index: number;
 };
 
-export type CustomNodeSpecification<Data extends object, Component extends string> = {
-  kind: Component;
+export type CustomNodeSpecification<Data extends object, ComponentKind extends string> = {
+  kind: ComponentKind;
   color?: string;
   icon?: VNode | VueComponent;
   displayName: string;
@@ -49,9 +56,9 @@ export type CustomNodeSpecification<Data extends object, Component extends strin
     determineOutputType: (state: InferTypeData<Data>) => VariableType;
   };
 
-  onNodeAdd?: (node: CustomDecisionNode<{ kind: Component; config: Data }>) => Promise<
+  onNodeAdd?: (node: CustomDecisionNode<{ kind: ComponentKind; config: Data }>) => Promise<
     CustomDecisionNode<{
-      kind: Component;
+      kind: ComponentKind;
       config: Data;
     }>
   >;
@@ -91,12 +98,12 @@ type CreateDynamicType<T extends ReadonlyArray<unknown>, Result = {}> = T extend
   : Result;
 
 export type BaseNode<
-  Component extends string,
+  ComponentKind extends string,
   InputName extends string,
   Inputs extends InputSchema<InputName>[],
   NodeData extends object = CreateDynamicType<Inputs>,
 > = {
-  kind: Component;
+  kind: ComponentKind;
   icon?: VNode | VueComponent;
   color?: string;
   displayName: string;
@@ -105,7 +112,7 @@ export type BaseNode<
   handleLeft?: boolean;
   handleRight?: boolean;
   inputs?: [...Inputs];
-  generateNode?: CustomNodeSpecification<NodeData, Component>['generateNode'];
-  renderNode?: CustomNodeSpecification<NodeData, Component>['renderNode'];
-  onNodeAdd?: CustomNodeSpecification<NodeData, Component>['onNodeAdd'];
+  generateNode?: CustomNodeSpecification<NodeData, ComponentKind>['generateNode'];
+  renderNode?: CustomNodeSpecification<NodeData, ComponentKind>['renderNode'];
+  onNodeAdd?: CustomNodeSpecification<NodeData, ComponentKind>['onNodeAdd'];
 };

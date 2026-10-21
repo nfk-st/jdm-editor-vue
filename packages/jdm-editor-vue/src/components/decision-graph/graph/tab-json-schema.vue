@@ -236,6 +236,16 @@ watch(
   },
 );
 
+// readOnly re-applied like upstream's options prop (function.vue's
+// review-5 discipline) — the editor is created once, so a later `disabled`
+// change never reached it.
+watch(
+  () => state.value.disabled,
+  (disabled) => {
+    editorRef.value?.updateOptions({ readOnly: disabled });
+  },
+);
+
 // original side of the diff syncs with previousValue (round-5)
 watch(
   () => previousValue.value,

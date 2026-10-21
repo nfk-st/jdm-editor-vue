@@ -9,7 +9,12 @@ withDefaults(
     open?: boolean;
     delay?: number;
   }>(),
-  { delay: 100 },
+  // PORTING: `open: undefined` is a DEFAULT, not a value — Vue only casts an
+  // absent Boolean prop to `false` when it has no default. Without it every
+  // tooltip was bound to open=false, which makes reka's TooltipRoot
+  // controlled-and-closed: a tooltip without an explicit `open` could never
+  // open. antd's Tooltip is uncontrolled by default.
+  { delay: 100, open: undefined },
 );
 
 const emit = defineEmits<{ (e: 'update:open', open: boolean): void }>();

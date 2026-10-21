@@ -14,7 +14,8 @@
     box-sizing: border-box;
   }
 
-  .react-flow__handle {
+  // PORTING(vue-flow): vue-flow's class name (see above).
+  .vue-flow__handle {
     cursor: crosshair !important;
     transition: 0.2s all;
     transform-origin: 50% calc(50% + 3.5px);
@@ -528,8 +529,13 @@
     }
   }
 
+  // PORTING(vue-flow): the container keeps upstream's `react-flow` class (it
+  // is OUR wrapper div, graph.vue), but every selector below targets
+  // vue-flow's class names — reactflow's `react-flow__*` matched nothing, so
+  // the handles had no size or colour, the edges had no hover zone, the
+  // panel had no border and the controls were unstyled.
   .react-flow {
-    &__handle {
+    .vue-flow__handle {
       border: 1px solid var(--grl-color-primary-border);
       background-color: var(--grl-color-primary-bg);
       height: 7px;
@@ -548,7 +554,7 @@
       }
     }
 
-    &__handle-left {
+    .vue-flow__handle-left {
       left: -3px !important;
 
       &::after {
@@ -558,7 +564,7 @@
       }
     }
 
-    &__handle-right {
+    .vue-flow__handle-right {
       right: -3px !important;
 
       &::after {
@@ -568,14 +574,13 @@
       }
     }
 
-    &__edge-interaction {
-      stroke-width: 50;
-    }
-
-    &__edge-path-selector {
+    // vue-flow's transparent, wide hover path — reactflow's equivalent is
+    // `.react-flow__edge-interaction` (upstream's `&__edge-path-selector` is
+    // a reactflow v10 leftover that matched nothing in v11 either).
+    .vue-flow__edge-interaction {
       fill: none;
       stroke: transparent;
-      stroke-width: 15;
+      stroke-width: 50;
 
       &:hover {
         cursor: pointer;
@@ -583,18 +588,21 @@
     }
   }
 
-  .react-flow__edge-path-selector:hover + .react-flow__edge-path,
-  .react-flow__edge-path:hover {
+  // PORTING(vue-flow): vue-flow renders the visible path BEFORE the
+  // transparent interaction path, so the adjacent-sibling combinator cannot
+  // reach it — :has() selects it from the hovered interaction path instead.
+  .vue-flow__edge:has(.vue-flow__edge-interaction:hover) .vue-flow__edge-path,
+  .vue-flow__edge-path:hover {
     stroke: var(--grl-color-primary-border-hover);
     cursor: pointer;
   }
 
-  .react-flow__panel {
+  .vue-flow__panel {
     box-shadow: none;
     border: 1px solid var(--grl-color-border);
   }
 
-  .react-flow__controls-button {
+  .vue-flow__controls-button {
     background: var(--grl-color-bg-elevated);
     color: var(--grl-color-text);
     border-color: var(--grl-color-border);
@@ -611,11 +619,8 @@
     }
   }
 
-  .react-flow__attribution {
-    color: var(--grl-color-text);
-    border: none;
-    background: transparent;
-  }
+  // PORTING(vue-flow): reactflow's attribution is not reproduced (vue-flow
+  // is MIT and carries none), so upstream's attribution rule has no target.
 
   .edge-renderer {
     position: absolute;
@@ -748,7 +753,12 @@
   }
 }
 
-.switch {
+// PORTING: upstream's `.switch` is a TOP-LEVEL rule — it reaches every
+// `.switch` element on the host's page, not just the editor's. The port
+// scopes it to the editor (PORTING.md's correspondence rules: the class
+// names are ours to keep inside the editor's namespace). The switch node
+// is always rendered inside .grl-dg.
+.grl-dg .switch {
   width: 220px;
   height: auto;
   padding: 0;
@@ -765,7 +775,7 @@
       border-color: var(--grl-color-success) !important;
     }
 
-    .react-flow__handle {
+    .vue-flow__handle {
       z-index: 20;
       top: calc(50% - 1px);
       right: -4px !important;

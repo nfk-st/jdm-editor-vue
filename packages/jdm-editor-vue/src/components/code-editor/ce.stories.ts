@@ -7,10 +7,10 @@
 // port's `stateChange` emit.
 // PORTING: upstream's antd `Typography` / `theme.useToken()` → plain elements
 // styled with the port's `--grl-*` design tokens (see the Debug story).
-// PORTING: upstream's storybook preview awaits the zen-engine wasm at module
-// scope; the port's preview boots it asynchronously (JdmConfigProvider), so
-// the wasm-dependent parts of the Debug / LivePreview stories wait for
-// `useWasmReady()` instead of throwing.
+// PORTING: upstream's storybook preview awaits the zen-engine wasm at
+// module scope; so does the port's preview.ts (`await ensureWasmLoaded()`),
+// so every story renders with the wasm ready. The wasm-dependent parts of
+// the Debug / LivePreview stories still wait for `useWasmReady()`.
 import { syntaxTree } from '@codemirror/language';
 import type { EditorState as CmEditorState } from '@codemirror/state';
 import { Variable, createVariableType, generateAst, generateAstUnary } from '@gorules/zen-engine-wasm';

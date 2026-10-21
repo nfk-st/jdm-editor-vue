@@ -24,7 +24,9 @@ import { fileURLToPath } from 'node:url';
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC_DIR = join(PKG_DIR, 'src');
 
-const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.vue'];
+// `.js` is included: a JavaScript source file can import a named export
+// that does not exist, exactly like a TypeScript one.
+const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.vue', '.js', '.jsx'];
 // Type-only files declare modules rather than import them.
 const SKIP_FILES = ['.d.ts'];
 
@@ -47,8 +49,19 @@ const collectFiles = (dir) => {
 // `import { a, b } from 'pkg'` / `import type { a } from 'pkg'` /
 // `import Default, { a } from 'pkg'`
 const IMPORT_RE = /^[ \t]*import\s+(?!type\s)(?!['"])([^'"]*?)\s+from\s+['"]([^'"]+)['"]/gm;
+// `import Default from 'pkg'` — a default import of a module that has no
+// default export binds `undefined` at runtime (no throw, so it is invisible).
+const DEFAULT_IMPORT_RE = /^[ \t]*import\s+(?!type\s)(?!['"])([A-Za-z_$][\w$]*)\s+from\s+['"]([^'"]+)['"]/gm;
 // `export { a } from 'pkg'` / `export { a as b } from 'pkg'`
 const EXPORT_RE = /^[ \t]*export\s+(?!type\s)(?!default\s)(?!star\s)([^'"]*?)\s+from\s+['"]([^'"]+)['"]/gm;
+
+/** The default-imported binding of an import clause, or null. */
+const defaultSpecifier = (clause) => {
+  const before = clause.split('{')[0].trim().replace(/,$/, '').trim();
+  if (!before || before.includes('*')) return null;
+  if (!/^[A-Za-z_$][\w$]*$/.test(before)) return null;
+  return before;
+};
 
 /** The package specifiers of an import/export clause, or null for a bare/default/namespace import. */
 const clauseSpecifiers = (clause) => {
@@ -106,7 +119,26 @@ const runtimeExports = async (spec) => {
   }
 };
 
+const collectDefaultImports = () => {
+  const found = new Map();
+
+  for (const file of collectFiles(SRC_DIR)) {
+    const source = readFileSync(file, 'utf8');
+    for (const match of source.matchAll(DEFAULT_IMPORT_RE)) {
+      const name = defaultSpecifier(match[1]);
+      if (!name) continue;
+      const spec = match[2];
+      if (spec.startsWith('.') || spec.startsWith('/')) continue;
+      if (!found.has(spec)) found.set(spec, new Set());
+      found.get(spec).add(file);
+    }
+  }
+
+  return found;
+};
+
 const namedImports = collectNamedImports();
+const defaultImports = collectDefaultImports();
 const phantoms = [];
 const unverifiable = [];
 
@@ -125,12 +157,29 @@ for (const [spec, bag] of [...namedImports].sort()) {
   }
 }
 
+// a default import of a module without a default export binds undefined
+for (const [spec, files] of [...defaultImports].sort()) {
+  const exports = await runtimeExports(spec);
+
+  if (!exports) {
+    continue;
+  }
+
+  if (!exports.has('default')) {
+    phantoms.push({ spec, name: 'default', files: [...files].sort() });
+  }
+}
+
 const rel = (file) => relative(PKG_DIR, file);
 
 if (phantoms.length) {
   console.error(`✗ ${phantoms.length} phantom named import(s) — these throw at runtime:\n`);
   for (const { spec, name, files } of phantoms) {
-    console.error(`  '${name}' is not exported by '${spec}'`);
+    console.error(
+      name === 'default'
+        ? `'${spec}' has no default export — the default import binds undefined`
+        : `'${name}' is not exported by '${spec}'`,
+    );
     for (const file of files) console.error(`      ${rel(file)}`);
     console.error('');
   }

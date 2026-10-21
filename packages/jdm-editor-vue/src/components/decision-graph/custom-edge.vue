@@ -76,6 +76,7 @@ const edgeStyle = computed(() => ({
       <Button
         v-if="!state.disabled"
         type="primary"
+        shape="round"
         danger
         :class="clsx('grl-edge-delete-button')"
         :data-visible="state.isHovered"
