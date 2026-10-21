@@ -25,7 +25,10 @@ export type CustomEdgeProps = {
 // — destructure the upstream EdgeProps fields it carries.
 import { BaseEdge, EdgeLabelRenderer, type Position, getBezierPath } from '@vue-flow/core';
 import clsx from 'clsx';
-import { Delete } from 'lucide-vue-next';
+// PORTING: upstream uses antd's DeleteOutlined (a bin with a lid); lucide's
+// `Delete` is a BACKSPACE glyph, so the port uses `Trash2` — the same shape
+// the port's other DeleteOutlined replacements use.
+import { Trash2 } from 'lucide-vue-next';
 import { match } from 'ts-pattern';
 import { computed } from 'vue';
 
@@ -82,7 +85,7 @@ const edgeStyle = computed(() => ({
         :data-visible="state.isHovered"
         @click="() => graphActions.removeEdges([id])"
       >
-        <template #icon><Delete :size="14" /></template>
+        <template #icon><Trash2 :size="14" /></template>
       </Button>
     </div>
   </EdgeLabelRenderer>

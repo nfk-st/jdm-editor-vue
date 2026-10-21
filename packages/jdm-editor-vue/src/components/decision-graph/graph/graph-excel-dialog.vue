@@ -385,26 +385,45 @@ const HeaderSelect = defineComponent({
                   ]),
                 ),
                 // dropdownRender footer: input + Add item (antd Divider above)
-                h('div', { class: 'grl-graph-excel__dropdown-footer' }, [
-                  h(Input, {
-                    'placeholder': 'Enter field name',
-                    'modelValue': selectProps.newItemName,
-                    'onUpdate:modelValue': (value: string) => emit('newItemName', value),
-                  }),
-                  h(
-                    Button,
-                    {
-                      type: 'text',
-                      size: 'small',
-                      onClick: (event: MouseEvent) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        emit('addItem');
-                      },
+                // PORTING(reka-ui): the footer lives inside reka's
+                // SelectContent, whose keydown handler implements a
+                // typeahead: every single-character keypress searches the
+                // options and MOVES THE FOCUS to the matching one, and Tab
+                // and Space are swallowed. antd's select has no typeahead —
+                // its dropdownRender footer is a plain input — so the
+                // footer's keydown stops at the footer. Escape is let
+                // through: reka's DismissableLayer listens for it on the
+                // window, and stopping it would trap the dropdown open.
+                h(
+                  'div',
+                  {
+                    class: 'grl-graph-excel__dropdown-footer',
+                    onKeydown: (event: KeyboardEvent) => {
+                      if (event.key === 'Escape') return;
+                      event.stopPropagation();
                     },
-                    { icon: () => h(Plus, { size: 14 }), default: () => 'Add item' },
-                  ),
-                ]),
+                  },
+                  [
+                    h(Input, {
+                      'placeholder': 'Enter field name',
+                      'modelValue': selectProps.newItemName,
+                      'onUpdate:modelValue': (value: string) => emit('newItemName', value),
+                    }),
+                    h(
+                      Button,
+                      {
+                        type: 'text',
+                        size: 'small',
+                        onClick: (event: MouseEvent) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          emit('addItem');
+                        },
+                      },
+                      { icon: () => h(Plus, { size: 14 }), default: () => 'Add item' },
+                    ),
+                  ],
+                ),
               ]),
             ]),
           ),

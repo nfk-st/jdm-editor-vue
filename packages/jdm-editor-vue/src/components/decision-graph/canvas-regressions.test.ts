@@ -92,6 +92,20 @@ describe('canvas regressions', () => {
     wrapper.unmount();
   });
 
+  it('renders the edge delete affordance with a bin, not a backspace glyph', async () => {
+    // upstream's edge button uses antd's DeleteOutlined (a bin with a lid);
+    // lucide's `Delete` is a BACKSPACE arrow with an X, so the port used
+    // `Trash2`.
+    const { wrapper } = await mountGraph(graphWithEdge());
+
+    const icon = wrapper.find('.grl-edge-delete-button svg');
+    expect(icon.exists()).toBe(true);
+    expect(icon.classes()).toContain('lucide-trash-2');
+    expect(icon.classes()).not.toContain('lucide-delete');
+
+    wrapper.unmount();
+  });
+
   it('keeps the node type map stable when the graph changes', async () => {
     // The map is rebuilt whenever the selector that produced it was
     // invalidated, and vue-flow remounts a node when its component function
