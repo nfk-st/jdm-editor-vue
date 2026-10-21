@@ -155,7 +155,7 @@ Bottom-up so every module lands with its dependencies already present:
 | 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)                                          |
 | 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                                                                |
 | 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels)                  |
-| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (57 stories; the parity review against upstream's own storybook is below)                                                                                   |
+| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (59 stories; the parity review against upstream's own storybook is below)                                                                                   |
 | 10  | docs site / README polish, publish prep          | —            | ✅ done (README with the full component API; docs/ index; publish prep — LICENSE, prepublishOnly, repository, sideEffects, changelog, publish + validate workflows) |     |
 
 Testing rule: each module lands with vitest coverage of its logic core
@@ -168,9 +168,10 @@ Upstream's own storybook runs from the pinned clone (`pnpm storybook` in
 `/tmp/jdm-editor/packages/jdm-editor`, port 9009); this port's runs on 6006.
 Every story the two share was rendered in both and compared.
 
-**57 port stories; 55 ids shared with upstream** (the port adds
-`expression--disabled` and `expression--read-only`; upstream's ids match
-one-for-one otherwise).
+**59 port stories; 55 ids shared with upstream** (the port adds
+`expression--disabled`, `expression--read-only` and the `ui/` primitives
+story — see the pre-ship log's round 4; upstream's ids match one-for-one
+otherwise).
 
 ### What the review found
 
@@ -393,10 +394,62 @@ the canonical types.
 
 - **Upstream's `inferNodeTypes` bug** (its `return` aborts the immer recipe
   on the first node) is kept 1:1 — see Known temp debt.
-- **The `excel` dialog's "Enter field name" input sits inside reka's
-  `SelectContent`**, whose typeahead moves focus to a matching option and
-  blocks Space and Tab; antd's select has no typeahead. The fix needs a
-  browser to confirm, and it is not yet applied.
+
+### Round 4 — the deferred list, closed
+
+The items the earlier rounds deferred were re-derived from the sources that
+produced them — antd 5.21.2's own code for the primitives, antd's computed
+tokens for the colours — and then confirmed in a browser, against upstream's
+own Storybook where a side-by-side was possible.
+
+- **The design tokens are antd's, verbatim.** The values were
+  approximations of antd v5's defaults; they are now antd 5.21.2's
+  computed values (`theme.getDesignToken` with `defaultAlgorithm` and with
+  `darkAlgorithm`). Eleven were wrong: the dark error-hover/bg/border, the
+  warning-text and info-text in both modes, the dark primary-border-hover,
+  the control outline, the dark bg-text-hover, the font-family (antd's
+  includes 'Noto Sans' and the emoji fallbacks) and the line-height. The
+  port's tokens now match the ones upstream's own Storybook renders,
+  token for token.
+- **The Button's loading state is antd's, not the disabled one.** antd
+  dims the button with `opacityLoading` (0.65), keeps the variant's
+  colours, REPLACES the icon with the spinner and swallows the click in
+  its `handleClick` — the button is not disabled. The port rendered the
+  disabled state and put the spinner beside the icon.
+- **The multi-select chip's remove control is rc-select's TransBtn** — a
+  span, not a button: not focusable, `aria-hidden`, unselectable. The port
+  used a focusable `<button>`, so every chip added a tab stop, and it
+  painted the icon in the text-secondary colour instead of antd's
+  `colorIcon` (0.45).
+- **The edge's delete affordance is a bin.** Upstream uses antd's
+  `DeleteOutlined`; the port used lucide's `Delete`, which is a BACKSPACE
+  glyph. It is `Trash2` now — the same shape the port's other
+  `DeleteOutlined` replacements use.
+- **The excel dialog's "Enter field name" input is typeable.** reka-ui's
+  `SelectContent` implements a typeahead: a keypress starts a search, and
+  the Space that follows it is swallowed — "My Field" became "MyField" —
+  and Tab was swallowed too. antd's select has no typeahead (its
+  `dropdownRender` footer is a plain input), so the footer's keydown stops
+  at the footer. Escape is let through: reka's `DismissableLayer` listens
+  for it on the window.
+- **The excel dialog's drag handle inherits the text colour.** Upstream
+  paints it with `var(--grl-color-text-tertiary)` — a variable its
+  `theme.tsx` never defines, so the icon inherits the text colour (0.88).
+  The port DOES define that variable (antd's `colorTextTertiary`, which its
+  Switch needs), so the literal would have rendered 0.45. It inherits now,
+  as upstream's does.
+
+The verification is in the browser, not in the reasoning: the excel dialog
+was driven with a real `.xlsx` upload (CDP `DOM.setFileInputFiles`) in both
+storybooks, and the field name, the Space, the Tab and the focus now behave
+identically to upstream's.
+
+The story count changed: the port now has **59 stories** (upstream's 55
+shared ids, plus `expression--disabled`, `expression--read-only` and the
+new `ui--button-states` / `ui--multi-select-tags`). The `ui/` stories are
+additive — upstream's ui primitives are antd's own components, so there is
+no upstream story to point at, and the port's own primitives had no surface
+that rendered the states the review had claims about.
 
 ## Publish prep (step 10)
 
@@ -443,9 +496,6 @@ AND listed").
 
 **Deferred — a browser must confirm it:**
 
-- The **excel dialog's "Enter field name" input** sits inside reka's
-  `SelectContent`, whose typeahead moves the focus to a matching option
-  and blocks Space and Tab; antd's select has no typeahead.
 - The **Storybook has no dark-mode toggle** (upstream's preview has one),
   so the dark parity was never reviewed side by side.
 - The **handle offsets** — the port restores reactflow's
@@ -454,27 +504,16 @@ AND listed").
 - The **empty node body** collapses with `:empty` — spec-compliant
   browsers agree, jsdom does not.
 
-**Deferred — a token value differs from antd's** (the port's value is a
-reasonable approximation, not upstream's):
-
-- The dark `--grl-color-error-hover` (#e86062 vs antd's #e86e6b).
-- The warning / info text colours, the dark primary-border-hover, the
-  control outline, the bg-text-hover, the error bg and border, and the
-  font-family (antd's includes 'Noto Sans' and the emoji fallbacks).
-- The `--grl-color-text-tertiary` the port added for the switch's hover
-  (antd's own variable is left undefined there, so its handle inherits the
-  0.88 text colour).
-
 **Deferred — cosmetic or invisible:**
 
-- The **button's loading state** looks disabled (antd uses opacity 0.65
-  and keeps the colours) and renders the icon and the spinner side by side
-  (antd swaps them).
-- The **multi-select chip's remove control** is a focusable `<button>`
-  (rc-select uses a non-focusable `<span>`), so every chip adds a tab
-  stop; and its colour is 0.65 rather than antd's colorIcon at 0.45.
-- The **edge's delete icon** is lucide's `Delete` (a backspace glyph);
-  upstream uses antd's DeleteOutlined.
+- The **select's clear affordance** differs from antd's: antd's
+  `.ant-select-clear` is `opacity: 0` and appears only while the select is
+  hovered (and antd hides the arrow once a value is there); the port shows
+  the clear icon AND the arrow at all times, in the text-secondary colour
+  instead of `colorTextQuaternary`. Fixing it means the trigger's layout
+  (the clear is in the flow, antd's overlays the arrow), so it wants a
+  side-by-side of every select in the app — found by the browser
+  comparison in round 4, not by the review.
 - The **switch's Popconfirm** lacks antd's default ExclamationCircleFilled
   icon.
 - The **simulator's Spin** dims the content instead of drawing a spinner.
