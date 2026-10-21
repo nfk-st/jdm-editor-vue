@@ -340,7 +340,13 @@ const ImportColumnRow = defineComponent({
               class: 'grl-dt-excel-row__handle',
               style: { cursor: 'grab', display: 'flex', alignItems: 'center', justifyContent: 'center' },
             },
-            () => h(GripVertical, { size: 14, style: { color: 'var(--grl-color-text-tertiary)' } }),
+            // PORTING(antd): upstream sets the handle's colour to
+            // `var(--grl-color-text-tertiary)`, but upstream's theme.tsx never
+            // exposes that variable — so upstream's icon inherits the text
+            // colour (0.88). The port DOES define the variable (antd's
+            // colorTextTertiary, which its Switch needs), so the literal
+            // would render 0.45 here. Inherit, as upstream does.
+            () => h(GripVertical, { size: 14, style: { color: 'var(--grl-color-text)' } }),
           ),
           h(Switch, {
             'size': 'small',
