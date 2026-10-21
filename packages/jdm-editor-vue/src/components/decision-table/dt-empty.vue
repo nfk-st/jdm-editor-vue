@@ -230,3 +230,11 @@ const unsubscribe = stateStore.subscribe((state, prevState) => {
 });
 onBeforeUnmount(unsubscribe);
 </script>
+
+<template>
+  <!-- PORTING: upstream's dt-empty.tsx is renderless — it returns null and
+       only wires the props to the store. A Vue SFC with no template has no
+       render function at all, and Vue warns "Component is missing template
+       or render function" (and renders a placeholder comment). This
+       template renders nothing, like upstream's null. -->
+</template>

@@ -102,7 +102,11 @@ const TableInputCell = defineComponent({
   name: 'TableInputCell',
   props: {
     column: { type: Object as PropType<TableCellProps['column']>, default: undefined },
-    value: { type: String, required: true },
+    // PORTING: upstream's React cell has no prop types, and an empty cell's
+    // value IS undefined (the rule has no entry for that column). Declaring
+    // the prop as required made Vue warn "Invalid prop: type check failed
+    // for prop 'value'" on every empty cell.
+    value: { type: String, required: false, default: undefined },
     disabled: { type: Boolean, default: undefined },
     diff: { type: Object as PropType<TableCellProps['diff']>, default: undefined },
     index: { type: Number, required: true },

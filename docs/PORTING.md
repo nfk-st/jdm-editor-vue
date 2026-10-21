@@ -603,10 +603,11 @@ export surface, not the surface the port wishes it had.
 - Table drop-direction uses Sortable's `willInsertAfter` (insertion side)
   where upstream reads the pointer delta — same in the common case, differs
   dragging down onto a target's upper half. Marked in table.vue.
-- The **excel dialog's "Enter field name" input sits inside reka's
+- ~~The **excel dialog's "Enter field name" input sits inside reka's
   `SelectContent`**, whose typeahead moves the focus to a matching option
-  and blocks Space and Tab; antd's select has no typeahead. The fix needs a
-  browser to confirm, so it is not applied.
+  and blocks Space and Tab~~ FIXED in round 4: the footer's keydown stops
+  at the footer (Escape is let through), and upstream's own storybook
+  types "My Field" the same way.
 - The **Storybook harness has no dark-mode toggle** — upstream's preview
   has one. The dark parity was therefore never reviewed side by side.
 - The **shipped types need `skipLibCheck`** (as most Vue libraries do):
