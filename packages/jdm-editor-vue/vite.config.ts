@@ -1,5 +1,7 @@
 import vue from '@vitejs/plugin-vue';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
@@ -7,7 +9,34 @@ import wasm from 'vite-plugin-wasm';
 
 import packageJson from './package.json';
 
+const require = createRequire(import.meta.url);
+
 const dependencyIds = [...Object.keys(packageJson.dependencies), ...Object.keys(packageJson.peerDependencies)];
+
+/** The manifest of an installed package, found through its entry point. */
+const packageManifest = (packageName: string): Record<string, unknown> | undefined => {
+  // the entry point is always exported; the manifest itself often is not
+  // (an `exports` map without './package.json' blocks the deep import)
+  let directory = dirname(require.resolve(packageName));
+
+  while (directory !== dirname(directory)) {
+    const manifestPath = join(directory, 'package.json');
+
+    if (existsSync(manifestPath)) {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, unknown>;
+
+      if (manifest.name === packageName) {
+        return manifest;
+      }
+
+      return undefined;
+    }
+
+    directory = dirname(directory);
+  }
+
+  return undefined;
+};
 
 /**
  * The subpaths a package's `exports` map publishes — the only subpaths a
@@ -19,18 +48,48 @@ const dependencyIds = [...Object.keys(packageJson.dependencies), ...Object.keys(
  * — and the bundle then fails to load at all.
  */
 const publishedSubpaths = (packageName: string): string[] => {
-  try {
-    const manifest = require.resolve(`${packageName}/package.json`, { paths: [process.cwd()] });
-    const exportsMap = JSON.parse(readFileSync(manifest, 'utf8')).exports;
+  const manifest = packageManifest(packageName);
 
-    if (!exportsMap || typeof exportsMap !== 'object') {
-      return [];
-    }
+  if (!manifest) {
+    throw new Error(`Cannot read the manifest of '${packageName}' — it is a declared dependency.`);
+  }
 
-    return Object.keys(exportsMap);
-  } catch {
+  const exportsMap = manifest.exports;
+
+  if (!exportsMap || typeof exportsMap !== 'object') {
     return [];
   }
+
+  return Object.keys(exportsMap as Record<string, unknown>);
+};
+
+/** Does the package's exports map publish this subpath? */
+const publishes = (packageName: string, subpath: string): boolean =>
+  publishedSubpaths(packageName).some((published) => {
+    if (published === subpath) {
+      return true;
+    }
+
+    if (published.includes('*')) {
+      const [prefix, suffix] = published.split('*');
+      return subpath.startsWith(prefix) && subpath.endsWith(suffix);
+    }
+
+    return false;
+  });
+
+/** Split a bare specifier into its package and its subpath ('./…'). */
+const splitPackageId = (id: string): { packageName: string; subpath: string } | undefined => {
+  const parts = id.split('/');
+  // a scoped package's name is two segments ('@scope/pkg')
+  const packageName = id.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+  const rest = id.slice(packageName.length);
+
+  if (!rest) {
+    return undefined;
+  }
+
+  return { packageName, subpath: `.${rest}` };
 };
 
 const isExternalDependency = (id: string): boolean => {
@@ -52,22 +111,13 @@ const isExternalDependency = (id: string): boolean => {
   // the subpath and its own dependencies are BUNDLED (reka-ui/date pulls in
   // @internationalized/date, an undeclared Apache-2.0 dependency). Only when
   // the package's exports map publishes it.
-  const slash = id.indexOf('/');
+  const split = splitPackageId(id);
 
-  if (slash < 0) {
+  if (!split || !dependencyIds.includes(split.packageName)) {
     return false;
   }
 
-  const packageName = id.slice(0, slash);
-  const subpath = id.slice(slash);
-
-  if (!dependencyIds.includes(packageName)) {
-    return false;
-  }
-
-  return publishedSubpaths(packageName).some(
-    (published) => published === subpath || published.startsWith(`${subpath}/`),
-  );
+  return publishes(split.packageName, split.subpath);
 };
 
 export default defineConfig({
@@ -105,7 +155,8 @@ export default defineConfig({
       // but only a PUBLISHED one: a package without an exports map needs
       // Node's extension resolution, and externalising its subpath leaves
       // the bundle with an import Node cannot resolve (the bundle then
-      // fails to load). `check:dist` guards that.
+      // fails to load). `check:dist` guards that, and it also checks that no
+      // UNDECLARED package ended up in the bundle.
       external: (id: string) => isExternalDependency(id),
     },
   },

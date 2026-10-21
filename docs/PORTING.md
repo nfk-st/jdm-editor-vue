@@ -427,6 +427,58 @@ keep-a-changelog `CHANGELOG.md` at 0.1.0, and CI: `validate.yaml` runs the
 gates, `publish.yaml` publishes on a `chore(release)` commit (upstream's
 trigger).
 
+## Deferred before 0.1.0
+
+The pre-ship review found these; none is a defect that blocks the publish,
+and each is listed here rather than left unrecorded (the rule is "marked
+AND listed").
+
+**Deferred — a browser must confirm it:**
+
+- The **excel dialog's "Enter field name" input** sits inside reka's
+  `SelectContent`, whose typeahead moves the focus to a matching option
+  and blocks Space and Tab; antd's select has no typeahead.
+- The **Storybook has no dark-mode toggle** (upstream's preview has one),
+  so the dark parity was never reviewed side by side.
+- The **handle offsets** — the port restores reactflow's
+  `translate(0, -50%)` base (vue-flow's own is `translate(-50%, -50%)`), so
+  the handles sit where upstream's do. The pixels are unverified.
+- The **empty node body** collapses with `:empty` — spec-compliant
+  browsers agree, jsdom does not.
+
+**Deferred — a token value differs from antd's** (the port's value is a
+reasonable approximation, not upstream's):
+
+- The dark `--grl-color-error-hover` (#e86062 vs antd's #e86e6b).
+- The warning / info text colours, the dark primary-border-hover, the
+  control outline, the bg-text-hover, the error bg and border, and the
+  font-family (antd's includes 'Noto Sans' and the emoji fallbacks).
+- The `--grl-color-text-tertiary` the port added for the switch's hover
+  (antd's own variable is left undefined there, so its handle inherits the
+  0.88 text colour).
+
+**Deferred — cosmetic or invisible:**
+
+- The **button's loading state** looks disabled (antd uses opacity 0.65
+  and keeps the colours) and renders the icon and the spinner side by side
+  (antd swaps them).
+- The **multi-select chip's remove control** is a focusable `<button>`
+  (rc-select uses a non-focusable `<span>`), so every chip adds a tab
+  stop; and its colour is 0.65 rather than antd's colorIcon at 0.45.
+- The **edge's delete icon** is lucide's `Delete` (a backspace glyph);
+  upstream uses antd's DeleteOutlined.
+- The **switch's Popconfirm** lacks antd's default ExclamationCircleFilled
+  icon.
+- The **simulator's Spin** dims the content instead of drawing a spinner.
+- **`#tab-bar-extra-content`** is always forwarded and loses antd's
+  `{left, right}` form.
+- **Dead code**: `ui/TimePicker.vue`'s `SEGMENTS`, `helpers/traversal.ts`'s
+  unused `DecisionEdge`, `expression.stories.ts`'s unused action.
+- The **graph's node components are handed reactive host props** (a Vue
+  dev-mode warning).
+- The **upstream portal-bubbled menu clicks** also select the node in
+  upstream; the port's do not.
+
 ## Definition of done
 
 - Public API checklist green.

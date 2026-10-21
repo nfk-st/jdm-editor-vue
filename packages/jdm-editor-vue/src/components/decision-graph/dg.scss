@@ -21,6 +21,18 @@
     transform-origin: 50% calc(50% + 3.5px);
     opacity: 0.75;
 
+    // PORTING(vue-flow): reactflow places a handle with
+    // `transform: translate(0, -50%)` (its own base CSS); vue-flow's base
+    // is `translate(-50%, -50%)`, which would put the handle ~3.5px
+    // further out. The declaration must stay BELOW the hover rule's
+    // specificity — upstream's base is reactflow's own (0,1,0) and its
+    // hover is (0,3,0), so the hover's `scale(2)` REPLACES the transform
+    // there too. A higher-specificity base would cancel the hover scale.
+    &-left,
+    &-right {
+      transform: translate(0, -50%);
+    }
+
     &-connecting,
     &:hover {
       transform: scale(2);
@@ -552,16 +564,6 @@
         top: 50%;
         border-radius: 50%;
       }
-    }
-
-    // PORTING(vue-flow): reactflow places a handle with
-    // `left: -4px; transform: translate(0, -50%)`; vue-flow's base is
-    // `left: 0; transform: translate(-50%, -50%)`. The offsets below are
-    // reactflow's, so the base transform is restored first — otherwise the
-    // handles sit ~3.5px further out and jump inward on the hover scale.
-    .vue-flow__handle-left,
-    .vue-flow__handle-right {
-      transform: translate(0, -50%);
     }
 
     .vue-flow__handle-left {

@@ -53,9 +53,10 @@ setViewport/fitView({nodes,duration,maxZoom})`.
 - `nodeTypes` map values are Vue components (or `#node-{type}` slots).
 - `onInit` → `@pane-ready`; `onDrop/onDragOver` stay on the wrapper div.
 - Event props → kebab-case emits (`@edge-mouse-enter`, `@nodes-change`,
-  `@edges-change`). Vue Flow 1.48 has no `@nodes-delete` emit — the delete
-  events are `onNodesDelete` / `onEdgesDelete` on the store, not component
-  emits.
+  `@edges-change`). Vue Flow 1.48 has no `@nodes-delete` emit, and the
+  store has no `onNodesDelete` / `onEdgesDelete` either: the removals are
+  picked out of the change events (`nodes-change` with a `remove` change),
+  which is what the port does.
 - Upstream's `React.memo` custom-equality node wrappers — rely on vue-flow
   reactivity (no equivalent).
 - `@vue-flow/core`, `@vue-flow/background` and `@vue-flow/controls` all
@@ -79,6 +80,3 @@ is marked `// PORTING(vue-flow):` at the site):
 | a handle is placed with `left: -4px; transform: translate(0, -50%)` | `left: 0; transform: translate(-50%, -50%)`          | the handles sat further out, and jumped on the hover scale                              |
 | the visible edge path comes first, then the interaction path        | the same order                                       | upstream's "hover the transparent path to recolour the edge" rule never fires in either |
 | `nodeTypes` is a plain map                                          | a changed component function REMOUNTS the node       | rebuilding the map on every edit remounted every node                                   |
-
-The store has no `onNodesDelete` / `onEdgesDelete`: Vue Flow 1.48 exposes
-the removals through the change events only.

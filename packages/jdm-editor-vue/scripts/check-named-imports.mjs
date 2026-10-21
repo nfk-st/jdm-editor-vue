@@ -31,16 +31,19 @@ const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.vue', '.js', '.jsx'];
 const SKIP_FILES = ['.d.ts'];
 
 /** Every source file under src/, minus declaration files. */
-const collectFiles = (dir) => {
+const collectFiles = (dir, skip = new Set()) => {
   const out = [];
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      out.push(...collectFiles(full));
+      out.push(...collectFiles(full, skip));
       continue;
     }
     if (!SOURCE_EXTENSIONS.some((ext) => entry.endsWith(ext))) continue;
     if (SKIP_FILES.some((suffix) => entry.endsWith(suffix))) continue;
+    // a file imported as `?raw` is TEXT, not a module — its "imports" are
+    // sample code, and a named import in it would be a false positive
+    if (skip.has(full)) continue;
     out.push(full);
   }
   return out;
@@ -106,8 +109,8 @@ const collectNamedImports = () => {
     }
   };
 
-  for (const file of collectFiles(SRC_DIR)) {
-    const source = readFileSync(file, 'utf8');
+  for (const file of collectFiles(SRC_DIR, collectRawAssets())) {
+    const source = withoutTemplateLiterals(readFileSync(file, 'utf8'));
     for (const match of source.matchAll(IMPORT_RE)) {
       const names = clauseSpecifiers(match[1]);
       if (names) record(match[2], names, file);
@@ -134,8 +137,8 @@ const runtimeExports = async (spec) => {
 const collectDefaultImports = () => {
   const found = new Map();
 
-  for (const file of collectFiles(SRC_DIR)) {
-    const source = readFileSync(file, 'utf8');
+  for (const file of collectFiles(SRC_DIR, collectRawAssets())) {
+    const source = withoutTemplateLiterals(readFileSync(file, 'utf8'));
     for (const match of source.matchAll(IMPORT_RE)) {
       // `import Default, { a } from 'pkg'` — the default binding sits
       // before the braces
@@ -151,6 +154,31 @@ const collectDefaultImports = () => {
   }
 
   return found;
+};
+
+/**
+ * The source with its TEMPLATE LITERALS blanked out.
+ *
+ * A story fixture holds a function's SOURCE in a template literal, and that
+ * source contains imports ('import zen from \'zen\'') — they are sample
+ * code, not imports of the module. The scan would report them as
+ * unverifiable specifiers.
+ */
+const withoutTemplateLiterals = (source) => source.replace(/`(?:\\.|[^`\\])*`/gs, '``');
+
+/** The files the sources import as `?raw` — text assets, not modules. */
+const collectRawAssets = () => {
+  const assets = new Set();
+
+  for (const file of collectFiles(SRC_DIR)) {
+    const source = readFileSync(file, 'utf8');
+
+    for (const match of source.matchAll(/['"](\.[^'"]*\?raw)['"]/g)) {
+      assets.add(resolve(dirname(file), match[1].split('?')[0]));
+    }
+  }
+
+  return assets;
 };
 
 const namedImports = collectNamedImports();

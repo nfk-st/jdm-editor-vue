@@ -11,7 +11,7 @@
 // gate stayed green while the package could not be loaded at all.
 //
 // Run: `pnpm --filter @nfk.st/jdm-editor-vue check:dist`
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -60,6 +60,58 @@ if (failed) {
   console.error("import means the dependency's specifier was externalised wrongly");
   console.error('(a subpath of a package without an `exports` map needs Node to');
   console.error('resolve it by path — with the file extension).');
+  process.exit(1);
+}
+
+// ── the bundle must not carry an UNDECLARED dependency ────────────────────
+//
+// A dependency that is bundled instead of externalised is invisible to the
+// import check above (it loads fine) — but it ships without its licence
+// notice and without being declared. reka-ui/date is the case in point:
+// bundling it pulled @internationalized/date (Apache-2.0) into the
+// package.
+const MAP = join(PKG_DIR, 'dist', 'index.js.map');
+
+if (existsSync(MAP)) {
+  const map = JSON.parse(readFileSync(MAP, 'utf8'));
+  const manifest = JSON.parse(readFileSync(join(PKG_DIR, 'package.json'), 'utf8'));
+  const declared = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.peerDependencies ?? {}),
+    ...Object.keys(manifest.devDependencies ?? {}),
+  ]);
+
+  const bundled = new Set();
+
+  for (const source of map.sources ?? []) {
+    // the LAST '/node_modules/' segment is the package itself (pnpm's store
+    // path repeats it)
+    const parts = source.split('/node_modules/');
+    const tail = parts[parts.length - 1];
+
+    if (!tail || tail.startsWith('.')) {
+      continue;
+    }
+
+    const segments = tail.split('/');
+    bundled.add(segments[0].startsWith('@') ? `${segments[0]}/${segments[1]}` : segments[0]);
+  }
+
+  const undeclared = [...bundled].filter((name) => !declared.has(name)).sort();
+
+  if (undeclared.length) {
+    failed = true;
+    console.error('✗ the bundle carries dependencies the manifest does not declare:');
+    for (const name of undeclared) {
+      console.error(`    ${name}`);
+    }
+    console.error('');
+    console.error('An externalised dependency must be external by NAME — a subpath');
+    console.error("is externalised only when the package's `exports` map publishes it.");
+  }
+}
+
+if (failed) {
   process.exit(1);
 }
 
