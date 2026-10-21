@@ -145,6 +145,12 @@ export const inferNodeTypes: InferNodeTypes = ({ decisionGraph, nodeTypes, custo
   const newNodeTypes = produce(nodeTypes, (draft) => {
     for (const { node, incomers } of graphWalker.walk(decisionGraph)) {
       if (node.type === 'inputNode') {
+        // upstream quirk, kept 1:1 (ADR-0002): upstream's `return` here
+        // leaves the immer recipe, and the walk yields the input node
+        // FIRST — so upstream's inference never reaches a downstream node.
+        // The port keeps the behaviour rather than silently "fixing" it;
+        // changing it to `continue` would be a behaviour change and needs
+        // an explicit decision.
         return;
       }
 

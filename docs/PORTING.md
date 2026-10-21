@@ -199,6 +199,11 @@ export surface, not the surface the port wishes it had.
   and its graph tab therefore froze at their first render; ours recompute.
   Each site carries a `// PORTING:` marker — the dependency lists are a
   React-era artifact, not a contract worth keeping.
+- Upstream's `inferNodeTypes` returns from the immer recipe on the first
+  node it walks, and the walk yields the input node first — so upstream's
+  type inference never reaches a downstream node. Kept 1:1 (ADR-0002) and
+  pinned by a test, so changing it to `continue` stays a deliberate
+  decision rather than an accidental drift.
 - Table drop-direction uses Sortable's `willInsertAfter` (insertion side)
   where upstream reads the pointer delta — same in the common case, differs
   dragging down onto a target's upper half. Marked in table.vue.
