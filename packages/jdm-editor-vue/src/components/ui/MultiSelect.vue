@@ -157,16 +157,21 @@ const contentStyle = computed(() =>
       >
         <span v-for="value in values" :key="value" class="grl-multiselect__chip">
           <span class="grl-multiselect__chip-content">{{ labelFor(value) }}</span>
-          <button
+          <!-- PORTING(antd): rc-select renders the tag's remove control as a
+               TransBtn — a SPAN, not a button: it is not focusable, it is
+               aria-hidden, and it is unselectable. A focusable button gave
+               every chip an extra tab stop. -->
+          <span
             v-if="!disabled"
-            type="button"
             class="grl-multiselect__chip-remove"
-            aria-label="Remove"
+            aria-hidden="true"
+            unselectable="on"
+            style="user-select: none"
             @mousedown.prevent
             @click.stop="toggleValue(value)"
           >
             <X :size="10" />
-          </button>
+          </span>
         </span>
         <input
           ref="inputRef"
@@ -259,10 +264,10 @@ const contentStyle = computed(() =>
     align-items: center;
     justify-content: center;
     padding: 0 2px;
-    color: var(--grl-color-text-secondary);
+    // antd's `.ant-select-selection-item-remove` uses colorIcon (0.45) and
+    // colorIconHover on hover (which is colorText).
+    color: var(--grl-color-icon);
     font-size: 12px;
-    border: none;
-    background: transparent;
     cursor: pointer;
     line-height: 1;
     // antd's `.ant-select-selection-item-remove` carries NO opacity rule —

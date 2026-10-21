@@ -1,13 +1,16 @@
 <script setup lang="ts">
 // antd Button replacement — token-styled, supports the variants the port uses
 // (text/link/default), danger state, icon slot, small/default sizes.
-// PORTING: antd swallows clicks while `loading` (its handleClick returns
-// early). The port also sets the disabled attribute, so a loading button is
-// inert to both pointer and keyboard — the semantics the REVIEW-PROMPT's
-// ui/ primitive bar asks for.
+// PORTING: antd's loading state is NOT its disabled state. antd renders the
+// button with `disabled={mergedDisabled}` (loading is not part of it), dims
+// it with opacity 0.65, keeps the variant's colours, swaps the icon for the
+// spinner, and swallows the click in its handleClick
+// (https://github.com/ant-design/ant-design/issues/30207). The port follows
+// that exactly: a loading button keeps its colours, its hover states and its
+// focusability, and only the click is swallowed.
 defineOptions({ inheritAttrs: false });
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     type?: 'default' | 'primary' | 'text' | 'link';
     // antd's `shape` — 'round' is the pill button the edge's delete
@@ -32,6 +35,15 @@ withDefaults(
 );
 
 const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', event: FocusEvent): void }>();
+
+// antd's handleClick: a loading button swallows the click.
+const onClick = (event: MouseEvent) => {
+  if (props.loading) {
+    event.preventDefault();
+    return;
+  }
+  emit('click', event);
+};
 </script>
 
 <template>
@@ -46,17 +58,22 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
       size !== 'default' && `grl-btn--${size}`,
       shape !== 'default' && `grl-btn--${shape}`,
       danger && 'grl-btn--danger',
-      (disabled || loading) && 'grl-btn--disabled',
+      // loading is NOT disabled — antd dims the button and keeps its
+      // colours, so it gets its own class.
+      disabled && 'grl-btn--disabled',
+      loading && 'grl-btn--loading',
       block && 'grl-btn--block',
     ]"
     type="button"
-    :disabled="disabled || loading"
-    @click="(e) => emit('click', e)"
+    :disabled="disabled"
+    @click="onClick"
     @blur="(e) => emit('blur', e)"
     v-bind="$attrs"
   >
-    <span v-if="$slots.icon" class="grl-btn__icon"><slot name="icon" /></span>
+    <!-- antd swaps the icon for the spinner while loading (it renders the
+         loading icon INSTEAD of the icon, not beside it). -->
     <span v-if="loading" class="grl-btn__spinner" />
+    <span v-else-if="$slots.icon" class="grl-btn__icon"><slot name="icon" /></span>
     <slot />
   </button>
 </template>
@@ -183,6 +200,14 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     }
   }
 
+  // antd's loading state: the button keeps its variant's colours and dims
+  // to opacity 0.65 (antd's opacityLoading). It is NOT the disabled state,
+  // so the hover rules above still apply.
+  &--loading {
+    opacity: var(--grl-opacity-loading);
+    cursor: default;
+  }
+
   &--block {
     width: 100%;
   }
@@ -215,7 +240,8 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     align-items: center;
   }
 
-  // antd loading parity — token spinner
+  // antd loading parity — the spinner replaces the icon, in the current
+  // colour (antd's LoadingOutlined).
   &__spinner {
     display: inline-block;
     width: 14px;
@@ -223,7 +249,6 @@ const emit = defineEmits<{ (e: 'click', event: MouseEvent): void; (e: 'blur', ev
     border: 2px solid currentcolor;
     border-top-color: transparent;
     border-radius: 50%;
-    opacity: 0.7;
     animation: grl-btn-spin 0.6s linear infinite;
   }
 }

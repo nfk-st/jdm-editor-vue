@@ -5,6 +5,10 @@
 // emit the same class name for their defaults, so every button matched
 // `.grl-btn--danger.grl-btn--default` — and a danger primary button
 // rendered red text on a red background.
+//
+// The loading state is antd's, not the disabled one: antd dims the button
+// (opacity 0.65), keeps the variant's colours, swaps the icon for the
+// spinner and swallows the click.
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
@@ -35,5 +39,55 @@ describe('Button classes', () => {
 
   it('marks a danger button', () => {
     expect(classes({ type: 'primary', danger: true })).toContain('grl-btn--danger');
+  });
+});
+
+describe('Button loading state', () => {
+  it('is not the disabled state — antd dims the button and keeps its colours', () => {
+    const wrapper = mount(Button, { props: { type: 'primary', loading: true } });
+
+    expect(wrapper.classes()).toContain('grl-btn--loading');
+    expect(wrapper.classes()).not.toContain('grl-btn--disabled');
+    // antd renders `disabled={mergedDisabled}` — loading is not part of it,
+    // so the button keeps its focusability and its hover states.
+    expect(wrapper.attributes('disabled')).toBeUndefined();
+
+    wrapper.unmount();
+  });
+
+  it('swallows the click, as antd’s handleClick does', async () => {
+    const wrapper = mount(Button, { props: { loading: true } });
+
+    // antd's button is NOT disabled while loading — the click is swallowed
+    // by the handler, not by the disabled attribute.
+    expect(wrapper.attributes('disabled')).toBeUndefined();
+    await wrapper.trigger('click');
+
+    expect(wrapper.emitted('click')).toBeUndefined();
+
+    wrapper.unmount();
+  });
+
+  it('emits the click when it is not loading', async () => {
+    const wrapper = mount(Button);
+
+    await wrapper.trigger('click');
+
+    expect(wrapper.emitted('click')).toHaveLength(1);
+
+    wrapper.unmount();
+  });
+
+  it('replaces the icon with the spinner instead of rendering both', () => {
+    const wrapper = mount(Button, {
+      props: { loading: true },
+      slots: { icon: '<span class="the-icon" />' },
+    });
+
+    expect(wrapper.find('.grl-btn__spinner').exists()).toBe(true);
+    expect(wrapper.find('.grl-btn__icon').exists()).toBe(false);
+    expect(wrapper.find('.the-icon').exists()).toBe(false);
+
+    wrapper.unmount();
   });
 });
