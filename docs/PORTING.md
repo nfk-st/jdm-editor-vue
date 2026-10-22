@@ -545,7 +545,7 @@ The seven deferred review differences were resolved in Round 5 above.
 - No phantom named imports (see below) — and the playground must actually
   BOOT in a browser, not just type-check.
 - A pre-ship external review has run against the whole port and its
-  findings are resolved (see `REVIEW-PROMPT.md`).
+  findings are resolved.
 
 ## Scope decisions
 
