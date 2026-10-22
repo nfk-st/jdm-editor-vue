@@ -9,7 +9,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Nothing yet.
 
-## [0.1.0] — 2026-10-21
+## [0.1.0] — 2026-10-22
 
 The first release: a complete Vue 3 port of GoRules' React
 [`@gorules/jdm-editor`](https://github.com/gorules/jdm-editor) v1.52.0 (upstream
