@@ -90,7 +90,7 @@ git -C /tmp/jdm-editor checkout 283bb11da324e0aaa641c790de9dd888ea2d2832
 | zustand                                   | provide/inject composables on `helpers/mini-store.ts` (certified round 3; expression/dt/dg stores use it; no Pinia) |
 | antd 5 + @ant-design/icons                | reka-ui + design tokens + `lucide-vue-next`                                                                         |
 | @tanstack/react-table / -virtual          | `@tanstack/vue-table` / `@tanstack/vue-virtual`                                                                     |
-| react-dnd                                 | `vue-draggable-plus` (list reorder only); public `manager` prop dropped → `addNode` ref method                      |
+| react-dnd                                 | `vue-draggable-plus` (list reorder only); deprecated `manager` no-op; no public `addNode` ref                       |
 | @monaco-editor/react                      | direct `monaco-editor` + local `helpers/monaco.ts` loader (same override story)                                     |
 | react-json-tree                           | local `JsonTree` component in `components/ui/`                                                                      |
 | react-resizable-panels / re-resizable     | `splitpanes` (+ CSS resize where simpler)                                                                           |
@@ -115,7 +115,7 @@ module is ported.
       step-8 wiring is in place (the graph store provides the key)_
 - [x] `usePersistentState` (from `helpers/use-persistent-state`)
 - [x] `helpers/schema` exports + `./dist/schema` entry
-- [x] `components/decision-graph`: `DecisionGraph` - **props** (`DecisionGraphProps`): `id`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `disabled`, `components`, `customNodes`, `hideLeftToolbar`, `name`, `viewConfig`, `viewConfigCta`, `onViewConfigCta`, `defaultActivePanel`, `panels`, `onPanelsChange`, `simulate`, `dictionaries`, `mode`, `onChange`, `onReactFlowInit`, `onCodeExtension`, `onFunctionReady`; `manager` is a deprecated accept-and-ignore stub (upstream's react-dnd `DragDropManager`). - **emits**: `update:modelValue` (upstream's `onChange`; the `onChange` prop is kept alongside it). - **slots**: `#tab-bar-extra-content` (upstream's `tabBarExtraContent` ReactNode prop). - **DROPPED**: `reactFlowProOptions` (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md). - **ref** (`DecisionGraphRef` = `GraphRef`): the store's action surface — `setDecisionGraph`, `handleNodesChange`, `handleEdgesChange`, `setNodes`, `addNodes`, `updateNode`, `removeNodes`, `duplicateNodes`, `copyNodes`, `pasteNodes`, `setEdges`, `addEdges`, `removeEdges`, `removeEdgeByHandleId`, `setHoveredEdgeId`, `closeTab`, `openTab`, `goToNode`, `setActivePanel`, `setCompactMode`, `toggleCompactMode`, `setNodeType`, `removeNodeType`, `triggerNodeSelect` — plus `stateStore`, `serialize()`, `restore()`. NOTE: upstream v1.52 has **no** `addNode` on the public ref (the singular add is the canvas's internal `addNodeInner`, upstream graph.tsx); an earlier draft of this checklist claimed one — corrected. - **module exports** (barrel mirrors upstream's `decision-graph/index.ts`): `DecisionGraph`, `GraphNode`, `GraphDecisionNode`, `GraphSimulator`, `SimulatorEditor`, `createJdmNode`, `nodeSpecification`, `NodeColor`, `NodeTypeKind`, the store/serializer hooks (`useDecisionGraphState`, `useDecisionGraphActions`, `useDecisionGraphReferences`, `useDecisionGraphListeners`, `useDecisionGraphRaw`, `useNodeDiff`, `useEdgeDiff`, `useGraphSerializer`, `useTabSerializer`), the diff helpers (`addStrikethrough`, `buildDiffString`, `compareAndUnifyLists`, `compareStringFields`, `calculateDiffGraph`, `processNodes`, `processEdges`) and the type surface (`DecisionGraphProps`, `DecisionGraphRef`, `NodeSpecification`, `MinimalNodeSpecification`, `MinimalNodeProps`, `CustomNodeSpecification`, `DecisionEdge`, `DecisionNode`, `DecisionGraphType`, `DiffMetadata`, `Diff`, `Position`, `DiffStatus`, the `Simulation*` family, `DecisionGraphSnapshot`, `TabSnapshot`, `Slice`).
+- [x] `components/decision-graph`: `DecisionGraph` - **props** (`DecisionGraphProps`): `id`, `defaultValue`, `modelValue` (v-model — upstream's `value`), `disabled`, `components`, `customNodes`, `hideLeftToolbar`, `name`, `viewConfig`, `viewConfigCta`, `onViewConfigCta`, `defaultActivePanel`, `panels`, `onPanelsChange`, `simulate`, `dictionaries`, `mode`, `onChange`, `onReactFlowInit`, `onCodeExtension`, `onFunctionReady`; `manager` is a deprecated accept-and-ignore stub (upstream's react-dnd `DragDropManager`). - **emits**: `update:modelValue` (upstream's `onChange`; the `onChange` prop is kept alongside it). - **slots**: `#tab-bar-extra-content` (single/right content), `#tab-bar-extra-content-left`, `#tab-bar-extra-content-right` (upstream's `{ left, right }` form). - **DROPPED**: `reactFlowProOptions` (vue-flow is MIT — no attribution needed; see docs/vue-flow-mapping.md). - **ref** (`DecisionGraphRef` = `GraphRef`): the store's action surface — `setDecisionGraph`, `handleNodesChange`, `handleEdgesChange`, `setNodes`, `addNodes`, `updateNode`, `removeNodes`, `duplicateNodes`, `copyNodes`, `pasteNodes`, `setEdges`, `addEdges`, `removeEdges`, `removeEdgeByHandleId`, `setHoveredEdgeId`, `closeTab`, `openTab`, `goToNode`, `setActivePanel`, `setCompactMode`, `toggleCompactMode`, `setNodeType`, `removeNodeType`, `triggerNodeSelect` — plus `stateStore`, `serialize()`, `restore()`. NOTE: upstream v1.52 has **no** `addNode` on the public ref (the singular add is the canvas's internal `addNodeInner`, upstream graph.tsx); an earlier draft of this checklist claimed one — corrected. - **module exports** (barrel mirrors upstream's `decision-graph/index.ts`): `DecisionGraph`, `GraphNode`, `GraphDecisionNode`, `GraphSimulator`, `SimulatorEditor`, `createJdmNode`, `nodeSpecification`, `NodeColor`, `NodeTypeKind`, the store/serializer hooks (`useDecisionGraphState`, `useDecisionGraphActions`, `useDecisionGraphReferences`, `useDecisionGraphListeners`, `useDecisionGraphRaw`, `useNodeDiff`, `useEdgeDiff`, `useGraphSerializer`, `useTabSerializer`), the diff helpers (`addStrikethrough`, `buildDiffString`, `compareAndUnifyLists`, `compareStringFields`, `calculateDiffGraph`, `processNodes`, `processEdges`) and the type surface (`DecisionGraphProps`, `DecisionGraphRef`, `NodeSpecification`, `MinimalNodeSpecification`, `MinimalNodeProps`, `CustomNodeSpecification`, `DecisionEdge`, `DecisionNode`, `DecisionGraphType`, `DiffMetadata`, `Diff`, `Position`, `DiffStatus`, the `Simulation*` family, `DecisionGraphSnapshot`, `TabSnapshot`, `Slice`).
 - [x] `components/function`: `Function` (public FunctionProps incl. v-model + trace/error), `FunctionDebugger`,
       `FunctionDebuggerLog`, functionLibraries/Definitions, variableTypeToTypescript
 - [x] `components/expression`: `Expression` (+ store, controller, list/item, command bar, context menu)
@@ -155,7 +155,7 @@ Bottom-up so every module lands with its dependencies already present:
 | 6   | `components/decision-table`                      | 4039         | ✅ done (react-dnd → vue-draggable-plus; +ui/Checkbox, Select allowClear, Modal getContainer/centered, Input focus/select)                                          |
 | 7   | `components/function`                            | 3868         | ✅ done (2.9k zod.d.ts by copy; Monaco via helpers/monaco loader; splitpanes; ui/Tabs + ui/JsonNode)                                                                |
 | 8   | `components/decision-graph` (+ simulator + diff) | 9102         | ✅ done (reactflow → @vue-flow/core; react-dnd dropped (HTML5 DnD); antd → Reka UI + `--grl-*` tokens; public `DecisionGraph` + wrapper + barrels)                  |
-| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (59 stories; the parity review against upstream's own storybook is below)                                                                                   |
+| 9   | stories → Storybook (vue3-vite), parity review   | —            | ✅ done (60 stories; the parity review against upstream's own storybook is below)                                                                                   |
 | 10  | docs site / README polish, publish prep          | —            | ✅ done (README with the full component API; docs/ index; publish prep — LICENSE, prepublishOnly, repository, sideEffects, changelog, publish + validate workflows) |     |
 
 Testing rule: each module lands with vitest coverage of its logic core
@@ -454,12 +454,45 @@ Two more deferred items fell to the same instrument:
   under a child-less node holds in a real browser (`display: none`), which
   jsdom could not confirm.
 
-The story count changed: the port now has **59 stories** (upstream's 55
+The story count changed: the port now has **60 stories** (upstream's 55
 shared ids, plus `expression--disabled`, `expression--read-only` and the
-new `ui--button-states` / `ui--multi-select-tags`). The `ui/` stories are
-additive — upstream's ui primitives are antd's own components, so there is
-no upstream story to point at, and the port's own primitives had no surface
-that rendered the states the review had claims about.
+new `ui--button-states`, `ui--multi-select-tags`, and `ui--toasts`). The
+`ui/` stories are additive — upstream's ui primitives are antd's own
+components, so there is no upstream story to point at, and the port's own
+primitives had no surface that rendered the states the review had claims
+about.
+
+### Final follow-up — dark preview and notifications
+
+The port's Storybook now uses `storybook-dark-mode`. Its `DARK_MODE` channel
+event drives `JdmConfigProvider`'s `theme.mode`; a prop-less `ThemeHost` keeps
+Storybook's live Controls attached to the root story vnode. The
+`Decision Graph / Controlled` story was rendered in dark mode beside the
+[pinned upstream Storybook](https://gorules.github.io/jdm-editor/?path=/story/decision-graph--controlled).
+The canvas, nodes, toolbar, and component drawer render with matching dark
+surfaces and tokens.
+
+The new `ui/Toast` host uses Reka UI's `ToastProvider` and toast manager.
+`useToast()` replaces the console stand-ins for success, error, and
+notification messages throughout the graph, table, function debugger, and
+simulator. The additive `UI / Toasts` story exercises each message style.
+
+### Round 5 — seven deferred differences, closed
+
+- Select `allowClear` now overlays the suffix icon, reveals the clear control
+  on hover/focus, and uses antd's quaternary text token.
+- The switch confirmation uses the warning icon shown by antd Popconfirm.
+- The simulator's loading state overlays a centered spinner and blocks the
+  trace list while it is busy.
+- DecisionGraph forwards tab-bar extras only when supplied. The existing
+  `#tab-bar-extra-content` slot maps to the right; separate `-left` and
+  `-right` slots cover antd's `{ left, right }` form.
+- Removed the unused `SEGMENTS`, `DecisionEdge` import, and Storybook action
+  import.
+- Node specification lists stay raw at the graph-store boundary so Vue does
+  not proxy the component definitions before rendering them.
+- Clicks inside the teleported node menu select that node, matching React's
+  portal event bubbling.
 
 ## Publish prep (step 10)
 
@@ -498,40 +531,9 @@ keep-a-changelog `CHANGELOG.md` at 0.1.0, and CI: `validate.yaml` runs the
 gates, `publish.yaml` publishes on a `chore(release)` commit (upstream's
 trigger).
 
-## Deferred before 0.1.0
+## Remaining before 0.1.0
 
-The pre-ship review found these; none is a defect that blocks the publish,
-and each is listed here rather than left unrecorded (the rule is "marked
-AND listed").
-
-**Deferred — a browser must confirm it:**
-
-- The **Storybook has no dark-mode toggle** (upstream's preview has one),
-  so the dark parity was never reviewed side by side. (The playground has
-  one — it is the port's own app — but the two storybooks cannot be
-  compared in the same dark state.)
-
-**Deferred — cosmetic or invisible:**
-
-- The **select's clear affordance** differs from antd's: antd's
-  `.ant-select-clear` is `opacity: 0` and appears only while the select is
-  hovered (and antd hides the arrow once a value is there); the port shows
-  the clear icon AND the arrow at all times, in the text-secondary colour
-  instead of `colorTextQuaternary`. Fixing it means the trigger's layout
-  (the clear is in the flow, antd's overlays the arrow), so it wants a
-  side-by-side of every select in the app — found by the browser
-  comparison in round 4, not by the review.
-- The **switch's Popconfirm** lacks antd's default ExclamationCircleFilled
-  icon.
-- The **simulator's Spin** dims the content instead of drawing a spinner.
-- **`#tab-bar-extra-content`** is always forwarded and loses antd's
-  `{left, right}` form.
-- **Dead code**: `ui/TimePicker.vue`'s `SEGMENTS`, `helpers/traversal.ts`'s
-  unused `DecisionEdge`, `expression.stories.ts`'s unused action.
-- The **graph's node components are handed reactive host props** (a Vue
-  dev-mode warning).
-- The **upstream portal-bubbled menu clicks** also select the node in
-  upstream; the port's do not.
+The seven deferred review differences were resolved in Round 5 above.
 
 ## Definition of done
 
@@ -594,9 +596,6 @@ export surface, not the surface the port wishes it had.
   all sites (expression-store, dt-store, dt-empty, table-row, function/types,
   helpers/traversal) import the canonical decision-graph/dg-types +
   simulator/simulation.types — the sweep is complete.
-- Toasts are `console` stand-ins (upstream uses antd message). The first real
-  consumers have landed (decision-graph's canvas + clipboard), so `ui/Toast`
-  (reka-ui Toast) is now worth building.
 - Stale-closure fixes where upstream's `useMemo` / `useState` dependency
   lists omit a value the body reads. Upstream's trace list (the simulator)
   and its graph tab therefore froze at their first render; ours recompute.
@@ -615,8 +614,6 @@ export surface, not the surface the port wishes it had.
   and blocks Space and Tab~~ FIXED in round 4: the footer's keydown stops
   at the footer (Escape is let through), and upstream's own storybook
   types "My Field" the same way.
-- The **Storybook harness has no dark-mode toggle** — upstream's preview
-  has one. The dark parity was therefore never reviewed side by side.
 - The **shipped types need `skipLibCheck`** (as most Vue libraries do):
   the declaration rollup writes Vue's `DefineComponent` type arguments out
   in full, and Vue 3.5's `GlobalComponents` does not satisfy that
