@@ -528,8 +528,10 @@ The other publish-prep changes: `LICENSE` copied into the package (the
 `dist/`), `repository` + `bugs`, `publishConfig.access: "public"` (a scoped
 package otherwise defaults to restricted and the publish fails), a
 keep-a-changelog `CHANGELOG.md` at 0.1.0, and CI: `validate.yaml` runs the
-gates, `publish.yaml` publishes on a `chore(release)` commit (upstream's
-trigger).
+gates. `publish.yaml` first published on a `chore(release)` commit
+(upstream's trigger). 0.1.0 was published by hand instead, and every release
+after it is staged from a `v<version>` tag through npm trusted publishing,
+for a 2FA approval.
 
 ## Remaining before 0.1.0
 

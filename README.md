@@ -325,8 +325,14 @@ every named import against the package's real runtime exports. A named
 import of a name a package does not export type-checks happily and throws
 in a real bundler; the guard is what catches it.
 
-CI (`.github/workflows/`) runs the gates on every push and pull request, and
-publishes to npm when a commit message starts with `chore(release)`.
+CI (`.github/workflows/`) runs the gates on every push to `main` and every
+pull request.
+
+To release, bump the version in `packages/jdm-editor-vue/package.json` and
+date it in its `CHANGELOG.md`, in a commit of its own. Tag that commit
+`v<version>` and push the tag. `publish.yaml` stages the release on npm
+through trusted publishing, and it goes live once it is approved with 2FA on
+npmjs.com.
 
 ## Documentation
 

@@ -1,33 +1,38 @@
 name: Publish
 
+# Every release after the first. 0.1.0 was published by hand: npm's trusted
+# publishing can only be configured for a package that already exists. From
+# then on this publishes with no stored credential — the trusted publisher
+# exchanges GitHub's OIDC token for the right to stage, and a person approves
+# the stage with 2FA. The same shape as actualwork's publish-mcp.yml.
 on:
   push:
-    branches:
-      - main
+    tags: ['v*']
 
 permissions:
-  contents: write
+  id-token: write
+  contents: read
 
 jobs:
   publish:
-    # Mirrors upstream's flow: a release commit publishes the package.
-    # Restricted to main — upstream's trigger accepts any branch, so a
-    # feature-branch commit could publish before review.
-    if: "startsWith(github.event.head_commit.message, 'chore(release)')"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
           version: 10
-          run_install: true
-
-      - uses: actions/setup-node@v4
+      # Node 24, not the 22 validate.yaml pins: Node 22 bundles npm 10, and
+      # `npm stage` needs npm >= 11.15.0 (Node 24 bundles 11.19.0).
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: '22.x'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 24
           cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Tag and manifest must agree
+        run: |
+          test "${GITHUB_REF_NAME#v}" = "$(node -p "require('./packages/jdm-editor-vue/package.json').version")"
 
       - name: Gates
         run: |
@@ -41,24 +46,19 @@ jobs:
       - name: Check the built bundle
         run: pnpm --filter @nfk.st/jdm-editor-vue check:dist
 
-      # A version that is already on the registry must not be published
-      # again — npm answers 403 and the whole run fails.
-      - name: Skip a version that is already published
-        id: already
-        run: |
-          VERSION=$(node -p "require('./packages/jdm-editor-vue/package.json').version")
-          if npm view "@nfk.st/jdm-editor-vue@$VERSION" version >/dev/null 2>&1; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "$VERSION is already on npm — nothing to publish."
-          else
-            echo "published=false" >> "$GITHUB_OUTPUT"
-          fi
+      # Packs dist/ exactly as the gates above built it. `--filter … pack`
+      # writes the tarball to the repo root, not the package directory
+      # (measured with pnpm 10).
+      - run: pnpm --filter @nfk.st/jdm-editor-vue pack
 
-      # npm publish runs the package's prepublishOnly (vite build), so a
-      # stale dist/ can never ship.
-      - name: Publish
-        if: steps.already.outputs.published == 'false'
-        run: npm publish --access public
-        working-directory: packages/jdm-editor-vue
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # `npm stage publish`, not `npm publish`: the trusted publisher is
+      # stage-only, so the release waits for a 2FA approval. That is a setting
+      # on npmjs.com, not in this file — "allow npm publish" there would grant
+      # a direct publish and skip the approval.
+      - run: npm stage publish "nfk.st-jdm-editor-vue-${GITHUB_REF_NAME#v}.tgz"
+
+      # Staging is this run's last state: approving needs interactive 2FA, so
+      # a green run means staged, not live.
+      - name: Staged, awaiting approval
+        run: |
+          echo "::notice::@nfk.st/jdm-editor-vue ${GITHUB_REF_NAME#v} is staged. Approve it with 2FA on npmjs.com (Staged Packages tab) or via \`npm stage approve\` locally."
