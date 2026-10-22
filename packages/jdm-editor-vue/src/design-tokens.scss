@@ -53,6 +53,8 @@
   --grl-color-text-secondary: rgba(0, 0, 0, 0.65);
   --grl-color-text-placeholder: rgba(0, 0, 0, 0.25);
   --grl-color-text-disabled: rgba(0, 0, 0, 0.25);
+  // antd's colorTextQuaternary, used by Select's clear affordance.
+  --grl-color-text-quaternary: rgba(0, 0, 0, 0.25);
   // antd's colorTextTertiary — the Switch track's hover state.
   --grl-color-text-tertiary: rgba(0, 0, 0, 0.45);
   // antd's colorIcon — the Select tag's remove icon.
@@ -139,6 +141,7 @@
     --grl-color-text-secondary: rgba(255, 255, 255, 0.65);
     --grl-color-text-placeholder: rgba(255, 255, 255, 0.25);
     --grl-color-text-disabled: rgba(255, 255, 255, 0.25);
+    --grl-color-text-quaternary: rgba(255, 255, 255, 0.25);
     --grl-color-text-tertiary: rgba(255, 255, 255, 0.45);
     --grl-color-icon: rgba(255, 255, 255, 0.45);
     // antd 5.21.2's dark algorithm: colorBgMask is NOT inverted (it is

@@ -46,6 +46,10 @@ const onClear = (e: Event) => {
 
 const rootModelValue = () => (props.modelValue === '' ? EMPTY_VALUE : props.modelValue);
 
+const showClear = computed(
+  () => props.allowClear && !props.disabled && props.modelValue !== undefined && props.modelValue !== '',
+);
+
 // reka's SelectValue shows the raw value until its item has rendered once
 // (antd shows the option label immediately) — resolve the label ourselves,
 // falling back to the raw value (antd behavior for unmatched presets).
@@ -73,16 +77,11 @@ const selectedLabel = computed(() => {
         'grl-select--disabled': disabled,
         'grl-select--borderless': borderless,
         'grl-select--small': size === 'small',
+        'grl-select--clearable': showClear,
       }"
     >
       <SelectValue class="grl-select__value" :placeholder="placeholder">{{ selectedLabel }}</SelectValue>
-      <span
-        v-if="allowClear && !disabled && modelValue !== undefined && modelValue !== ''"
-        class="grl-select__clear"
-        role="button"
-        aria-label="Clear select"
-        @click="onClear"
-      >
+      <span v-if="showClear" class="grl-select__clear" role="button" aria-label="Clear select" @click="onClear">
         <X :size="12" />
       </span>
       <ChevronDown v-if="!hideArrow" class="grl-select__arrow" :size="12" />
@@ -110,6 +109,7 @@ const selectedLabel = computed(() => {
 <style lang="scss">
 .grl-select {
   display: inline-flex;
+  position: relative;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -176,7 +176,9 @@ const selectedLabel = computed(() => {
   &__arrow {
     flex-shrink: 0;
     color: var(--grl-color-text-secondary);
-    transition: transform var(--grl-transition);
+    transition:
+      transform var(--grl-transition),
+      opacity var(--grl-transition-quick);
 
     [data-state='open'] & {
       transform: rotate(180deg);
@@ -186,13 +188,38 @@ const selectedLabel = computed(() => {
   // antd allowClear affordance
   &__clear {
     display: inline-flex;
+    position: absolute;
+    top: 50%;
+    right: 11px;
+    z-index: 1;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    color: var(--grl-color-text-secondary);
+    width: 12px;
+    height: 12px;
+    color: var(--grl-color-text-quaternary);
     cursor: pointer;
-    transition: var(--grl-transition-quick);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition:
+      opacity var(--grl-transition-quick),
+      color var(--grl-transition-quick);
 
     &:hover {
-      color: var(--grl-color-text);
+      color: var(--grl-color-icon);
+    }
+  }
+
+  &--clearable:hover,
+  &--clearable:focus-within {
+    .grl-select__clear {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .grl-select__arrow {
+      opacity: 0;
     }
   }
 
