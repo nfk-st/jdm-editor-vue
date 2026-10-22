@@ -75,8 +75,8 @@ The pre-ship review found defects that no gate caught. All are fixed:
 - reactflow's "React Flow" attribution is not reproduced — Vue Flow is MIT and
   carries none.
 
-See [docs/PORTING.md](https://github.com/nfk-st/goruleditor/blob/master/docs/PORTING.md)
+See [docs/PORTING.md](https://github.com/nfk-st/jdm-editor-vue/blob/master/docs/PORTING.md)
 for the full parity checklist and the deliberate deviations from upstream.
 
-[Unreleased]: https://github.com/nfk-st/goruleditor/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/nfk-st/goruleditor/releases/tag/v0.1.0
+[Unreleased]: https://github.com/nfk-st/jdm-editor-vue/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/nfk-st/jdm-editor-vue/releases/tag/v0.1.0

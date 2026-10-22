@@ -4,7 +4,7 @@ A **Vue 3** port of GoRules' [`@gorules/jdm-editor`](https://github.com/gorules/
 open-source components for crafting and designing JDM (JSON Decision Model) files.
 
 > **Not affiliated with or endorsed by GoRules.** Derived from the upstream React
-> library (MIT); see [THIRD_PARTY_NOTICES.md](https://github.com/nfk-st/goruleditor/blob/master/THIRD_PARTY_NOTICES.md).
+> library (MIT); see [THIRD_PARTY_NOTICES.md](https://github.com/nfk-st/jdm-editor-vue/blob/master/THIRD_PARTY_NOTICES.md).
 
 Ported from upstream **v1.52.0**. Every upstream module and every upstream
 Storybook story is present.
@@ -135,7 +135,7 @@ upstream does not export them either.
 
 The full API reference, the parity checklist against upstream, and the
 deliberate deviations live in the
-[repository](https://github.com/nfk-st/goruleditor/tree/main/docs).
+[repository](https://github.com/nfk-st/jdm-editor-vue/tree/master/docs).
 
 ## License
 

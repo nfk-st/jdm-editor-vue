@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "description": "Vue 3 port of GoRules' JDM Editor — components for crafting and designing JDM (JSON Decision Model) files",
   "author": "nfk.st",
-  "homepage": "https://github.com/nfk-st/goruleditor",
+  "homepage": "https://github.com/nfk-st/jdm-editor-vue",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nfk-st/goruleditor.git",
+    "url": "git+https://github.com/nfk-st/jdm-editor-vue.git",
     "directory": "packages/jdm-editor-vue"
   },
   "bugs": {
-    "url": "https://github.com/nfk-st/goruleditor/issues"
+    "url": "https://github.com/nfk-st/jdm-editor-vue/issues"
   },
   "publishConfig": {
     "access": "public"
