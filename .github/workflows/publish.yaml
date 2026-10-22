@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     branches:
-      - master
+      - main
 
 permissions:
   contents: write
@@ -11,7 +11,7 @@ permissions:
 jobs:
   publish:
     # Mirrors upstream's flow: a release commit publishes the package.
-    # Restricted to master — upstream's trigger accepts any branch, so a
+    # Restricted to main — upstream's trigger accepts any branch, so a
     # feature-branch commit could publish before review.
     if: "startsWith(github.event.head_commit.message, 'chore(release)')"
     runs-on: ubuntu-latest

@@ -315,7 +315,7 @@ ones that were not are recorded below.
 - **The `vue` peer range was too low** (`>=3.4`): `@vueuse/core`, a runtime
   dependency, requires Vue 3.5.13.
 - **The publish workflow published from any branch** and re-published a
-  version that was already on the registry. It is now master-only, runs
+  version that was already on the registry. It is now main-only, runs
   the gates first, and skips a version that is already published.
 - **The import guard missed `.js` sources** and never checked default
   imports. It now does both.
