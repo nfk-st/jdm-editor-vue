@@ -4,7 +4,7 @@
 // pattern). Renders nothing.
 import { useDebounceFn } from '@vueuse/core';
 import equal from 'fast-deep-equal/es6/react';
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { markRaw, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue';
 
 import type { DictionaryMap } from '../../theme';
 import type { JdmUiMode } from '../decision-table/context/dt-store.context';
@@ -49,6 +49,12 @@ export type DecisionGraphEmptyType = {
 const props = defineProps<DecisionGraphEmptyType>();
 
 const emit = defineEmits<{ (e: 'update:modelValue', graph: DecisionGraphType): void }>();
+
+// Node specifications contain component definitions. Keep the spec lists
+// outside the deep reactive store so Vue does not proxy those definitions
+// before Graph hands them to <component :is>.
+const rawSpecifications = <T extends object>(items: T[] | undefined): T[] =>
+  markRaw(Array.isArray(items) ? toRaw(items).map((item) => toRaw(item)) : []);
 
 const mounted = ref(false);
 const graphActions = useDecisionGraphActions();
@@ -109,8 +115,8 @@ watch(
     stateStore.setState({
       id,
       disabled,
-      components: Array.isArray(components) ? components : [],
-      customNodes: Array.isArray(customNodes) ? customNodes : [],
+      components: rawSpecifications(components),
+      customNodes: rawSpecifications(customNodes),
       panels,
       viewConfig,
       viewConfigCta,

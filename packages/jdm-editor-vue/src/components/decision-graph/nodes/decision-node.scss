@@ -367,7 +367,15 @@
   min-width: 160px;
 
   &__message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 13px;
+  }
+
+  &__icon {
+    flex: 0 0 auto;
+    color: var(--grl-color-warning);
   }
 
   &__actions {

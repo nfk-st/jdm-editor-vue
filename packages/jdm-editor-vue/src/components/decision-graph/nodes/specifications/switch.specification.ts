@@ -11,7 +11,7 @@ import { useIntersectionObserver } from '@vueuse/core';
 import clsx from 'clsx';
 import { produce } from 'immer';
 import _ from 'lodash';
-import { ArrowRight, ChevronDown, Split, Trash2 } from 'lucide-vue-next';
+import { ArrowRight, ChevronDown, CircleAlert, Split, Trash2 } from 'lucide-vue-next';
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -423,7 +423,10 @@ const Popconfirm = defineComponent({
           trigger: () => slots.trigger?.()[0],
           default: () =>
             h('div', { class: 'grl-popconfirm' }, [
-              h('div', { class: 'grl-popconfirm__message grl-typography' }, 'Remove condition?'),
+              h('div', { class: 'grl-popconfirm__message grl-typography' }, [
+                h(CircleAlert, { class: 'grl-popconfirm__icon', size: 14 }),
+                h('span', 'Remove condition?'),
+              ]),
               h('div', { class: 'grl-popconfirm__actions' }, [
                 h(Button, { size: 'small', onClick: () => (open.value = false) }, () => 'Cancel'),
                 h(

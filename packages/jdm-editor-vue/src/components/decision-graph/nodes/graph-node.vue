@@ -227,6 +227,7 @@ const onConfirmDelete = () => {
       :compact-mode="nodeState.compactMode"
       @name-change="onNameChange"
       @details-close="() => setDetailsOpen(false)"
+      @menu-click="onClick"
     >
       <template #details>
         <component :is="Settings" v-if="Settings" :id="id" />

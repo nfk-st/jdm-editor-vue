@@ -101,7 +101,11 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{ (e: 'nameChange', name: string): void; (e: 'detailsClose'): void }>();
+const emit = defineEmits<{
+  (e: 'nameChange', name: string): void;
+  (e: 'detailsClose'): void;
+  (e: 'menuClick', event: MouseEvent): void;
+}>();
 
 const nodeColor = computed(() =>
   match(props.color)
@@ -155,7 +159,14 @@ const menuIcon = (icon: VNode | Component): VNode => (isVNode(icon) ? icon : h(i
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuContent class="grl-context-menu grl-dn__menu" align="end" :side-offset="6">
+              <!-- PORTING: Reka teleports this menu outside the node's DOM;
+                   bridge clicks back to GraphNode to match React portal bubbling. -->
+              <DropdownMenuContent
+                class="grl-context-menu grl-dn__menu"
+                align="end"
+                :side-offset="6"
+                @click="emit('menuClick', $event)"
+              >
                 <template v-for="item in menuItems" :key="item.key">
                   <DropdownMenuSeparator v-if="item.type === 'divider'" class="grl-context-menu__separator" />
                   <DropdownMenuItem

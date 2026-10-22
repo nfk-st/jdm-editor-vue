@@ -60,6 +60,7 @@ import { type Component, computed, ref } from 'vue';
 
 import { usePersistentState } from '../../../helpers/use-persistent-state';
 import Button from '../../ui/Button.vue';
+import Spinner from '../../ui/Spinner.vue';
 import Tabs from '../../ui/Tabs.vue';
 import Tooltip from '../../ui/Tooltip.vue';
 import { useDecisionGraphRaw, useDecisionGraphState } from '../context/dg-store.context';
@@ -212,6 +213,9 @@ const onClear = () => {
       </div>
       <div class="grl-dg__simulator__section__content">
         <div class="grl-dg__simulator__loading" :class="{ 'grl-dg__simulator__loading--active': props.loading }">
+          <div v-if="props.loading" class="grl-dg__simulator__loading__indicator">
+            <Spinner />
+          </div>
           <div class="grl-dg__simulator__nodes-list">
             <span
               v-if="!simulate"
@@ -300,12 +304,28 @@ const onClear = () => {
   position: relative;
   height: 100%;
 
+  &--active &__indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  &--active .grl-dg__simulator__nodes-list {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
   &--active::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--grl-color-bg-mask);
-    opacity: 0.1;
+    z-index: 0;
+    background: var(--grl-color-bg-container);
+    opacity: 0.25;
     pointer-events: all;
   }
 }
