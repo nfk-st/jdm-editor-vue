@@ -1,9 +1,5 @@
 // Ported from components/expression/expression.stories.tsx — the upstream
 // story (CSF2 + React) becomes CSF3 with a Vue render function.
-// PORTING: upstream's `fn()` from @storybook/test is `action()` from
-// @storybook/addon-actions (that package is what addon-essentials pulls in;
-// @storybook/test is not a dependency of this port).
-import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/vue3';
 import { type PropType, defineComponent, h, ref } from 'vue';
 

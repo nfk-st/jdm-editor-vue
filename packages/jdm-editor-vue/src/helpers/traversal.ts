@@ -2,7 +2,7 @@ import { type Edge, type Node, getIncomers, getOutgoers } from '@vue-flow/core';
 import equal from 'fast-deep-equal/es6/react';
 
 // dg-types landed with decision-graph — the local stand-ins are retired.
-import type { DecisionEdge, DecisionGraphType, DecisionNode } from '../components/decision-graph/dg-types';
+import type { DecisionGraphType, DecisionNode } from '../components/decision-graph/dg-types';
 // dg-util landed with decision-graph — local mappers retired.
 import { mapToGraphEdges, mapToGraphNodes } from '../components/decision-graph/dg-util';
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import dayjs, { type Dayjs } from 'dayjs';
-import { type SegmentPart, TimeFieldInput, TimeFieldRoot, type TimeValue, injectTimeFieldRootContext } from 'reka-ui';
+import { TimeFieldInput, TimeFieldRoot, type TimeValue, injectTimeFieldRootContext } from 'reka-ui';
 import { defineComponent, onMounted, shallowRef, watch } from 'vue';
 
 // antd TimePicker replacement — reka-ui's TimeField (editable hour/minute
@@ -56,10 +56,6 @@ const onUpdate = (value: TimeValue | undefined) => {
   emit('update:modelValue', time);
   emit('change', time);
 };
-
-// PORTING(reka): TimeFieldInput's `part` prop is a SegmentPart union, not a
-// plain string — the fixed hour/minute list is typed accordingly.
-const SEGMENTS: { part: SegmentPart }[] = [{ part: 'hour' }, { part: 'minute' }];
 </script>
 
 <template>
