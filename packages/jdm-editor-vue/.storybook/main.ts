@@ -20,7 +20,10 @@ const config: StorybookConfig = {
     },
   },
   stories: ['../src/**/*.stories.@(ts|tsx)'],
-  addons: ['@storybook/addon-essentials'],
+  // PORTING: upstream's preview has a dark-mode toggle (the
+  // `storybook-dark-mode` addon) — the port's preview now has the same one,
+  // so the dark parity can be reviewed side by side.
+  addons: ['@storybook/addon-essentials', 'storybook-dark-mode'],
   viteFinal: (viteConfig) =>
     mergeConfig(viteConfig, {
       plugins: [wasm(), safeDocgenInfo()],
