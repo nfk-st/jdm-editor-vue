@@ -16,7 +16,8 @@ export type DecisionGraphProps = {
   // (docs/vue-flow-mapping.md). The prop is not accepted at all.
   //
   // PORTING: upstream's `tabBarExtraContent?: TabsProps['tabBarExtraContent']`
-  // (a ReactNode prop) becomes the #tab-bar-extra-content slot.
+  // becomes slots: #tab-bar-extra-content (single/right content), or
+  // #tab-bar-extra-content-left and -right for its { left, right } form.
 } & DecisionGraphContextProps &
   DecisionGraphEmptyType;
 
@@ -77,8 +78,14 @@ const emptyProps = computed(() => {
 <template>
   <div class="grl-dg" :class="{ 'hidden-left-toolbar': props.hideLeftToolbar }">
     <DgWrapper ref="wrapperRef">
-      <template #tab-bar-extra-content>
+      <template v-if="$slots['tab-bar-extra-content']" #tab-bar-extra-content>
         <slot name="tab-bar-extra-content" />
+      </template>
+      <template v-if="$slots['tab-bar-extra-content-left']" #tab-bar-extra-content-left>
+        <slot name="tab-bar-extra-content-left" />
+      </template>
+      <template v-if="$slots['tab-bar-extra-content-right']" #tab-bar-extra-content-right>
+        <slot name="tab-bar-extra-content-right" />
       </template>
     </DgWrapper>
     <DecisionGraphInferTypes />

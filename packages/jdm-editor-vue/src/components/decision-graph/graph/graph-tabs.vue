@@ -9,8 +9,7 @@ import type { DecisionGraphType, DiffStatus } from '../dg-types';
 export type GraphTabsProps = {
   disabled?: boolean;
   // PORTING: upstream's `tabBarExtraContent?: TabsProps['tabBarExtraContent']`
-  // (a ReactNode prop) becomes the `#extra` slot — upstream render props
-  // become Vue slots (docs/PORTING.md's React → Vue table).
+  // maps to `extra` (single/right content) or `extra-left` + `extra-right`.
 };
 
 // upstream: the openTabs → node mapping (graph-tabs.tsx:26-38)
@@ -284,11 +283,16 @@ const IconView = defineComponent({
           </ContextMenuPortal>
         </ContextMenuRoot>
       </template>
-      <!-- PORTING: upstream renders antd's tabBarExtraContent only when the
-           caller provides it — the slot is forwarded conditionally so ui/Tabs
-           does not reserve the extra area for nothing. -->
+      <!-- PORTING: antd accepts one node or `{ left, right }`; these named
+           slots keep both placements available in the Vue API. -->
+      <template v-if="$slots['extra-left']" #extra-left>
+        <slot name="extra-left" />
+      </template>
       <template v-if="$slots.extra" #extra>
         <slot name="extra" />
+      </template>
+      <template v-if="$slots['extra-right']" #extra-right>
+        <slot name="extra-right" />
       </template>
     </Tabs>
   </div>

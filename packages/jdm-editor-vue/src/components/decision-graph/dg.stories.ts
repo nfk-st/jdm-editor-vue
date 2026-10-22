@@ -11,8 +11,9 @@
 // PORTING (props): upstream's `reactFlowProOptions` prop is DROPPED in the
 // port (vue-flow is MIT — see docs/vue-flow-mapping.md), so the stories do
 // not pass it.
-// PORTING (props): upstream's `tabBarExtraContent` prop became the port's
-// `#tab-bar-extra-content` slot — upstream's story never used it.
+// PORTING (props): upstream's `tabBarExtraContent` maps to the port's
+// `#tab-bar-extra-content` slot (single/right), plus `-left` and `-right`
+// slots for antd's `{ left, right }` form — upstream's story never used it.
 // PORTING (props): upstream's react-dnd `manager` prop is a deprecated
 // accept-and-ignore stub in the port — the stories do not pass it.
 // PORTING (layout): upstream sizes the story wrapper with `height: '100%'`.

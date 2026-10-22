@@ -9,8 +9,8 @@ export type DecisionGraphWrapperProps = {
   // (docs/vue-flow-mapping.md). The prop is not accepted at all.
   //
   // PORTING: upstream's `tabBarExtraContent?: TabsProps['tabBarExtraContent']`
-  // (a ReactNode prop) becomes the #tab-bar-extra-content slot — upstream
-  // render props become Vue slots (docs/PORTING.md's React → Vue table).
+  // becomes #tab-bar-extra-content (single/right content), or the
+  // #tab-bar-extra-content-left and -right slots for its { left, right } form.
 };
 </script>
 
@@ -122,8 +122,14 @@ const TabContents = defineComponent({
   <GraphSideToolbar v-if="!hideLeftToolbar" />
   <div class="grl-dg__graph">
     <GraphTabs :disabled="disableTabs">
-      <template #extra>
+      <template v-if="$slots['tab-bar-extra-content-left']" #extra-left>
+        <slot name="tab-bar-extra-content-left" />
+      </template>
+      <template v-if="$slots['tab-bar-extra-content']" #extra>
         <slot name="tab-bar-extra-content" />
+      </template>
+      <template v-if="$slots['tab-bar-extra-content-right']" #extra-right>
+        <slot name="tab-bar-extra-content-right" />
       </template>
     </GraphTabs>
 

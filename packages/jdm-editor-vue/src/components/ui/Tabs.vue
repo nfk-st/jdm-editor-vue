@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // antd Tabs replacement — Reka UI Tabs styled with --grl-* tokens. Covers the
 // port's usages (function debugger, later decision-graph simulator): label-only
-// items, v-model activeKey (antd activeKey/onChange), size, and extra content
-// (antd tabBarExtraContent, rendered right of the list).
+// items, v-model activeKey (antd activeKey/onChange), size, and tab-bar
+// extras on the left or right of the list (antd tabBarExtraContent).
 // PORTING: tab content renders OUTSIDE the control in every ported consumer,
 // driven by the v-model — upstream's `.grl-inline-tabs` global antd overrides
 // (styles.scss:152) are folded into this component's own look instead of
@@ -28,6 +28,9 @@ const labelOf = (item: string | TabItem): string => (typeof item === 'string' ? 
 <template>
   <TabsRoot v-model="activeKey" class="grl-tabs" :class="`grl-tabs--${size}`">
     <div class="grl-tabs__bar">
+      <div v-if="$slots['extra-left']" class="grl-tabs__extra grl-tabs__extra--left">
+        <slot name="extra-left" />
+      </div>
       <TabsList class="grl-tabs__list">
         <TabsTrigger v-for="item in items" :key="keyOf(item)" :value="keyOf(item)" class="grl-tabs__tab">
           <!-- PORTING(additive): scoped #label slot for callers whose tab
@@ -35,7 +38,10 @@ const labelOf = (item: string | TabItem): string => (typeof item === 'string' ? 
           <slot name="label" :item="item" :label="labelOf(item)">{{ labelOf(item) }}</slot>
         </TabsTrigger>
       </TabsList>
-      <div v-if="$slots.extra" class="grl-tabs__extra"><slot name="extra" /></div>
+      <div v-if="$slots.extra || $slots['extra-right']" class="grl-tabs__extra">
+        <slot name="extra" />
+        <slot name="extra-right" />
+      </div>
     </div>
     <!-- default slot for TabsContent-style usage; unused by current ported consumers -->
     <slot />
@@ -93,6 +99,10 @@ const labelOf = (item: string | TabItem): string => (typeof item === 'string' ? 
   &__extra {
     display: flex;
     align-items: center;
+
+    &--left {
+      order: -1;
+    }
   }
 
   &--small &__tab {
