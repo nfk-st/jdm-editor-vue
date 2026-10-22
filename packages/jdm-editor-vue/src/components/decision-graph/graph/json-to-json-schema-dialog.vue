@@ -14,7 +14,7 @@ export type JsonToJsonSchemaDialogProps = {
 // monaco.editor.create lifecycle (function.vue's mount/dispose discipline;
 // value sync per the round-5 lesson). antd Modal → ui/Modal (reka-ui Dialog
 // unmounts content while closed — antd destroyOnClose parity). antd message →
-// console stand-in (use-graph-clipboard precedent).
+// ui/Toast.
 import json5 from 'json5';
 import type { editor } from 'monaco-editor';
 import toJsonSchema from 'to-json-schema';
@@ -26,13 +26,9 @@ import { copyToClipboard } from '../../../helpers/utility';
 import { useThemeMode } from '../../../theme';
 import Button from '../../ui/Button.vue';
 import Modal from '../../ui/Modal.vue';
+import { useToast } from '../../ui/toast';
 
-// PORTING: antd message.success/error → console (no toast primitive in ui/
-// yet; swap when one lands — docs/PORTING.md known temp debt).
-const message = {
-  success: (m: string) => console.info(m),
-  error: (m: string) => console.error(m),
-};
+const toast = useToast();
 
 const props = defineProps<JsonToJsonSchemaDialogProps>();
 
@@ -66,7 +62,7 @@ const onOk = () => {
       model: value.value,
     });
   } catch (e: any) {
-    message.error(e?.message);
+    toast.error(e?.message);
   }
 };
 
@@ -116,9 +112,9 @@ const createEditor = async () => {
     run: async (editor) => {
       try {
         await copyToClipboard(JSON.stringify(json5.parse(editor.getValue())));
-        message.success('Copied to clipboard!');
+        toast.success('Copied to clipboard!');
       } catch {
-        message.error('Failed to copy to clipboard.');
+        toast.error('Failed to copy to clipboard.');
       }
     },
   });

@@ -18,8 +18,7 @@ export type JsonTheme = {
 <script setup lang="ts">
 // PORTING: antd Dropdown (trigger=['contextMenu']) + menu → reka-ui
 // ContextMenu with .grl-context-menu classes (expression/dt recipe);
-// antd message.success → console stand-in (dt-command-bar precedent, swap when
-// ui/Toast lands); antd Tooltip → ui/Tooltip; react-json-tree JSONTree →
+// antd message.success → ui/Toast; antd Tooltip → ui/Tooltip; react-json-tree JSONTree →
 // ui/JsonTree — its labelRenderer/valueRenderer render props port as h()-
 // returning functions so this file keeps upstream's helper names 1:1;
 // antd theme.useToken → useThemeMode().
@@ -30,14 +29,11 @@ import { copyToClipboard } from '../../helpers/utility';
 import { useThemeMode } from '../../theme';
 import JsonTree, { type JsonTreeTheme } from '../ui/JsonTree.vue';
 import Tooltip from '../ui/Tooltip.vue';
+import { useToast } from '../ui/toast';
 
 const props = defineProps<FunctionDebuggerLogProps>();
 
-// PORTING: antd message.success → console (no toast primitive in ui/ yet; swap
-// when one lands).
-const message = {
-  success: (m: string) => console.info(m),
-};
+const toast = useToast();
 
 // antd theme.useToken() → useThemeMode() (docs/PORTING.md antd → tokens).
 const mode = useThemeMode();
@@ -197,7 +193,7 @@ const lineData = computed(() =>
 
 const onCopy = async () => {
   await copyToClipboard(props.lines.length === 1 ? props.lines[0] : `[${props.lines.join(', ')}]`);
-  message.success('Copied to clipboard');
+  toast.success('Copied to clipboard');
 };
 </script>
 

@@ -22,8 +22,7 @@
 //
 // PORTING (antd → Reka UI + --grl-* tokens — ADR-0001):
 //   App.useApp().modal.confirm → ui/Modal (graph-node.vue precedent)
-//   message.error / notification.error → console stand-ins (toasts are known
-//                               temp debt — docs/PORTING.md)
+//   message.error / notification.error → ui/Toast
 //   Typography.Text          → .grl-typography spans
 //   Button                   → ui/Button
 //   @ant-design/icons        → lucide-vue-next
@@ -128,6 +127,7 @@ import { type Component, type VNode, computed, h, ref, shallowRef } from 'vue';
 import { nodeSchema } from '../../../helpers/schema';
 import Button from '../../ui/Button.vue';
 import Modal from '../../ui/Modal.vue';
+import { useToast } from '../../ui/toast';
 import {
   useDecisionGraphActions,
   useDecisionGraphListeners,
@@ -148,16 +148,7 @@ import GraphComponents from './graph-components.vue';
 
 const props = defineProps<GraphProps>();
 
-// PORTING: antd message.error → console (no toast primitive in ui/ yet —
-// docs/PORTING.md known temp debt; use-graph-clipboard precedent).
-const message = {
-  error: (m: string) => console.error(m),
-};
-
-// PORTING: antd notification.error({ message }) → console (same debt).
-const notification = {
-  error: (config: { message: string }) => console.error(config.message),
-};
+const toast = useToast();
 
 const componentsOpenedKey = 'jdm-components-opened';
 
@@ -348,7 +339,7 @@ const addNodeInner = async (type: string, position?: XYPosition, component?: str
       return allSpecifications.find((s) => s.type === type);
     });
   if (!customSpecification) {
-    message.error(`Unknown node type ${type} - ${component}.`);
+    toast.error(`Unknown node type ${type} - ${component}.`);
     return;
   }
 
@@ -383,7 +374,7 @@ const addNodeInner = async (type: string, position?: XYPosition, component?: str
     })
     .otherwise(() => null);
   if (!newNode) {
-    message.error(`Unknown node type ${type} - ${component}.`);
+    toast.error(`Unknown node type ${type} - ${component}.`);
     return;
   }
 
@@ -399,7 +390,7 @@ const addNodeInner = async (type: string, position?: XYPosition, component?: str
   if (parsed.success) {
     return graphActions.addNodes([nodeSchema.parse(newNode)]);
   }
-  message.error(parsed.error?.message);
+  toast.error(parsed.error?.message);
 };
 
 const isValidConnection = (connection: Connection): boolean => {
@@ -495,7 +486,7 @@ const onDrop = (event: DragEvent) => {
       const jsonData = JSON.parse(nodeData);
       graphActions.addNodes([nodeSchema.parse({ ...jsonData, position })]);
     } catch (err) {
-      notification.error({ message: 'Failed to create a node' });
+      toast.notificationError({ message: 'Failed to create a node' });
       console.error(err);
     }
 

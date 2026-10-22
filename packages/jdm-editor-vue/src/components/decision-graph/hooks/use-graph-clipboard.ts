@@ -5,21 +5,14 @@
 // instance): refs read via `.value` and the getNodes()/getEdges() instance
 // methods become the `.getNodes.value`/`.getEdges.value` ComputedRef getters.
 // `project` exists on the VueFlowStore directly (deprecated alias of
-// screenToFlowCoordinate) — kept for body parity. antd message → console
-// stand-in (dt-command-bar precedent).
+// screenToFlowCoordinate) — kept for body parity. antd message → ui/Toast.
 import type { Node, VueFlowStore, XYPosition } from '@vue-flow/core';
 import type { Ref } from 'vue';
 
 import { copyToClipboard, pasteFromClipboard } from '../../../helpers/utility';
+import { useToast } from '../../ui/toast';
 import { useDecisionGraphActions, useDecisionGraphRaw } from '../context/dg-store.context';
 import { type DecisionEdge, type DecisionNode } from '../dg-types';
-
-// PORTING: antd message.success/error → console (no toast primitive in ui/
-// yet; swap when one lands — docs/PORTING.md known temp debt).
-const message = {
-  success: (m: string) => console.info(m),
-  error: (m: string) => console.error(m),
-};
 
 type ClipboardData = {
   nodes: DecisionNode[];
@@ -34,6 +27,7 @@ const isClipboardData = (data: any): data is ClipboardData => {
 export const useGraphClipboard = (reactFlow: Ref<VueFlowStore | null>, wrapper: Ref<HTMLDivElement | null>) => {
   const raw = useDecisionGraphRaw();
   const graphActions = useDecisionGraphActions();
+  const toast = useToast();
 
   const copyNodes = async (nodes: Node[]) => {
     try {
@@ -70,9 +64,9 @@ export const useGraphClipboard = (reactFlow: Ref<VueFlowStore | null>, wrapper: 
       };
 
       await copyToClipboard(JSON.stringify(clipboardData));
-      message.success('Copied to clipboard!');
+      toast.success('Copied to clipboard!');
     } catch (e: any) {
-      message.error(e.message);
+      toast.error(e.message);
     }
   };
 
@@ -155,7 +149,7 @@ export const useGraphClipboard = (reactFlow: Ref<VueFlowStore | null>, wrapper: 
 
       graphActions.addNodes(nodes);
       graphActions.addEdges(edges);
-      message.success('Pasted from clipboard!');
+      toast.success('Pasted from clipboard!');
 
       if (anchor) {
         try {
@@ -165,7 +159,7 @@ export const useGraphClipboard = (reactFlow: Ref<VueFlowStore | null>, wrapper: 
         }
       }
     } catch {
-      message.error('Failed to paste from clipboard');
+      toast.error('Failed to paste from clipboard');
     }
   };
 

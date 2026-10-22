@@ -136,7 +136,7 @@ importers:
         specifier: ^0.52.2
         version: 0.52.2
       reka-ui:
-        specifier: ^2.1.0
+        specifier: ^2.11.0
         version: 2.11.0(vue@3.5.44(typescript@5.9.3))
       splitpanes:
         specifier: ^3.1.5

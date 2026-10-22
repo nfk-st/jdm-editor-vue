@@ -126,8 +126,8 @@ export { DecisionContentType };
 
 <script setup lang="ts">
 // PORTING: antd Dropdown → reka-ui DropdownMenu (switch.specification
-// precedent); antd message → console stand-in (use-graph-clipboard
-// precedent); panel icons (VNode | Component) render through IconView.
+// precedent); antd message → ui/Toast; panel icons (VNode | Component)
+// render through IconView.
 import { CloudDownload, CloudUpload } from 'lucide-vue-next';
 import {
   DropdownMenuContent,
@@ -143,15 +143,11 @@ import { exportDecisionTable, getExcelData } from '../../../helpers/excel';
 import { decisionModelSchema } from '../../../helpers/schema';
 import Button from '../../ui/Button.vue';
 import Tooltip from '../../ui/Tooltip.vue';
+import { useToast } from '../../ui/toast';
 import { useDecisionGraphActions, useDecisionGraphRaw, useDecisionGraphState } from '../context/dg-store.context';
 import GraphExcelDialog from './graph-excel-dialog.vue';
 
-// PORTING: antd message.success/error → console (no toast primitive in ui/
-// yet; swap when one lands — docs/PORTING.md known temp debt).
-const message = {
-  success: (m: string) => console.info(m),
-  error: (m: string) => console.error(m),
-};
+const toast = useToast();
 
 // renders the VNode | Component panel icons (decision-node.vue's VNodeView)
 const IconView = defineComponent({
@@ -197,14 +193,13 @@ const handleUploadInput = async (event: Event) => {
       });
 
       if (!modelParsed.success) {
-        console.log(modelParsed.error?.message);
-        message.error(modelParsed.error?.message);
+        toast.error(modelParsed.error?.message);
         return;
       }
 
       setDecisionGraph(modelParsed.data as never);
     } catch (e: any) {
-      message.error(e.message);
+      toast.error(e.message);
     }
   };
 
@@ -231,10 +226,10 @@ const uploadJDMExcel = (event: Event) => {
 
       excelGraphData.value = excelData;
 
-      message.success('Excel file has been uploaded successfully!');
+      toast.success('Excel file has been uploaded successfully!');
     };
   } catch {
-    message.error('Failed to upload Excel!');
+    toast.error('Failed to upload Excel!');
   }
 };
 
@@ -251,8 +246,7 @@ const handleDataMapping = (mappedExcelData: MergedDataItem[]) => {
   });
 
   if (!modelParsed.success) {
-    console.log(modelParsed.error?.message);
-    message.error(modelParsed.error?.message);
+    toast.error(modelParsed.error?.message);
     return;
   }
 
@@ -288,7 +282,7 @@ const downloadJDM = async () => {
     window.document.body.removeChild(link);
     URL.revokeObjectURL(href);
   } catch (e: any) {
-    message.error(e.message);
+    toast.error(e.message);
   }
 };
 
@@ -307,9 +301,9 @@ const downloadJDMExcel = async () => {
       }));
 
     await exportDecisionTable(fileName, decisionTableNodes);
-    message.success('Excel file has been downloaded successfully!');
+    toast.success('Excel file has been downloaded successfully!');
   } catch {
-    message.error('Failed to download Excel file!');
+    toast.error('Failed to download Excel file!');
   }
 };
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Ported from simulator/simulator-request-panel.tsx.
-// PORTING: antd notification → console stand-in (PORTING.md temp debt).
+// PORTING: antd notification → ui/Toast.
 import { VariableType } from '@gorules/zen-engine-wasm';
 import json5 from 'json5';
 import { Info, Play } from 'lucide-vue-next';
@@ -9,6 +9,7 @@ import { ref, watch } from 'vue';
 import { isWasmAvailable } from '../../../helpers/wasm';
 import Button from '../../ui/Button.vue';
 import Tooltip from '../../ui/Tooltip.vue';
+import { useToast } from '../../ui/toast';
 import { NodeTypeKind, useDecisionGraphRaw } from '../context/dg-store.context';
 import type { DecisionGraphType } from '../dg-types';
 import SimulatorEditor from './simulator-editor.vue';
@@ -30,6 +31,7 @@ export type SimulatorRequestPanelProps = {
 const props = defineProps<SimulatorRequestPanelProps>();
 
 const requestValue = ref(props.defaultRequest);
+const toast = useToast();
 const { stateStore, actions } = useDecisionGraphRaw();
 
 watch(
@@ -60,8 +62,10 @@ const onRun = () => {
     const parsed = (requestValue.value || '').trim().length === 0 ? null : json5.parse(requestValue.value || '');
     props.onRun?.({ graph: stateStore.getState().decisionGraph, context: parsed });
   } catch {
-    // PORTING: antd notification.error → console
-    console.error('Invalid format', 'Unable to format request, invalid JSON format');
+    toast.notificationError({
+      message: 'Invalid format',
+      description: 'Unable to format request, invalid JSON format',
+    });
   }
 };
 </script>

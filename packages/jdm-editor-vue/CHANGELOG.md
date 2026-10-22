@@ -26,7 +26,7 @@ commit `283bb11da324e0aaa641c790de9dd888ea2d2832`).
   `usePersistentState()`, `useNodeType()`, `codemirror`.
 - **JDM schemas** — the zod schemas, `NodeKind` and the field-type options,
   published as the `@nfk.st/jdm-editor-vue/dist/schema` entry point.
-- **Storybook** — 57 stories covering all seven upstream modules, used as the
+- **Storybook** — 60 stories covering all seven upstream modules, used as the
   parity reference for the port.
 
 ### Notes for consumers
@@ -70,7 +70,6 @@ The pre-ship review found defects that no gate caught. All are fixed:
   it walks, so upstream's type inference never reaches a downstream node. The
   port keeps this behaviour as-is; changing it would be a behaviour change,
   not a port.
-- Toasts are `console` stand-ins; upstream uses antd's `message` API.
 - Upstream's react-dnd `DragDropManager` (`manager`) is accepted and ignored.
 - reactflow's "React Flow" attribution is not reproduced — Vue Flow is MIT and
   carries none.

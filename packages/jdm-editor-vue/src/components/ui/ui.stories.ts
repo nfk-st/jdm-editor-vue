@@ -12,6 +12,7 @@ import { defineComponent, h, ref } from 'vue';
 import Button from './Button.vue';
 import MultiSelect from './MultiSelect.vue';
 import Switch from './Switch.vue';
+import { useToast } from './toast';
 
 const meta = {
   title: 'UI',
@@ -93,4 +94,40 @@ const MultiSelectHost = defineComponent({
 
 export const MultiSelectTags: Story = {
   render: () => h(MultiSelectHost),
+};
+
+const ToastsHost = defineComponent({
+  name: 'ToastsHost',
+  setup() {
+    const toast = useToast();
+
+    return () =>
+      h('div', { style: { display: 'flex', gap: '12px', padding: '24px' } }, [
+        h(
+          Button,
+          { type: 'primary', onClick: () => toast.success('Copied to clipboard!') },
+          { default: () => 'Success' },
+        ),
+        h(
+          Button,
+          { danger: true, onClick: () => toast.error('Failed to copy to clipboard.') },
+          { default: () => 'Error' },
+        ),
+        h(
+          Button,
+          {
+            onClick: () =>
+              toast.notificationError({
+                message: 'Invalid format',
+                description: 'Unable to format the request as JSON.',
+              }),
+          },
+          { default: () => 'Notification' },
+        ),
+      ]);
+  },
+});
+
+export const Toasts: Story = {
+  render: () => h(ToastsHost),
 };

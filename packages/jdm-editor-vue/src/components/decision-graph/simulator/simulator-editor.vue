@@ -2,7 +2,7 @@
 // Ported from simulator/simulator-editor.tsx — Monaco editor with copy/format
 // actions. PORTING: @monaco-editor/react → our loader + direct create
 // (function.vue pattern, incl. the round-5 value-sync lesson); antd message →
-// console stand-in (PORTING.md temp debt).
+// ui/Toast.
 import json5 from 'json5';
 import type { editor } from 'monaco-editor';
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
@@ -11,6 +11,7 @@ import { type Monaco, loader } from '../../../helpers/monaco';
 import { copyToClipboard } from '../../../helpers/utility';
 import { useThemeMode } from '../../../theme';
 import Spinner from '../../ui/Spinner.vue';
+import { useToast } from '../../ui/toast';
 
 // PORTING: upstream's `value` / `onChange` pair becomes `modelValue` +
 // `update:modelValue` on our public components (PORTING.md's React → Vue
@@ -27,6 +28,7 @@ const emit = defineEmits<{
 }>();
 
 const mode = useThemeMode();
+const toast = useToast();
 const monaco = shallowRef<Monaco | null>(null);
 const container = ref<HTMLDivElement | null>(null);
 const editorRef = shallowRef<editor.IStandaloneCodeEditor | null>(null);
@@ -84,9 +86,9 @@ onMounted(async () => {
     run: async (activeEditor) => {
       try {
         await copyToClipboard(JSON.stringify(json5.parse(activeEditor.getValue())));
-        console.info('Copied to clipboard!'); // PORTING: antd message → console
+        toast.success('Copied to clipboard!');
       } catch {
-        console.error('Failed to copy to clipboard.'); // PORTING: antd message → console
+        toast.error('Failed to copy to clipboard.');
       }
     },
   });

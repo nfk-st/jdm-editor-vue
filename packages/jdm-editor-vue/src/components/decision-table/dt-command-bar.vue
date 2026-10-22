@@ -2,7 +2,7 @@
 // Ported from components/decision-table/dt-command-bar.tsx.
 // PORTING: antd Button/Divider/Popconfirm/Select/Tooltip → ui/Button +
 // token-styled divider + ConfirmAction + ui/Select + ui/Tooltip; antd
-// message (toasts) → console stand-in (no toast primitive in ui/ yet);
+// message → ui/Toast;
 // lucide replaces @ant-design/icons.
 import { ArrowDown, ArrowUp, Download, Trash2, Upload, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -14,6 +14,7 @@ import Stack from '../stack.vue';
 import Button from '../ui/Button.vue';
 import Select from '../ui/Select.vue';
 import Tooltip from '../ui/Tooltip.vue';
+import { useToast } from '../ui/toast';
 import DtExcelDialog from './components/dt-excel-dialog.vue';
 import type { MappedExcelData } from './components/dt-excel-dialog.vue';
 import {
@@ -23,12 +24,7 @@ import {
   useDecisionTableState,
 } from './context/dt-store.context';
 
-// PORTING: antd message.success/error → console (no toast primitive in ui/
-// yet; swap when one lands).
-const message = {
-  success: (m: string) => console.info(m),
-  error: (m: string) => console.error(m),
-};
+const toast = useToast();
 
 const excelData = ref<ParsedExcelData[] | null>();
 
@@ -139,10 +135,10 @@ const exportExcel = async () => {
   try {
     const { decisionTable, name } = stateStore.getState();
     await exportDecisionTable(name ?? 'table', [{ ...decisionTable, name: 'decision table', id: crypto.randomUUID() }]);
-    message.success('Excel file has been downloaded successfully!');
+    toast.success('Excel file has been downloaded successfully!');
   } catch (e) {
     console.error('Failed to download Excel file!', e);
-    message.error('Failed to download Excel file!');
+    toast.error('Failed to download Excel file!');
   }
 };
 
@@ -165,13 +161,13 @@ const readExcelFile = async (event: any) => {
 
       if (excelData.length === 1) {
         setExcelData(excelData);
-        message.success('Excel file has been uploaded successfully!');
+        toast.success('Excel file has been uploaded successfully!');
       } else {
-        message.error('Only excel file with a single data sheet can be handled in a table view.');
+        toast.error('Only excel file with a single data sheet can be handled in a table view.');
       }
     };
   } catch {
-    message.error('Failed to upload Excel!');
+    toast.error('Failed to upload Excel!');
   }
 };
 

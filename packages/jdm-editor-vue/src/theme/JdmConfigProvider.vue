@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ConfigProvider } from 'reka-ui';
+import { ConfigProvider, ToastProvider } from 'reka-ui';
 import { computed, reactive, ref, watch } from 'vue';
 
+import Toast from '../components/ui/Toast.vue';
 import { ensureWasmLoaded } from '../helpers/wasm';
 import { type DictionaryMap, type JdmConfigProviderProps, provideDictionaries, useProvideThemeMode } from './index';
 
@@ -60,7 +61,10 @@ const rootEl = ref<HTMLElement | null>(null);
 <template>
   <div ref="rootEl" class="grl-root" :data-mode="mode" :style="tokenStyle">
     <ConfigProvider :teleport-to="rootEl ?? undefined">
-      <slot />
+      <ToastProvider :duration="3000" :limit="5">
+        <Toast />
+        <slot />
+      </ToastProvider>
     </ConfigProvider>
   </div>
 </template>
